@@ -2,7 +2,7 @@
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
 <dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="choixFormat" dlg:left="146" dlg:top="89" dlg:width="185" dlg:height="184" dlg:closeable="true" dlg:moveable="true" dlg:title="Choix du format d&apos;enregistrement">
  <dlg:bulletinboard>
-  <dlg:checkbox dlg:id="chkOOo" dlg:tab-index="4" dlg:left="9" dlg:top="97" dlg:width="64" dlg:height="11" dlg:value="OpenOffice.org" dlg:checked="true"/>
+  <dlg:checkbox dlg:id="chkOOo" dlg:tab-index="4" dlg:left="9" dlg:top="97" dlg:width="64" dlg:height="11" dlg:value="Open Document" dlg:checked="true"/>
   <dlg:checkbox dlg:id="chkWord" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="Microsoft" dlg:checked="false"/>
   <dlg:checkbox dlg:id="chkPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="PDF" dlg:checked="true"/>
   <dlg:text dlg:id="Label1" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="Cocher pour choisir le(s) format(s) d&apos;enregistrement" dlg:multiline="true"/>
