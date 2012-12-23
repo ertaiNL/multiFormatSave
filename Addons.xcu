@@ -20,9 +20,8 @@
 				<node oor:name="MenuItems">
 					<node oor:name="N002" oor:op="replace">
 						<prop oor:name="Title" oor:type="xs:string">
-							<value xml:lang="fr">MultiSave</value>
-							<value xml:lang="en">MultiSave</value>
-							<value xml:lang="fi-FI">Tallenna valituissa tallennusmuodoissa</value>
+							<value xml:lang="fr">MultiFormatSave</value>
+							<value xml:lang="en">MultiFormatSave</value>
 						</prop>
 						<prop oor:name="URL" oor:type="xs:string">
 							<value>vnd.sun.star.script:StarXpert_MultiSave.MultiSave.MultiSave?language=Basic&amp;location=application</value>
@@ -68,9 +67,8 @@
 							<value>%origin%/icons/image1</value>
 						</prop>
 						<prop oor:name="Title" oor:type="xs:string">
-							<value xml:lang="fr">MultiSave</value>
-							<value xml:lang="en">MultiSave</value>
-							<value xml:lang="fi-FI">Tallenna valituissa tallennusmuodoissa</value>
+							<value xml:lang="fr">MultiFormatSave</value>
+							<value xml:lang="en">MultiFormatSave</value>
 						</prop>
 						<prop oor:name="Target" oor:type="xs:string">
 							<value>_self</value>

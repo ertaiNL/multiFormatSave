@@ -7,7 +7,7 @@
 		<node oor:name="States">
 			<node oor:name="private:resource/toolbar/addon_StarXpert_MultiSave.OfficeToolBar" oor:op="replace">
 				<prop oor:name="UIName" oor:type="xs:string">
-					<value>MultiSave</value>
+					<value>MultiFormatSave</value>
 				</prop>
 			</node>
 		</node>
