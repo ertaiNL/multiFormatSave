@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oor:component-data xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" oor:name="MultiSave" oor:package="StarXpert_MultiSave.MultiSave">
+ <node oor:name="MultiSaveConfig">
+  <node oor:name="Settings">
+   <node oor:name="my.location" oor:op="replace">
+    <prop oor:name="Setting" oor:type="xs:string">
+			<value>%origin%/img/</value>
+    </prop>
+   </node>
+  </node>
+ </node>
+</oor:component-data>

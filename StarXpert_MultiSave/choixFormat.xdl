@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="choixFormat" dlg:left="146" dlg:top="89" dlg:width="185" dlg:height="184" dlg:closeable="true" dlg:moveable="true" dlg:title="Choix du format d&apos;enregistrement">
+ <dlg:bulletinboard>
+  <dlg:checkbox dlg:id="chkOOo" dlg:tab-index="4" dlg:left="9" dlg:top="97" dlg:width="64" dlg:height="11" dlg:value="OpenOffice.org" dlg:checked="true"/>
+  <dlg:checkbox dlg:id="chkWord" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="Microsoft" dlg:checked="false"/>
+  <dlg:checkbox dlg:id="chkPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="PDF" dlg:checked="true"/>
+  <dlg:text dlg:id="Label1" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="Cocher pour choisir le(s) format(s) d&apos;enregistrement" dlg:multiline="true"/>
+  <dlg:button dlg:id="CommandButton1" dlg:tab-index="9" dlg:left="4" dlg:top="149" dlg:width="58" dlg:height="17" dlg:value="Enregistrer">
+   <script:event script:event-name="on-performaction" script:location="application" script:macro-name="Standard.florent.MultiSave_OK" script:language="StarBasic"/>
+  </dlg:button>
+  <dlg:button dlg:id="CommandButton2" dlg:tab-index="11" dlg:left="124" dlg:top="149" dlg:width="58" dlg:height="17" dlg:value="Annuler">
+   <script:event script:event-name="on-performaction" script:location="document" script:macro-name="StarXpert.MultiSave.MultiSave_Cancel" script:language="StarBasic"/>
+  </dlg:button>
+  <dlg:text dlg:id="Label2" dlg:tab-index="12" dlg:left="8" dlg:top="3" dlg:width="69" dlg:height="9" dlg:value="Enregistrer dans : "/>
+  <dlg:textfield dlg:id="txtChemin" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="15"/>
+  <dlg:button dlg:id="btnChoisirChemin" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="...">
+   <script:event script:event-name="on-performaction" script:location="document" script:macro-name="StarXpert.MultiSave.MultiSave_ChoosePath" script:language="StarBasic"/>
+  </dlg:button>
+  <dlg:text dlg:id="Label3" dlg:tab-index="13" dlg:left="8" dlg:top="33" dlg:width="49" dlg:height="13" dlg:value="Nom du fichier : "/>
+  <dlg:textfield dlg:id="txtFichier" dlg:tab-index="2" dlg:left="63" dlg:top="31" dlg:width="120" dlg:height="13"/>
+  <dlg:img dlg:id="imgOOo" dlg:tab-index="3" dlg:left="23" dlg:top="65" dlg:width="21" dlg:height="25">
+   <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="StarXpert.MultiSave.img_OOo_clic" script:language="StarBasic"/>
+  </dlg:img>
+  <dlg:img dlg:id="imgWord" dlg:tab-index="5" dlg:left="85" dlg:top="65" dlg:width="21" dlg:height="25">
+   <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="StarXpert.MultiSave.img_Word_clic" script:language="StarBasic"/>
+  </dlg:img>
+  <dlg:img dlg:id="imgPDF" dlg:tab-index="8" dlg:left="133" dlg:top="65" dlg:width="21" dlg:height="25">
+   <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="StarXpert.MultiSave.img_PDF_clic" script:language="StarBasic"/>
+  </dlg:img>
+  <dlg:titledbox dlg:id="FrameControl1" dlg:tab-index="14" dlg:left="5" dlg:top="52" dlg:width="173" dlg:height="61">
+   <dlg:title dlg:value="Formats de fichier"/>
+  </dlg:titledbox>
+  <dlg:titledbox dlg:id="FrameControl2" dlg:tab-index="15" dlg:left="250" dlg:top="113" dlg:width="0" dlg:height="2">
+   <dlg:title dlg:value="FrameControl2"/>
+  </dlg:titledbox>
+  <dlg:titledbox dlg:id="FrameControl3" dlg:tab-index="16" dlg:left="217" dlg:top="104" dlg:width="0" dlg:height="2">
+   <dlg:title dlg:value="FrameControl3"/>
+  </dlg:titledbox>
+ </dlg:bulletinboard>
+</dlg:window>

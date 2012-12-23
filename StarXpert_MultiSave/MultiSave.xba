@@ -1,0 +1,1024 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="MultiSave" script:language="StarBasic">REM  *****  BASIC  *****
+
+&apos;************************************************
+&apos;Copyright (C) 2004 StarXpert -- Florent Manens
+&apos;fmanens@starxpert.fr 
+
+&apos;This library is free software; you can redistribute it and/or
+&apos;modify it under the terms of the GNU Lesser General Public
+&apos;License as published by the Free Software Foundation; either
+&apos;version 2.1 of the License, or (at your option) any later version.
+
+&apos;This library is distributed in the hope that it will be useful,
+&apos;but WITHOUT ANY WARRANTY; without even the implied warranty of
+&apos;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&apos;Lesser General Public License for more details.
+
+&apos;You should have received a copy of the GNU Lesser General Public
+&apos;License along with this library; if not, write to the Free Software
+&apos;Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+&apos;************************************************
+&apos; Thanks to DannyB for a lot of good examples on ooomacros
+
+&apos; Améliorations possibles : 
+&apos;- envoi par mail
+&apos;- vérifier si le fichier a été modifié
+&apos;- move the localization stuff to another file
+
+&apos; NOTE :
+&apos; The mailing part does not work for Win 98 !!!!!!!!!!!!!!!!!!!!!!
+
+
+Option Explicit
+
+Public choixFormat As Object
+Public sZipName As String
+Public sVersion As String
+
+
+&apos; Déclaration des constantes
+
+&apos; Number of different formats (odf, office, pdf)
+CONST MAX_DIFFERENT_FORMAT = 3
+
+&apos; 
+CONST ODF = 0
+CONST OFFICE = 1
+CONST PDF = 2
+
+
+&apos;
+CONST FILTER_NAME = 0
+CONST COMPRESS_MODE = 1
+
+
+
+&apos; Types declarations
+
+&apos; Informations about a file.
+Type FileDescriptor
+	URL As String
+	atype As String		&apos; scalc, swriter, simpress
+	format As Integer	&apos; ODF, OFFICE, PDF
+	info				&apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
+End Type
+
+Sub MultiSave
+&apos; goal : 
+&apos;record a file under different filter (word, pdf, OOo)
+
+	InitializeLanguages
+
+	dim oTextDoc as Object
+	&apos; Init globals
+	&apos; Fix here the save name as the Zip in Makefile
+	sZipName = &quot;StarXpert_MultiSave.oxt&quot;	
+	sVersion = &quot;v 1.3.0&quot;
+ 	oTextDoc = ThisComponent
+ 	
+&apos; Todo:  	DECOMMENTER LES 3 LIGNES SUIVANTES
+	globalscope.Basiclibraries.Loadlibrary(&quot;StarXpert_MultiSave&quot;)
+	globalscope.DialogLibraries.LoadLibrary(&quot;StarXpert_MultiSave&quot;)
+	choixFormat = CreateUnoDialog(globalscope.DialogLibraries.StarXpert_MultiSave.choixFormat)
+
+&apos; Todo:  	COMMENTER LES 3 LIGNES SUIVANTES
+&apos;	Basiclibraries.loadlibrary(&quot;StarXpert&quot;)
+&apos;	DialogLibraries.LoadLibrary(&quot;StarXpert&quot;)	
+&apos;	choixFormat = CreateUnoDialog(DialogLibraries.StarXpert.choixFormat)
+	
+	
+	SetLocalizedDialogTexts(choixFormat)
+	&apos; fix current file path
+	choixFormat.model.txtChemin.text = ConvertFromURL(getFileDir(thisComponent.Location))
+	choixFormat.model.txtFichier.text = ConvertFromURL(getFileName(thisComponent.Location))
+	&apos; fix icon path
+
+
+&apos; Todo:  	DECOMMENTER LES 3 LIGNES SUIVANTES
+	choixFormat.model.imgOOo.ImageURL = getImagePath(sZipName,&quot;ooo_gulls.xpm&quot;)
+	choixFormat.model.imgWord.ImageURL = getImagePath(sZipName,&quot;imgms.xpm&quot;)
+	choixFormat.model.imgPDF.ImageURL = getImagePath(sZipName,&quot;pdf-ico.gif&quot;)
+
+	choixFormat.execute
+End Sub
+
+
+
+
+&apos; Function called when the &quot;Save&quot; button is clicked.
+&apos;
+Sub MultiSave_OK
+
+	
+	&apos; vérif parameters
+	if choixFormat.model.txtChemin.text  = &quot;&quot; then
+		MsgBox GetLocalizedText( 0, &quot;Vous devez préciser un chemin&quot;)
+		exit sub
+	end if
+	if choixFormat.model.txtFichier.text = &quot;&quot; then
+		MsgBox GetLocalizedText( 1, &quot;Vous devez préciser un nom de fichier&quot;)
+		exit sub
+	end if
+	if choixFormat.model.chkWord.state=0 and choixFormat.model.chkOOo.state=0 and choixFormat.model.chkPDF.state=0 Then
+		Msgbox GetLocalizedText( 2, &quot;Vous devez au moins choisir un format d&apos;export&quot;)
+		exit sub
+	end if
+
+
+&apos; Error managment.
+On Local Error Goto ErrorHandler
+
+
+	&apos; -- Getting info from the UI. -------------------------------------------
+	
+	&apos; Note : sPath is useless for Sending Mail
+	Dim sPath As String
+	Dim sPathURL As String	
+	Dim fileName As String
+	Dim formats(2) as Boolean
+	
+	GetUIProperties( sPath, fileName, formats() )
+
+
+	&apos; Convert the path to a URL
+	sPathURL = ConvertToURL( sPath )
+	&apos; check the &quot;/&quot; at url end
+	if right(sPathURL,1) &lt;&gt; &quot;/&quot; Then
+		sPathURL = sPathURL+&quot;/&quot;
+	End If
+
+	
+	&apos; -- module where the macro is called from : Writer, Calc or Impress ? ---
+	Dim oTextDoc as Object
+	Dim documentType As String
+
+	oTextDoc = ThisComponent
+	documentType = GetDocumentType(oTextDoc)
+
+
+	&apos; -- Generate the info for the files to save. ----------------------------
+	Dim FileDescriptorList()
+	
+	FileDescriptorList() = generateFileDescriptors( _
+		sPathURL, fileName, documentType, formats() _
+		)
+	
+
+
+	&apos; -- Write the files to the disk. ----------------------------------------
+	Dim counter
+	for counter=0 to UBound( FileDescriptorList() )
+		
+		&apos;print FileDescriptorList( counter ).URL
+		&apos;print FileDescriptorList( counter ).format
+		
+		&apos; Save As... Behavior : the file displayed is the OOo version just
+		&apos; saved.
+		if FileDescriptorList( counter ).format = getCurrentFormat(fileName) then &apos;ODF then
+			&apos;print &quot;Save AS&quot;
+			oTextDoc.storeAsURL( _
+				FileDescriptorList( counter ).URL, _
+				FileDescriptorList( counter ).info() _
+				)
+		&apos; Export behavior
+		Else
+			oTextDoc.storeToURL( _
+				FileDescriptorList( counter ).URL, _
+				FileDescriptorList( counter ).info() _
+				)
+		End if
+	next
+
+	
+	&apos;
+	choixFormat.endExecute
+	goto endsub
+
+&apos; Something bad happened when saving file
+ErrorHandler: 
+   MsgBox GetLocalizedText(3, &quot;Une erreur s&apos;est produite lors de l&apos;enregistrement des fichiers, assurez vous que les fichiers de destination (MS and PDF) sont fermés.&quot;)
+   MsgBox (GetLocalizedText(4, &quot;Erreur &quot;) &amp; ERR &amp; GetLocalizedText( 5, &quot; ligne &quot;) &amp; Erl &amp; &quot;.&quot; &amp; chr$(13) &amp; ERROR$)
+endsub:
+
+End Sub
+
+&apos;getCurrentFormat()------------------------------------------------------------------
+&apos;
+&apos;@Task : provide format of the current document (ODF, MS)
+&apos;@Parameters : file_name =&gt; current document name with its extension
+&apos;@Returns : an integer which represents current format : ODF or OFFICE
+&apos;------------------------------------------------------------------------------------
+Function getCurrentFormat(file_name as string) as integer
+	&apos;msgbox file_name
+	dim parts()
+	dim ext as string
+	dim tabOOo(), tabMS() as string
+	parts = split(file_name,&quot;.&quot;)
+
+	tabOOo = array(&quot;sxw&quot;, &quot;sxc&quot;, &quot;sxi&quot;, &quot;stw&quot;,&quot;stc&quot;, &quot;sti&quot;, &quot;sxd&quot;, &quot;odt&quot;, &quot;ods&quot;, &quot;odp&quot;, &quot;ott&quot;, &quot;ots&quot;, &quot;otp&quot;, &quot;odg&quot;)
+	tabMS = array(&quot;doc&quot;, &quot;xls&quot;, &quot;ppt&quot;, &quot;dot&quot;, &quot;xlt&quot;, &quot;pot&quot;, &quot;docx&quot;, &quot;docm&quot;, &quot;dotx&quot;, &quot;dotm&quot;, &quot;xlsx&quot;, &quot;xlsm&quot;, &quot;xltx&quot;, &quot;xltm&quot;, &quot;xlsb&quot;, &quot;pptx&quot;, &quot;pptm&quot;, &quot;ppsx&quot;, &quot;ppsm&quot;, &quot;potx&quot;, &quot;potm&quot;, &quot;sldx&quot;, &quot;sldm&quot;)
+	
+	dim ubParts as long
+	ubParts = ubound(parts)
+
+	&apos;default value : if file_name equals &quot;&quot; or if file_name have no extension
+	getCurrentFormat= ODF
+	if (ubParts &gt; 0) then
+		&apos;here file_name is different than &quot;&quot; and it have an extension
+		ext = parts(ubParts)
+		if  isIn(ext, tabOOo) then
+			getCurrentFormat= ODF
+		elseif  isIn(ext, tabMS) then
+			getCurrentFormat= OFFICE
+		else
+			getCurrentFormat= PDF
+		endif		
+	endif
+
+End function
+
+&apos; Get the values from the interface&apos;s widgets.
+&apos;
+&apos; Parameters :
+&apos; - sPath [OUT] : path were to save the file (useless for SendMail).
+&apos; - fileName [OUT] : name from the text-box
+&apos; - formats [OUT] : slected format(s) (ODF, MS OFFICE or PDF).
+&apos;
+Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
+	
+	&apos; 
+	sPath = choixFormat.model.txtChemin.text
+
+	&apos; Name for the file
+	&apos;Dim fileName As String
+	FileName = choixFormat.model.txtFichier.text
+	
+
+	&apos; Format required : ODF, OFFICE or PDF format ?
+	&apos; Dim formats(2) as Boolean
+	
+	Dim counter as Integer
+	for counter = 0 to 2
+		formats( counter ) = FALSE
+	next
+	
+	&apos; MS Office (doc, xls, ppt).
+	if choixFormat.model.chkWord.state = 1 then
+		formats(OFFICE) = TRUE
+	end if
+	&apos; OpenOffice (odt, ods or odp).
+	if choixFormat.model.chkOOo.state = 1 then
+		formats(ODF) = TRUE
+	end if
+	&apos; PDF
+	if choixFormat.model.chkPDF.state = 1 then
+		formats(PDF) = TRUE
+	end if
+
+End Sub
+
+
+
+&apos; Saves to  function
+&apos;
+&apos; Parameters :
+&apos; - directoryURL [IN] : URL of the directory where to save the files.
+&apos; - documentName [IN] : generic name of the file to be save (name with no extension).
+&apos; - documentType [IN] : scalc, swriter or simpress ?
+&apos; - formats() [IN] : list of the format (ODF, MS Office, PDF) to save the file to.
+&apos;
+&apos; Returns :
+&apos; - the list of FileDescriptor structure :
+&apos;	Struct FileDescriptor {
+&apos;		URL : URL to the file
+&apos;		info : list of &quot;com.sun.star.beans.PropertyValue&quot; useful for saving a file.
+&apos;	}
+&apos;
+&apos; TODO : we can avoid the &quot;redim&quot; at the end by defining the value of fileDescriptors
+&apos; to be returned based on the &quot;format()&quot; argument.
+Function generateFileDescriptors( directoryURL As String, documentName As String, _
+					documentType As String, formats() As Boolean )
+
+
+	&apos;
+	Dim cDocumentTitle,cURL As String
+	Dim originalFilename As String
+	Dim position as Integer
+	
+	Dim oTextDoc as Object
+	oTextDoc = thisComponent
+
+
+	&apos; Get the name of the file to be created.
+	Dim listIterator As Integer
+	listIterator = 0
+
+	&apos; Note : 3 is the maximum length of the table (odf, ms office, pdf).
+	Dim FileDescriptorList( MAX_DIFFERENT_FORMAT ) As FileDescriptor
+
+	&apos; TODO: factorise
+	
+	&apos; Note : need 3 args because we return them by reference...
+	&apos; ideas : We could write an array sto store things.
+	dim args1(0) as new com.sun.star.beans.PropertyValue
+	dim args2() as new com.sun.star.beans.PropertyValue
+	dim args3(1) as new com.sun.star.beans.PropertyValue
+	
+
+	&apos; Note :
+	&apos;FILTER_NAME = 0
+	&apos;COMPRESS_MODE = 1
+
+	&apos; Default Initialization (all this is not necessary -&gt;)
+	args1(FILTER_NAME).Name = &quot;FilterName&quot;
+
+	args3(FILTER_NAME).Name = &quot;FilterName&quot;
+	args3( COMPRESS_MODE ).Name = &quot;CompressMode&quot;
+	args3( COMPRESS_MODE ).Value = 0	
+
+	&apos; Path to the document (without extension).
+	cDocumentTitle = directoryURL + documentName
+
+	originalFilename = cDocumentTitle
+	
+
+	&apos; -- if it exist, delete the extension from the file (&quot;test.odt&quot; -&gt; &quot;test&quot;). ---
+ 	position = getCommonExtention(cDocumentTitle)
+	if (position &lt;&gt; 0) then
+   		&apos;user write extention
+	   	cdocumenttitle = left(cdocumenttitle,(position - 1))
+   	end if
+	
+	
+
+	&apos;*********************************************
+	&apos; 			Working in Calc
+	&apos;*********************************************
+	if documentType = &quot;scalc&quot; Then
+   
+		&apos; Save as MS Office format (XLS).
+		if formats(OFFICE) = TRUE then
+
+			cURL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
+			args1( FILTER_NAME ).Value = &quot;MS Excel 97&quot;
+
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = OFFICE
+			FileDescriptorList( listIterator ).info = args1()
+					
+			listIterator = listIterator + 1
+
+		end if
+
+	   &apos; Save as OpenOffice format (ODS)
+	   if formats(ODF) = TRUE then
+			
+			cURL = ConvertToURL( cDocumentTitle + &quot;.ods&quot; )			
+			
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = ODF			
+			FileDescriptorList( listIterator ).info = args2()
+
+			listIterator = listIterator + 1
+		   
+	   end if
+	   
+	   &apos; Save as PDF format	   
+	   if formats(PDF) = TRUE then
+	   
+			cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
+		   
+			args3( FILTER_NAME ).Value = &quot;calc_pdf_Export&quot;
+		   
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = PDF			
+			FileDescriptorList( listIterator ).info = args3()
+
+			listIterator = listIterator + 1			   
+		   
+	   End if
+
+
+	&apos;*********************************************
+	&apos; 			Working in Writer
+	&apos;*********************************************
+	ElseIf documentType = &quot;swriter&quot;	Then
+	  	
+
+		&apos; Save a backup as DOC	  	
+	  	if formats(OFFICE) = TRUE then
+
+			cURL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
+			args1( FILTER_NAME ).Value = &quot;MS Word 97&quot;
+	
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = OFFICE			
+			FileDescriptorList( listIterator ).info = args1()
+		
+			&apos; Counter
+			listIterator = listIterator + 1	
+				
+			
+	 	end if
+		
+		&apos; Save the document as ODT
+		if formats(ODF) = TRUE then
+		
+			cURL = ConvertToURL( cDocumentTitle + &quot;.odt&quot; )							
+			
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = ODF
+			FileDescriptorList( listIterator ).info = args2()
+		
+			listIterator = listIterator + 1			
+		
+		end if
+	 	
+		&apos; Save a backup as a PDF
+	 	if formats(PDF) = TRUE then
+
+			cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
+			
+			args3( FILTER_NAME ).Value = &quot;writer_pdf_Export&quot;			
+
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = PDF			
+			FileDescriptorList( listIterator ).info = args3()
+			
+			listIterator = listIterator + 1					
+			
+		End if
+		
+		
+	&apos;*********************************************
+	&apos; 			Working in Impress
+	&apos;*********************************************		
+	ElseIf documentType = &quot;simpress&quot;	Then 
+
+		
+		&apos; Save a backup as PPT	 	 	
+		if formats(OFFICE) = TRUE then
+		
+			cURL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
+			args1( FILTER_NAME ).Value = &quot;MS PowerPoint 97&quot;
+			
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = OFFICE			
+			FileDescriptorList( listIterator ).info = args1()
+			
+			listIterator = listIterator + 1
+						
+		end if
+
+		&apos; Save the document as SXI or ODP
+		if formats(ODF) = TRUE then
+						
+			cURL = ConvertToURL( cDocumentTitle + &quot;.odp&quot; )			
+       		
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = ODF			
+			FileDescriptorList( listIterator ).info = args2()
+       		
+			listIterator = listIterator + 1       		
+       		
+		end if
+
+		&apos; Save a backup as a PDF	 	 	
+	 	if formats(PDF) = TRUE then
+
+			cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
+
+			args3( FILTER_NAME ).Value = &quot;impress_pdf_Export&quot;
+
+			FileDescriptorList( listIterator ).URL = cURL
+			FileDescriptorList( listIterator ).atype = documentType
+			FileDescriptorList( listIterator ).format = PDF
+			FileDescriptorList( listIterator ).info = args3()
+
+			listIterator = listIterator + 1			
+			
+		End If
+	
+	End If
+
+
+	&apos; Resize the table so that it fits exactly the numer of files to be created.
+	Redim Preserve FileDescriptorList( listIterator - 1 ) As FileDescriptor
+	
+	
+	
+&apos;	print &quot;Results&quot;
+
+&apos;	dim counter
+&apos;	for counter=0 to UBound( FileDescriptorList() )
+		&apos; print counter
+&apos;		print FileDescriptorList( counter ).URL
+&apos;		print FileDescriptorList( counter ).info( FILTER_NAME ).Value
+&apos;	next		
+&apos;	print &quot;OK&quot;
+	
+	
+	&apos; Returns the list of fileDescriptor.
+	generateFileDescriptors = FileDescriptorList()
+	
+
+End	Function
+
+Sub MultiSave_Cancel
+   choixFormat.endExecute
+End Sub
+
+Sub MultiSave_ChoosePath
+	Dim Folder,FileName As String
+
+	If choixFormat.model.txtChemin.text &lt;&gt; &quot;&quot; Then
+		Folder = choixFormat.model.txtChemin.text
+	Else
+		Folder = getFileDir(thisComponent.Location)
+	End If
+	If choixFormat.model.txtFichier.text &lt;&gt; &quot;&quot; Then
+		FileName = choixFormat.model.txtFichier.text
+	Else 
+		FileName = getFileName(thisComponent.Location)
+	End If
+	Folder = OpenFolderDialog(ConvertToURL(Folder))
+	if Folder &lt;&gt; &quot;&quot; then
+		choixFormat.model.txtChemin.text = ConvertFromURL(Folder)
+	end if 
+	choixFormat.model.txtFichier.text = FileName
+End Sub
+
+
+Sub OpenFolderDialog(Folder As String) As String
+	dim sFolderPickerArgs as Variant
+	dim oFolderPicker as Object
+
+	sFolderPickerArgs = Array(com.sun.star.ui.dialogs.TemplateDescription.FILEOPEN_SIMPLE )
+	oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
+	oFolderPicker.setTitle( GetLocalizedText( 6, &quot;Enregistrer sous&quot;) )
+	oFolderPicker.setDisplayDirectory( Folder )
+	If oFolderPicker.execute() Then
+		OpenFolderDialog = oFolderPicker.Directory
+	End If
+End Sub
+
+
+Function getFileDir(FileLocation As String) As String
+&apos; find last  &quot;/&quot;
+&apos; extract first part
+	dim pos as integer
+	dim StringEnd as integer
+	
+	pos=1 
+	While (pos &lt;&gt; 0)
+	  pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
+	  If pos &lt;&gt; 0 Then
+	    StringEnd=pos
+	    pos=pos+1 
+	  End If
+	Wend
+	getFileDir=left(FileLocation,StringEnd)
+End Function
+
+Function getFileName(FileLocation As String) As String
+&apos; find last  &quot;/&quot;
+&apos; extract last part
+	dim pos as integer
+	dim StringEnd as integer
+	
+	pos=1 
+	while (pos &lt;&gt; 0)
+	  pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
+	  if pos &lt;&gt; 0 then
+	    StringEnd=pos
+	    pos=pos+1 
+	  End If
+	wend
+	getFileName=right(FileLocation,len(FileLocation) -StringEnd)
+End Function
+
+Sub img_OOo_clic
+	choixFormat.model.chkOOo.state = 1 xor 	choixFormat.model.chkOOo.state
+End sub
+
+Sub img_PDF_clic
+	choixFormat.model.chkPDF.state = 1 xor 	choixFormat.model.chkPDF.state
+End sub
+
+Sub img_Word_clic
+	choixFormat.model.chkWord.state = 1 xor choixFormat.model.chkWord.state
+End sub
+
+Sub showHelp
+	MsgBox &quot;-- StarXpert --&quot;+chr(13)+&quot;FM &lt;fmanens@starxpert.fr&gt;&quot;+chr(13)+ &quot;LGPL - 15/03/04 - &quot;+sVersion
+End Sub
+
+
+
+
+function getImagePath(nomModule as String, nomImage as String) as String
+&apos; hugly hack to get folder of the package// FIXME
+        Dim oPaths as Object, PathsModule as String, sValue as String, sPath as String, oSettings as Object, oPathSettings as Object
+        dim sImagePath as string
+		sImagePath = ConvertToUrl( GetMyLocation() + nomImage)
+&apos;		print sImagePath
+		If FileExists(sImagePath) Then
+        	getImagePath = sImagePath
+        Else
+            oPathSettings = createUnoService(&quot;com.sun.star.util.PathSettings&quot;)
+	     &apos;   oPathSettings = oSettings.getByName(&quot;PathSettings&quot;)
+        	sPath = oPathSettings.GetPropertyValue(&quot;Bitmap&quot;)
+			sImagePath = ConvertToUrl(sPath) + nomImage
+			If FileExists(sImagePath) Then
+				&apos;Macro has been delivered during the installation, images are in share/config/symbol 
+	        	getImagePath = sImagePath			
+			Else
+	        	&apos; Macro has been delivered as a package, images are under the package directory
+	        	&apos; Go to Modeles Path
+		        oPaths = createUnoService(&quot;com.sun.star.util.PathSettings&quot;)
+	    	    PathsModule = oPaths.Module + &quot;/../share/uno_packages/cache/uno_packages/&quot;
+	        	sValue = Dir(PathsModule,16)
+				do
+					sValue = Dir
+				Loop Until instr(sValue,nomModule)&lt;&gt;0 or sValue=&quot;&quot; &apos; verify if package present ? //FIXME
+	        
+		        If sValue = &quot;&quot; Then 
+	    	    	&apos; look into user&apos;s modules
+		    	    PathsModule = oPaths.UserConfig + &quot;/../uno_packages/cache/uno_packages/&quot;
+	    	    	sValue = Dir(PathsModule,16)
+					do
+						sValue = Dir
+					Loop Until instr(sValue, nomModule) &lt;&gt; 0 or sValue=&quot;&quot; 
+		    	End if    
+		    
+	        	If sValue &lt;&gt; &quot;&quot; Then
+		       	 getImagePath =PathsModule+sValue+nomImage
+	       		 Else
+	        		MsgBox GetLocalizedText(7, &quot;Impossible de trouver le fichier image&quot;)
+	        		getImagePath = &quot;&quot;
+	       	 	End If
+	       	 End If
+       	 End If
+End Function
+
+
+
+
+Function GetDocumentType(oDocument)
+&apos; Andrew Pitonyak&apos;s Macro Document 
+&apos;(http://www.ooomacros.org/files.php?type=doc#AndrewPitonyaksMacroDocument) 
+
+   On Local Error GoTo NODOCUMENTTYPE
+   If oDocument.SupportsService(&quot;com.sun.star.sheet.SpreadsheetDocument&quot;) Then
+      GetDocumentType() = &quot;scalc&quot;
+   ElseIf oDocument.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
+      GetDocumentType() = &quot;swriter&quot;
+   ElseIf oDocument.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
+   	  GetDocumentType() = &quot;simpress&quot; &apos; Impress is also a drawingdocument.
+   ElseIf oDocument.SupportsService(&quot;com.sun.star.drawing.DrawingDocument&quot;) Then
+      GetDocumentType() = &quot;sdraw&quot;
+   ElseIf oDocument.SupportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) Then
+      GetDocumentType() = &quot;smath&quot;
+   End If
+   NODOCUMENTTYPE:
+   If Err &lt;&gt; 0 Then
+      GetDocumentType = &quot;&quot;
+      Resume GOON
+      GOON:
+   End If
+End Function 
+
+
+
+Function getCommonExtention(DocumentTitle)
+
+	Dim extentions As Variant
+	Dim result As Variant
+	Dim ext As Integer
+	dim anExt as string
+
+	&apos; list of common extentions
+
+	&apos; Following extensions are recognized:
+	&apos;	&quot;.sxw&quot;, &quot;.sxc&quot;, &quot;.sxi&quot;, &quot;.stw&quot;, &quot;.stc&quot;, &quot;.sti&quot;, &quot;.sxd&quot;,   		&apos; OpenOffice.org 1.1.x
+	&apos;	&quot;.odt&quot;, &quot;.ods&quot;, &quot;.odp&quot;, &quot;.ott&quot;, &quot;.ots&quot;, &quot;.otp&quot;, &quot;.odg&quot;, &quot;odm&quot;,	&apos; OpenOffice.org 2.x  
+	&apos;	&quot;.doc&quot;, &quot;.xls&quot;, &quot;.ppt&quot;, &quot;.dot&quot;, &quot;.xlt&quot;, &quot;.pot&quot;,           		&apos; Microsoft office
+	&apos;	&quot;.docx&quot;, &quot;.docm&quot;, &quot;.dotx&quot;, &quot;.dotm&quot;, &quot;.xlsx&quot;, &quot;.xlsm&quot;, &quot;.xltx&quot;, &quot;.xltm&quot;, &quot;.xlsb&quot;, &quot;.pptx&quot;, &quot;.pptm&quot;, &quot;.ppsx&quot;, &quot;.ppsm&quot;, &quot;.potx&quot;, &quot;.potm&quot;, &quot;.sldx&quot;, &quot;.sldm&quot;		&apos;OOXML
+	&apos;	&quot;.psw&quot;, &quot;.pxl&quot;,                                           		&apos; Microsoft PocketPC
+	&apos;	&quot;.sdw&quot;, &quot;.sdc&quot;, &quot;.sdd&quot;, &quot;.vor&quot; _                          		&apos; StarX
+	&apos;   &quot;.rtf&quot;, &quot;.xml&quot;, &quot;.txt&quot;, &quot;.pdb&quot;, &quot;.html&quot;,                  		&apos; Write others
+	&apos;   &quot;.dif&quot;, &quot;.dbf&quot;, &quot;.slk&quot;, &quot;.csv&quot;,                           		&apos; Calc others
+	&apos;   &quot;.sda&quot;)                                                   		&apos; Impress others
+	
+	extentions = Array(&quot;.sxw&quot;, &quot;.sxc&quot;, &quot;.sxi&quot;, &quot;.stw&quot;, &quot;.stc&quot;, &quot;.sti&quot;, &quot;.sxd&quot;, _
+	                   &quot;.odt&quot;, &quot;.ods&quot;, &quot;.odp&quot;, &quot;.ott&quot;, &quot;.ots&quot;, &quot;.otp&quot;, &quot;.odg&quot;, &quot;odm&quot;, _
+	                   &quot;.doc&quot;, &quot;.xls&quot;, &quot;.ppt&quot;, &quot;.dot&quot;, &quot;.xlt&quot;, &quot;.pot&quot;, _
+	                   &quot;.docx&quot;, &quot;.docm&quot;, &quot;.dotx&quot;, &quot;.dotm&quot;, &quot;.xlsx&quot;, &quot;.xlsm&quot;, &quot;.xltx&quot;, &quot;.xltm&quot;, &quot;.xlsb&quot;, &quot;.pptx&quot;, &quot;.pptm&quot;, &quot;.ppsx&quot;, &quot;.ppsm&quot;, &quot;.potx&quot;, &quot;.potm&quot;, &quot;.sldx&quot;, &quot;.sldm&quot;, _
+	                   &quot;.psw&quot;, &quot;.pxl&quot;, _
+	                   &quot;.sdw&quot;, &quot;.sdc&quot;, &quot;.sdd&quot;, &quot;.vor&quot;, _
+	                   &quot;.rtf&quot;, &quot;.xml&quot;, &quot;.txt&quot;, &quot;.pdb&quot;, &quot;.html&quot;, _
+	                   &quot;.dif&quot;, &quot;.dbf&quot;, &quot;.slk&quot;, &quot;.csv&quot;, _
+	                   &quot;.sda&quot;)
+	result=0
+	for ext = LBound(extentions) To UBound(extentions)
+		anExt = extentions(ext)
+		if (right(documentTitle, len(anExt)) = anExt) then
+			result=InStr(DocumentTitle,anExt)
+			Exit For
+		end if
+	Next ext
+	getCommonExtention=result
+End Function
+
+&apos; Dannyb&apos;s 
+Function GetConfigAccess( ByVal cNodePath As String,_
+							Optional bEnableSync, Optional bLazyWrite ) As Object
+							&apos;							ByVal bWriteAccess As Boolean,_
+	Dim oConfigProvider As Object
+	Dim	bWriteAccess As Boolean
+	Dim cServiceName As String
+	Dim oConfigAccess As Object
+	
+	If IsMissing( bEnableSync ) Then
+		bEnableSync = True
+	EndIf
+	If IsMissing( bLazyWrite ) Then
+		bLazyWrite = False
+	EndIf
+
+&apos;	If bWriteAccess  And  bEnableSync Then
+&apos;		oConfigProvider = GetProcessServiceManager().createInstanceWithArguments(_
+&apos;							&quot;com.sun.star.configuration.ConfigurationProvider&quot;,_
+&apos;							Array( MakePropertyValue( &quot;enableasync&quot;, bEnableSync ) ) )
+&apos;	Else
+		oConfigProvider = createUnoService( &quot;com.sun.star.configuration.ConfigurationProvider&quot; )
+&apos;	EndIf
+	
+	If bWriteAccess Then
+		cServiceName = &quot;com.sun.star.configuration.ConfigurationUpdateAccess&quot;
+	Else
+		cServiceName = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
+	EndIf
+	
+	oConfigAccess = oConfigProvider.createInstanceWithArguments( cServiceName,_
+		Array( MakePropertyValue( &quot;nodepath&quot;, cNodePath ),_
+				MakePropertyValue( &quot;lazywrite&quot;, bLazyWrite ) ) )
+	
+	GetConfigAccess() = oConfigAccess
+End Function
+
+
+&apos; Dannyb&apos;s
+Function GetMyLocation()
+	Dim oConfigAccess As Object, oElement As Object, oLocation As Object, cMyLocation As String, cMyLocations As Variant
+	Dim oSM As Object
+	Dim oMS As Object
+	
+On error Goto fin
+	
+	oConfigAccess = GetConfigAccess( &quot;/StarXpert_MultiSave.MultiSave.MultiSave/MultiSaveConfig&quot; )
+
+	oElement = oConfigAccess.getByName( &quot;Settings&quot; )
+
+	if Not oElement.hasByName( &quot;my.location&quot; ) Then
+		MsgBox &quot;my.location not defined&quot;
+		Exit Function
+	EndIf
+	
+	oLocation = oElement.getByName( &quot;my.location&quot; )
+	cMyLocation = oLocation.Setting
+	&apos;cut the vnd.sun.star.expand: part
+&apos;	Print cMyLocation
+	cMyLocations = Split(cMyLocation, &quot;vnd.sun.star.expand:&quot;)
+	cMyLocation = cMyLocations(1)
+&apos;	Print cMyLocation
+
+	&apos;Expand the macrofield expression
+	oSM = getProcessServiceManager
+	
+	oMS = oSM.DefaultContext.getValueByName(&quot;/singletons/com.sun.star.util.theMacroExpander&quot;)	
+	cMyLocation = oMS.ExpandMacros(cMyLocation)
+&apos;	Print cMyLocation
+	GetMyLocation() = cMyLocation
+	Exit Function
+fin:
+	GetMyLocation = &quot;&quot;
+End Function
+
+&apos;----------
+&apos;	Create and return a new com.sun.star.beans.PropertyValue.
+&apos; Dannyb&apos;s
+Function MakePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
+	Dim oPropertyValue As New com.sun.star.beans.PropertyValue
+	If Not IsMissing( cName ) Then
+		oPropertyValue.Name = cName
+	EndIf
+	If Not IsMissing( uValue ) Then
+		oPropertyValue.Value = uValue
+	EndIf
+	MakePropertyValue() = oPropertyValue
+End Function
+
+
+&apos; Sets the localized texts to the dialog
+Function SetLocalizedDialogTexts(dialog As Object)
+	choixFormat.model.Title = GetLocalizedText( 9, &quot;Choix du format d&apos;enregistrement&quot; ) 
+	choixFormat.model.Label1.Label = GetLocalizedText( 10, &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; ) &apos;Label1
+	choixFormat.model.CommandButton1.Label = GetLocalizedText( 11,  &quot;Enregistrer&quot; ) &apos; CommandButton1
+	choixFormat.model.CommandButton2.Label = GetLocalizedText( 12,  &quot;Annuler&quot;) &apos; CommandButton2
+	choixFormat.model.Label2.Label = GetLocalizedText( 13, &quot;Enregistrer dans : &quot; )&apos; Label2
+	choixFormat.model.btnChoisirChemin.Label = GetLocalizedText( 14, &quot;...&quot;) &apos; btnChoisirChemin
+	choixFormat.model.Label3.Label = GetLocalizedText( 15, &quot;Nom du fichier : &quot; ) &apos; Label3
+	choixFormat.model.FrameControl1.Label = GetLocalizedText( 16, &quot;Formats de fichier&quot; ) &apos; FrameControl1
+
+End Function
+
+&apos; -----------------------------------------------------------------------------------------------
+&apos; Localization functions and properties
+
+&apos; Number of the texts
+Const NumberOfTextIds = 18
+
+&apos; Global array for storing localized texts
+Dim LocalizedTexts( 0 to NumberOfTextIds) as string
+
+&apos; Returns text in given language.
+&apos; If there is no text with the given id default text is returned.
+Function GetLocalizedText( uId as Integer, cDefaultText as String)
+	&apos; Check that the ids is valid
+	if (uId &gt;=0 and uId &lt; NumberOfTextIds) then
+		GetLocalizedText = LocalizedTexts(uId)
+	else
+		GetLocalisedText = &quot;&quot;
+	EndIf
+	
+	&apos; If the localized text could not be found use default text
+	If (GetLocalizedText = &quot;&quot;) Then
+		GetLocalizedText = cDefaultText
+	EndIf 
+End Function
+
+&apos; Initiliazes the localized texts based on the OpenOffice.org language
+&apos; New languages can be added to the function
+Function InitializeLanguages()
+
+	&apos; French
+	If (OOoLang() = &quot;fr&quot;) Then
+		LocalizedTexts(0)  = &quot;Vous devez préciser un chemin&quot;
+		LocalizedTexts(1)  = &quot;Vous devez préciser un nom de fichier&quot;
+		LocalizedTexts(2)  = &quot;Vous devez au moins choisir un format d&apos;export&quot;
+		LocalizedTexts(3)  = &quot;Une erreur s&apos;est produite lors de l&apos;enregistrement des fichiers, assurez vous que les fichiers de destination (MS and PDF) sont fermés.&quot;
+		LocalizedTexts(4)  = &quot;Erreur&quot; 
+		LocalizedTexts(5)  = &quot;ligne&quot;
+		LocalizedTexts(6)  = &quot;Enregistrer sous&quot;
+		LocalizedTexts(7)  = &quot;Impossible de trouver le fichier image&quot;
+		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
+		LocalizedTexts(9)  = &quot;Choix du format d&apos;enregistrement&quot; &apos; choixFormat
+		LocalizedTexts(10) = &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; &apos;Label1
+		LocalizedTexts(11) = &quot;Enregistrer&quot; &apos; CommandButton1
+		LocalizedTexts(12) = &quot;Annuler&quot; &apos; CommandButton2
+		LocalizedTexts(13) = &quot;Enregistrer dans : &quot; &apos; Label2
+		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
+		LocalizedTexts(15) = &quot;Nom du fichier : &quot; &apos; Label3
+		LocalizedTexts(16) = &quot;Formats de fichier&quot; &apos; FrameControl1		
+		
+	&apos; Finnish
+	ElseIf (OOoLang() = &quot;fi&quot;) Then 
+		LocalizedTexts(0)  = &quot;Määrittele tallennuspaikka.&quot;
+		LocalizedTexts(1)  = &quot;Määrittele tiedostonimi.&quot;
+		LocalizedTexts(2)  = &quot;Valitse vähintään yksi tallennusmuoto.&quot;
+		LocalizedTexts(3)  = &quot;Virhe tapahtui tiedoston tallennuksen yhteydessä. Varmista että kohdetiedostot (MS ja PDF) ovat suljettuja.&quot;
+		LocalizedTexts(4)  = &quot;Virhe&quot; 
+		LocalizedTexts(5)  = &quot;rivi&quot;
+		LocalizedTexts(6)  = &quot;Valitse tallennuspaikka&quot;
+		LocalizedTexts(7)  = &quot;Kuvatiedostoa ei löydetty&quot;
+		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
+		LocalizedTexts(9)  = &quot;Tallenna valituissa tallennusmuodoissa&quot; &apos; choixFormat
+		LocalizedTexts(10) = &quot;Valitse tallennusmuodot, joissa haluat tiedoston tallentaa&quot; &apos;Label1
+		LocalizedTexts(11) = &quot;Tallenna&quot; &apos; CommandButton1
+		LocalizedTexts(12) = &quot;Peruuta&quot; &apos; CommandButton2
+		LocalizedTexts(13) = &quot;Tallennuspaikka : &quot; &apos; Label2
+		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
+		LocalizedTexts(15) = &quot;Tiedostonimi : &quot; &apos; Label3
+		LocalizedTexts(16) = &quot;Tallennusmuoto&quot; &apos; FrameControl1
+		
+	&apos; German
+	ElseIf (OOoLang() = &quot;de&quot;) Then 
+		LocalizedTexts(0)  = &quot;Sie müssen einen Dateinamen angeben&quot;
+		LocalizedTexts(1)  = &quot;Sie müssen einen Verzeichnispfad angeben&quot;
+		LocalizedTexts(2)  = &quot;Sie müssen wenigstens ein Dateiformat zum Exportieren wählen&quot;
+		LocalizedTexts(3)  = &quot;Ein Fehler ist wärend des Speichervorgangs der Datei aufgetreten, versichern Sie sich das die ausgesuchten Dateien (MS und PDF) geschlossen sind.&quot;
+		LocalizedTexts(4)  = &quot;Fehler&quot; 
+		LocalizedTexts(5)  = &quot;Linie&quot;
+		LocalizedTexts(6)  = &quot;Speichern unter...&quot;
+		LocalizedTexts(7)  = &quot;Die Bild Datei konnte nicht gefunden werden.&quot;
+		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter nicht gefunden&quot;
+		LocalizedTexts(9)  = &quot;Wahl des Speicherformates&quot; &apos; choixFormat
+		LocalizedTexts(10) = &quot;Auswahl des zu speichernden Dateityps bzw. der zu speichernden Dateitypen&quot; &apos;Label1
+		LocalizedTexts(11) = &quot;OK&quot; &apos; CommandButton1
+		LocalizedTexts(12) = &quot;Abbrechen&quot; &apos; CommandButton2
+		LocalizedTexts(13) = &quot;Verzeichnis auswählen:&quot; &apos; Label2
+		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
+		LocalizedTexts(15) = &quot;Dateiname:&quot; &apos; Label3
+		LocalizedTexts(16) = &quot;Dateien Formate&quot; &apos; FrameControl1
+		
+	&apos; Spanish
+	ElseIf (OOoLang() = &quot;es&quot;) Then
+		LocalizedTexts(0)  = &quot;Es necesario introducir un directorio de almacenamiento&quot;
+		LocalizedTexts(1)  = &quot;Es necesario introducir el nombre de un archivo&quot;
+		LocalizedTexts(2)  = &quot;Es necesario elegir al menos un formato de exportacion&quot;
+		LocalizedTexts(3)  = &quot;Se ha producido un error durante el almacenamiento del archivo, asegerate de que los archivos de destino (MS y PDF) estᮠcerrados.&quot;
+		LocalizedTexts(4)  = &quot;Error&quot; 
+		LocalizedTexts(5)  = &quot;linea&quot;
+		LocalizedTexts(6)  = &quot;Guardar como&quot;
+		LocalizedTexts(7)  = &quot;Imposible encontar el archivo del icono&quot;
+		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter no definido&quot;
+		LocalizedTexts(9)  = &quot;Elige un formato de almacenamiento&quot; &apos; choixFormat
+		LocalizedTexts(10) = &quot;Click para seleccionar los formatos de almacenamiento&quot; &apos;Label1
+		LocalizedTexts(11) = &quot;Guardar&quot; &apos; CommandButton1
+		LocalizedTexts(12) = &quot;Cancelar&quot; &apos; CommandButton2
+		LocalizedTexts(13) = &quot;Guardar en : &quot; &apos; Label2
+		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
+		LocalizedTexts(15) = &quot;Nombre del archivo : &quot; &apos; Label3
+		LocalizedTexts(16) = &quot;Formatos del archivo&quot; &apos; FrameControl1
+		
+	&apos; English (Default)
+	Else
+		LocalizedTexts(0)  = &quot;You must provide a Path !&quot;
+		LocalizedTexts(1)  = &quot;You must provide a file name !&quot;
+		LocalizedTexts(2)  = &quot;You must choose at least one export filter !&quot;
+		LocalizedTexts(3)  = &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;
+		LocalizedTexts(4)  = &quot;Error&quot; 
+		LocalizedTexts(5)  = &quot;line&quot;
+		LocalizedTexts(6)  = &quot;Save in&quot;
+		LocalizedTexts(7)  = &quot;Can not find icon File&quot;
+		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
+		LocalizedTexts(9)  = &quot;Choose file format&quot; &apos; choixFormat
+		LocalizedTexts(10) = &quot;Check format you want your file to be save as&quot; &apos;Label1
+		LocalizedTexts(11) = &quot;Save&quot; &apos; CommandButton1
+		LocalizedTexts(12) = &quot;Cancel&quot; &apos; CommandButton2
+		LocalizedTexts(13) = &quot;Save in : &quot; &apos; Label2
+		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
+		LocalizedTexts(15) = &quot;File name : &quot; &apos; Label3
+		LocalizedTexts(16) = &quot;File format&quot; &apos; FrameControl1
+    EndIf
+End Function
+
+
+&apos; Returns the language of the OpenOffice.org
+&apos; Source of the code: &quot;Usefull macro Information for OpenOffice&quot; by Andrew Pitonyak
+Function OOoLang() as string
+	&apos;Author : Laurent Godard
+	&apos;e-mail : listes.godard@laposte.net
+	Dim oSet, oConfigProvider
+	Dim oParm(0) As New com.sun.star.beans.PropertyValue
+	Dim sProvider$, sAccess$
+	sProvider = &quot;com.sun.star.configuration.ConfigurationProvider&quot;
+	sAccess = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
+	oConfigProvider = createUnoService(sProvider)
+	oParm(0).Name = &quot;nodepath&quot;
+	oParm(0).Value = &quot;/org.openoffice.Setup/L10N&quot;
+	oSet = oConfigProvider.createInstanceWithArguments(sAccess, oParm())
+	Dim OOLangue as string
+	OOLangue= oSet.getbyname(&quot;ooLocale&quot;) &apos;en-US
+	OOoLang=lcase(Left(trim(OOLangue),2)) &apos;en
+End Function
+
+&apos;isIn()---------------------------------------------------------------------------------
+&apos;@Task : check if a string is present in the array of strings
+&apos;@Parameters : str =&gt; string to seek in array
+&apos;			   list : array to read through
+&apos;@Returns : true if str is in the list, false else
+&apos;-----------------------------------------------------------------------------------------
+Function isIn(str as string, list as array) as boolean
+		
+	Dim found as boolean
+	found = false
+	
+	Dim i as integer
+	i=0
+	
+	do until found or i &gt; Ubound(list)
+		if ( str = list(i) ) then
+			found = true
+			else
+				found= false
+		endif	
+		i=i+1 
+	loop
+	
+	isIn = found
+	
+End function 
+
+</script:module>

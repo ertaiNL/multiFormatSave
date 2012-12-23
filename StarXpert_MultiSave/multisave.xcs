@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<oor:component-schema oor:name="MultiSave" oor:package="StarXpert_MultiSave.MultiSave" xml:lang="en-US" xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<templates>
+		<group oor:name="MultiSaveSetting">
+			<prop oor:name="Setting" oor:type="xs:string"/>			
+		</group>
+	</templates>
+	<component>
+		<group oor:name="MultiSaveConfig">
+			<set oor:name="Settings" oor:node-type="MultiSaveSetting"/>
+		</group>
+	</component>
+</oor:component-schema>
+

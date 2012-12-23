@@ -1,0 +1,1 @@
+MultiSave vous permet d'enregistrer simultanément un document aux formats OpenDocument, MS Office et/ou PDF au choix.
