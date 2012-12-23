@@ -75,7 +75,7 @@ Sub MultiSave
 	&apos; Init globals
 	&apos; Fix here the save name as the Zip in Makefile
 	sZipName = &quot;StarXpert_MultiSave.oxt&quot;	
-	sVersion = &quot;v 1.3.0&quot;
+	sVersion = &quot;v 1.3.1&quot;
  	oTextDoc = ThisComponent
  	
 &apos; Todo:  	DECOMMENTER LES 3 LIGNES SUIVANTES
