@@ -13,16 +13,16 @@
 		<name xlink:href="http://www.ertai.nl/">Ertai_NL</name>
 	</publisher>
 	<display-name>
-		<name lang="en">MultiFormatSave</name>
-		<name lang="fr">MultiFormatSave</name>
+		<name>MultiFormatSave</name>
 	</display-name>
 	<icon>
-		<default xlink:href="images/icon.png" />
-		<high-contrast xlink:href="images/icon_hc.png" />
+		<default xlink:href="icons/multiFormatSave.png" />
+		<high-contrast xlink:href="icons/multiFormatSave.png" />
 	</icon>
 	<extension-description>
 		<src xlink:href="pkg-desc/pkg-description.en" lang="en" />
 		<src xlink:href="pkg-desc/pkg-description.fr" lang="fr" />
+		<src xlink:href="pkg-desc/pkg-description.nl" lang="nl" />
 	</extension-description>
 	<registration>
 	</registration>
