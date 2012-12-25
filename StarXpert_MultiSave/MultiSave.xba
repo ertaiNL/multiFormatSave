@@ -3,8 +3,8 @@
 <script:module xmlns:script="http://openoffice.org/2000/script" script:name="MultiSave" script:language="StarBasic">REM  *****  BASIC  *****
 
 &apos;************************************************
-&apos;Copyright (C) 2004 StarXpert -- Florent Manens
-&apos;fmanens@starxpert.fr
+&apos;Copyright (C) 2004 - 2012 StarXpert -- Florent Manens
+&apos;Copyright (C) 2012 Rob Snelders
 
 &apos;This library is free software; you can redistribute it and/or
 &apos;modify it under the terms of the GNU Lesser General Public
