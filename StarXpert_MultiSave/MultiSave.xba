@@ -33,7 +33,7 @@
 
 Option Explicit
 
-Public choixFormat As Object
+Public DChooseFormat As Object
 Public sZipName As String
 Public sVersion As String
 
@@ -65,25 +65,25 @@ Sub MultiSave
 	dim oTextDoc as Object
 	&apos; Init globals
 	&apos; Fix here the save name as the Zip in Makefile
-	sZipName = &quot;StarXpert_MultiSave.oxt&quot;
+	sZipName = &quot;MultiFormatSave.oxt&quot;
 	sVersion = &quot;v 1.3.3&quot;
 	oTextDoc = ThisComponent
 
 	globalscope.Basiclibraries.Loadlibrary(&quot;StarXpert_MultiSave&quot;)
 	globalscope.DialogLibraries.LoadLibrary(&quot;StarXpert_MultiSave&quot;)
-	choixFormat = CreateUnoDialog(globalscope.DialogLibraries.StarXpert_MultiSave.choixFormat)
+	DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.StarXpert_MultiSave.chooseFormat)
 
-	SetLocalizedDialogTexts(choixFormat)
+	SetLocalizedDialogTexts(DChooseFormat)
 	&apos; fix current file path
-	choixFormat.model.txtChemin.text = ConvertFromURL(getFileDir(thisComponent.Location))
-	choixFormat.model.txtFichier.text = ConvertFromURL(getFileName(thisComponent.Location))
+	DChooseFormat.model.TFPath.text = ConvertFromURL(getFileDir(thisComponent.Location))
+	DChooseFormat.model.TFFilename.text = ConvertFromURL(getFileName(thisComponent.Location))
 
 	&apos; fix icon path
-	choixFormat.model.imgOOo.ImageURL = getImagePath(sZipName,&quot;ooo_gulls.xpm&quot;)
-	choixFormat.model.imgWord.ImageURL = getImagePath(sZipName,&quot;imgms.xpm&quot;)
-	choixFormat.model.imgPDF.ImageURL = getImagePath(sZipName,&quot;pdf-ico.gif&quot;)
+	DChooseFormat.model.IODF.ImageURL = getImagePath(sZipName,&quot;ooo_gulls.xpm&quot;)
+	DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;imgms.xpm&quot;)
+	DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;pdf-ico.gif&quot;)
 
-	choixFormat.execute
+	DChooseFormat.execute
 End Sub
 
 &apos; Function called when the &quot;Save&quot; button is clicked.
@@ -91,16 +91,16 @@ End Sub
 Sub MultiSave_OK
 
 	&apos; verify parameters
-	if choixFormat.model.txtChemin.text  = &quot;&quot; then
-		MsgBox GetLocalizedText( 0, &quot;Vous devez préciser un chemin&quot;)
+	if DChooseFormat.model.TFPath.text  = &quot;&quot; then
+		MsgBox GetLocalizedText( 0, &quot;You must provide a Path&quot;)
 		exit sub
 	end if
-	if choixFormat.model.txtFichier.text = &quot;&quot; then
-		MsgBox GetLocalizedText( 1, &quot;Vous devez préciser un nom de fichier&quot;)
+	if DChooseFormat.model.TFFilename.text = &quot;&quot; then
+		MsgBox GetLocalizedText( 1, &quot;You must provide a file name&quot;)
 		exit sub
 	end if
-	if choixFormat.model.chkWord.state=0 and choixFormat.model.chkOOo.state=0 and choixFormat.model.chkPDF.state=0 Then
-		Msgbox GetLocalizedText( 2, &quot;Vous devez au moins choisir un format d&apos;export&quot;)
+	if DChooseFormat.model.CBMSO.state=0 and DChooseFormat.model.CBODF.state=0 and DChooseFormat.model.CBPDF.state=0 Then
+		Msgbox GetLocalizedText( 2, &quot;You must choose at least one export filter&quot;)
 		exit sub
 	end if
 
@@ -157,13 +157,13 @@ On Local Error Goto ErrorHandler
 	next
 
 	&apos;
-	choixFormat.endExecute
+	DChooseFormat.endExecute
 	goto endsub
 
 &apos; Something bad happened when saving file
 ErrorHandler:
-   MsgBox GetLocalizedText(3, &quot;Une erreur s&apos;est produite lors de l&apos;enregistrement des fichiers, assurez vous que les fichiers de destination (MS and PDF) sont fermés.&quot;)
-   MsgBox (GetLocalizedText(4, &quot;Erreur &quot;) &amp; ERR &amp; GetLocalizedText( 5, &quot; ligne &quot;) &amp; Erl &amp; &quot;.&quot; &amp; chr$(13) &amp; ERROR$)
+   MsgBox GetLocalizedText(3, &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;)
+   MsgBox (GetLocalizedText(4, &quot;Error&quot;) &amp; ERR &amp; GetLocalizedText( 5, &quot; line &quot;) &amp; Erl &amp; &quot;.&quot; &amp; chr$(13) &amp; ERROR$)
 endsub:
 
 End Sub
@@ -212,8 +212,8 @@ End function
 &apos;
 Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
 
-	sPath = choixFormat.model.txtChemin.text
-	FileName = choixFormat.model.txtFichier.text
+	sPath = DChooseFormat.model.TFPath.text
+	FileName = DChooseFormat.model.TFFilename.text
 
 	&apos; Format required : ODF, OFFICE or PDF format ?
 	Dim counter as Integer
@@ -222,15 +222,15 @@ Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
 	next
 
 	&apos; MS Office (doc, xls, ppt).
-	if choixFormat.model.chkWord.state = 1 then
+	if DChooseFormat.model.CBMSO.state = 1 then
 		formats(OFFICE) = TRUE
 	end if
 	&apos; OpenOffice (odt, ods or odp).
-	if choixFormat.model.chkOOo.state = 1 then
+	if DChooseFormat.model.CBODF.state = 1 then
 		formats(ODF) = TRUE
 	end if
 	&apos; PDF
-	if choixFormat.model.chkPDF.state = 1 then
+	if DChooseFormat.model.CBPDF.state = 1 then
 		formats(PDF) = TRUE
 	end if
 
@@ -423,27 +423,27 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 End	Function
 
 Sub MultiSave_Cancel
-   choixFormat.endExecute
+   DChooseFormat.endExecute
 End Sub
 
 Sub MultiSave_ChoosePath
 	Dim Folder,FileName As String
 
-	If choixFormat.model.txtChemin.text &lt;&gt; &quot;&quot; Then
-		Folder = choixFormat.model.txtChemin.text
+	If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
+		Folder = DChooseFormat.model.TFPath.text
 	Else
 		Folder = getFileDir(thisComponent.Location)
 	End If
-	If choixFormat.model.txtFichier.text &lt;&gt; &quot;&quot; Then
-		FileName = choixFormat.model.txtFichier.text
+	If DChooseFormat.model.TFFilename.text &lt;&gt; &quot;&quot; Then
+		FileName = DChooseFormat.model.TFFilename.text
 	Else
 		FileName = getFileName(thisComponent.Location)
 	End If
 	Folder = OpenFolderDialog(ConvertToURL(Folder))
 	if Folder &lt;&gt; &quot;&quot; then
-		choixFormat.model.txtChemin.text = ConvertFromURL(Folder)
+		DChooseFormat.model.TFPath.text = ConvertFromURL(Folder)
 	end if
-	choixFormat.model.txtFichier.text = FileName
+	DChooseFormat.model.TFFilename.text = FileName
 End Sub
 
 
@@ -495,16 +495,16 @@ Function getFileName(FileLocation As String) As String
 	getFileName=right(FileLocation,len(FileLocation) -StringEnd)
 End Function
 
-Sub img_OOo_clic
-	choixFormat.model.chkOOo.state = 1 xor choixFormat.model.chkOOo.state
+Sub IODF_click
+	DChooseFormat.model.CBODF.state = 1 xor DChooseFormat.model.CBODF.state
 End sub
 
-Sub img_PDF_clic
-	choixFormat.model.chkPDF.state = 1 xor	choixFormat.model.chkPDF.state
+Sub IPDF_click
+	DChooseFormat.model.CBPDF.state = 1 xor	DChooseFormat.model.CBPDF.state
 End sub
 
-Sub img_Word_clic
-	choixFormat.model.chkWord.state = 1 xor choixFormat.model.chkWord.state
+Sub IMSO_click
+	DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
 End sub
 
 Sub showHelp
@@ -697,14 +697,14 @@ End Function
 
 &apos; Sets the localized texts to the dialog
 Function SetLocalizedDialogTexts(dialog As Object)
-	choixFormat.model.Title = GetLocalizedText( 9, &quot;Choix du format d&apos;enregistrement&quot; )
-	choixFormat.model.Label1.Label = GetLocalizedText( 10, &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; ) &apos;Label1
-	choixFormat.model.CommandButton1.Label = GetLocalizedText( 11,  &quot;Enregistrer&quot; ) &apos; CommandButton1
-	choixFormat.model.CommandButton2.Label = GetLocalizedText( 12,  &quot;Annuler&quot;) &apos; CommandButton2
-	choixFormat.model.Label2.Label = GetLocalizedText( 13, &quot;Enregistrer dans : &quot; )&apos; Label2
-	choixFormat.model.btnChoisirChemin.Label = GetLocalizedText( 14, &quot;...&quot;) &apos; btnChoisirChemin
-	choixFormat.model.Label3.Label = GetLocalizedText( 15, &quot;Nom du fichier : &quot; ) &apos; Label3
-	choixFormat.model.FrameControl1.Label = GetLocalizedText( 16, &quot;Formats de fichier&quot; ) &apos; FrameControl1
+	DChooseFormat.model.Title = GetLocalizedText( 9, &quot;Choose file format&quot; )
+	DChooseFormat.model.LHelp.Label = GetLocalizedText( 10, &quot;Check format you want your file to be save as.&quot; )
+	DChooseFormat.model.BSave.Label = GetLocalizedText( 11,  &quot;Save&quot; )
+	DChooseFormat.model.BCancel.Label = GetLocalizedText( 12,  &quot;Cancel&quot;)
+	DChooseFormat.model.LPath.Label = GetLocalizedText( 13, &quot;Save in:&quot; )
+	DChooseFormat.model.BPath.Label = GetLocalizedText( 14, &quot;...&quot;)
+	DChooseFormat.model.LFilename.Label = GetLocalizedText( 15, &quot;Filename:&quot; )
+	DChooseFormat.model.FCFileFormat.Label = GetLocalizedText( 16, &quot;File format&quot; )
 
 End Function
 
@@ -721,10 +721,9 @@ Dim LocalizedTexts( 0 to NumberOfTextIds) as string
 &apos; If there is no text with the given id default text is returned.
 Function GetLocalizedText( uId as Integer, cDefaultText as String)
 	&apos; Check that the ids is valid
+	GetLocalizedText = &quot;&quot;
 	if (uId &gt;=0 and uId &lt; NumberOfTextIds) then
 		GetLocalizedText = LocalizedTexts(uId)
-	else
-		GetLocalisedText = &quot;&quot;
 	EndIf
 
 	&apos; If the localized text could not be found use default text
@@ -748,14 +747,14 @@ Function InitializeLanguages()
 		LocalizedTexts(6)  = &quot;Enregistrer sous&quot;
 		LocalizedTexts(7)  = &quot;Impossible de trouver le fichier image&quot;
 		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Choix du format d&apos;enregistrement&quot; &apos; choixFormat
-		LocalizedTexts(10) = &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; &apos;Label1
-		LocalizedTexts(11) = &quot;Enregistrer&quot; &apos; CommandButton1
-		LocalizedTexts(12) = &quot;Annuler&quot; &apos; CommandButton2
-		LocalizedTexts(13) = &quot;Enregistrer dans : &quot; &apos; Label2
-		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
-		LocalizedTexts(15) = &quot;Nom du fichier : &quot; &apos; Label3
-		LocalizedTexts(16) = &quot;Formats de fichier&quot; &apos; FrameControl1
+		LocalizedTexts(9)  = &quot;Choix du format d&apos;enregistrement&quot; &apos; DChooseFormat
+		LocalizedTexts(10) = &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; &apos;LHelp
+		LocalizedTexts(11) = &quot;Enregistrer&quot; &apos; BSave
+		LocalizedTexts(12) = &quot;Annuler&quot; &apos; BCancel
+		LocalizedTexts(13) = &quot;Enregistrer dans : &quot; &apos; LPath
+		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(15) = &quot;Nom du fichier : &quot; &apos; LFilename
+		LocalizedTexts(16) = &quot;Formats de fichier&quot; &apos; FCFileFormat
 
 	&apos; Finnish
 	ElseIf (OOoLang() = &quot;fi&quot;) Then
@@ -768,14 +767,14 @@ Function InitializeLanguages()
 		LocalizedTexts(6)  = &quot;Valitse tallennuspaikka&quot;
 		LocalizedTexts(7)  = &quot;Kuvatiedostoa ei löydetty&quot;
 		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Tallenna valituissa tallennusmuodoissa&quot; &apos; choixFormat
-		LocalizedTexts(10) = &quot;Valitse tallennusmuodot, joissa haluat tiedoston tallentaa&quot; &apos;Label1
-		LocalizedTexts(11) = &quot;Tallenna&quot; &apos; CommandButton1
-		LocalizedTexts(12) = &quot;Peruuta&quot; &apos; CommandButton2
-		LocalizedTexts(13) = &quot;Tallennuspaikka : &quot; &apos; Label2
-		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
-		LocalizedTexts(15) = &quot;Tiedostonimi : &quot; &apos; Label3
-		LocalizedTexts(16) = &quot;Tallennusmuoto&quot; &apos; FrameControl1
+		LocalizedTexts(9)  = &quot;Tallenna valituissa tallennusmuodoissa&quot; &apos; DChooseFormat
+		LocalizedTexts(10) = &quot;Valitse tallennusmuodot, joissa haluat tiedoston tallentaa&quot; &apos;LHelp
+		LocalizedTexts(11) = &quot;Tallenna&quot; &apos; BSave
+		LocalizedTexts(12) = &quot;Peruuta&quot; &apos; BCancel
+		LocalizedTexts(13) = &quot;Tallennuspaikka : &quot; &apos; LPath
+		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(15) = &quot;Tiedostonimi : &quot; &apos; LFilename
+		LocalizedTexts(16) = &quot;Tallennusmuoto&quot; &apos; FCFileFormat
 
 	&apos; German
 	ElseIf (OOoLang() = &quot;de&quot;) Then
@@ -788,14 +787,14 @@ Function InitializeLanguages()
 		LocalizedTexts(6)  = &quot;Speichern unter...&quot;
 		LocalizedTexts(7)  = &quot;Die Bild Datei konnte nicht gefunden werden.&quot;
 		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter nicht gefunden&quot;
-		LocalizedTexts(9)  = &quot;Wahl des Speicherformates&quot; &apos; choixFormat
-		LocalizedTexts(10) = &quot;Auswahl des zu speichernden Dateityps bzw. der zu speichernden Dateitypen&quot; &apos;Label1
-		LocalizedTexts(11) = &quot;OK&quot; &apos; CommandButton1
-		LocalizedTexts(12) = &quot;Abbrechen&quot; &apos; CommandButton2
-		LocalizedTexts(13) = &quot;Verzeichnis auswählen:&quot; &apos; Label2
-		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
-		LocalizedTexts(15) = &quot;Dateiname:&quot; &apos; Label3
-		LocalizedTexts(16) = &quot;Dateien Formate&quot; &apos; FrameControl1
+		LocalizedTexts(9)  = &quot;Wahl des Speicherformates&quot; &apos; DChooseFormat
+		LocalizedTexts(10) = &quot;Auswahl des zu speichernden Dateityps bzw. der zu speichernden Dateitypen&quot; &apos;LHelp
+		LocalizedTexts(11) = &quot;OK&quot; &apos; BSave
+		LocalizedTexts(12) = &quot;Abbrechen&quot; &apos; BCancel
+		LocalizedTexts(13) = &quot;Verzeichnis auswählen:&quot; &apos; LPath
+		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(15) = &quot;Dateiname:&quot; &apos; LFilename
+		LocalizedTexts(16) = &quot;Dateien Formate&quot; &apos; FCFileFormat
 
 	&apos; Spanish
 	ElseIf (OOoLang() = &quot;es&quot;) Then
@@ -808,34 +807,34 @@ Function InitializeLanguages()
 		LocalizedTexts(6)  = &quot;Guardar como&quot;
 		LocalizedTexts(7)  = &quot;Imposible encontar el archivo del icono&quot;
 		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter no definido&quot;
-		LocalizedTexts(9)  = &quot;Elige un formato de almacenamiento&quot; &apos; choixFormat
-		LocalizedTexts(10) = &quot;Click para seleccionar los formatos de almacenamiento&quot; &apos;Label1
-		LocalizedTexts(11) = &quot;Guardar&quot; &apos; CommandButton1
-		LocalizedTexts(12) = &quot;Cancelar&quot; &apos; CommandButton2
-		LocalizedTexts(13) = &quot;Guardar en : &quot; &apos; Label2
-		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
-		LocalizedTexts(15) = &quot;Nombre del archivo : &quot; &apos; Label3
-		LocalizedTexts(16) = &quot;Formatos del archivo&quot; &apos; FrameControl1
+		LocalizedTexts(9)  = &quot;Elige un formato de almacenamiento&quot; &apos; DChooseFormat
+		LocalizedTexts(10) = &quot;Click para seleccionar los formatos de almacenamiento&quot; &apos;LHelp
+		LocalizedTexts(11) = &quot;Guardar&quot; &apos; BSave
+		LocalizedTexts(12) = &quot;Cancelar&quot; &apos; BCancel
+		LocalizedTexts(13) = &quot;Guardar en : &quot; &apos; LPath
+		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(15) = &quot;Nombre del archivo : &quot; &apos; LFilename
+		LocalizedTexts(16) = &quot;Formatos del archivo&quot; &apos; FCFileFormat
 
 	&apos; English (Default)
 	Else
-		LocalizedTexts(0)  = &quot;You must provide a Path !&quot;
-		LocalizedTexts(1)  = &quot;You must provide a file name !&quot;
-		LocalizedTexts(2)  = &quot;You must choose at least one export filter !&quot;
+		LocalizedTexts(0)  = &quot;You must provide a Path&quot;
+		LocalizedTexts(1)  = &quot;You must provide a file name&quot;
+		LocalizedTexts(2)  = &quot;You must choose at least one export filter&quot;
 		LocalizedTexts(3)  = &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;
 		LocalizedTexts(4)  = &quot;Error&quot;
 		LocalizedTexts(5)  = &quot;line&quot;
 		LocalizedTexts(6)  = &quot;Save in&quot;
 		LocalizedTexts(7)  = &quot;Can not find icon File&quot;
 		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Choose file format&quot; &apos; choixFormat
-		LocalizedTexts(10) = &quot;Check format you want your file to be save as&quot; &apos;Label1
-		LocalizedTexts(11) = &quot;Save&quot; &apos; CommandButton1
-		LocalizedTexts(12) = &quot;Cancel&quot; &apos; CommandButton2
-		LocalizedTexts(13) = &quot;Save in : &quot; &apos; Label2
-		LocalizedTexts(14) = &quot;...&quot; &apos; btnChoisirChemin
-		LocalizedTexts(15) = &quot;File name : &quot; &apos; Label3
-		LocalizedTexts(16) = &quot;File format&quot; &apos; FrameControl1
+		LocalizedTexts(9)  = &quot;Choose file format&quot; &apos; DChooseFormat
+		LocalizedTexts(10) = &quot;Check format you want your file to be saved as&quot; &apos;Lhelp
+		LocalizedTexts(11) = &quot;Save&quot; &apos; Bsave
+		LocalizedTexts(12) = &quot;Cancel&quot; &apos; BCancel
+		LocalizedTexts(13) = &quot;Save in:&quot; &apos; LPath
+		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(15) = &quot;Filename:&quot; &apos; LFilename
+		LocalizedTexts(16) = &quot;File format&quot; &apos; FCFileFormat
     EndIf
 End Function
 
