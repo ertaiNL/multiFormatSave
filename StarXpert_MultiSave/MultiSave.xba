@@ -453,7 +453,7 @@ Sub OpenFolderDialog(Folder As String) As String
 
 	sFolderPickerArgs = Array(com.sun.star.ui.dialogs.TemplateDescription.FILEOPEN_SIMPLE )
 	oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
-	oFolderPicker.setTitle( GetLocalizedText( 6, &quot;Enregistrer sous&quot;) )
+	oFolderPicker.setTitle( GetLocalizedText( 6, &quot;Save in&quot;) )
 	oFolderPicker.setDisplayDirectory( Folder )
 	If oFolderPicker.execute() Then
 		OpenFolderDialog = oFolderPicker.Directory
@@ -547,7 +547,7 @@ function getImagePath(nomModule as String, nomImage as String) as String
 	    If sValue &lt;&gt; &quot;&quot; Then
 		getImagePath =PathsModule+sValue+nomImage
 	    Else
-		MsgBox GetLocalizedText(7, &quot;Impossible de trouver le fichier image&quot;)
+		MsgBox GetLocalizedText(7, &quot;Can not find icon File&quot;)
 		getImagePath = &quot;&quot;
 	    End If
 	End If
@@ -697,14 +697,14 @@ End Function
 
 &apos; Sets the localized texts to the dialog
 Function SetLocalizedDialogTexts(dialog As Object)
-	DChooseFormat.model.Title = GetLocalizedText( 9, &quot;Choose file format&quot; )
-	DChooseFormat.model.LHelp.Label = GetLocalizedText( 10, &quot;Check format you want your file to be save as.&quot; )
-	DChooseFormat.model.BSave.Label = GetLocalizedText( 11,  &quot;Save&quot; )
-	DChooseFormat.model.BCancel.Label = GetLocalizedText( 12,  &quot;Cancel&quot;)
-	DChooseFormat.model.LPath.Label = GetLocalizedText( 13, &quot;Save in:&quot; )
-	DChooseFormat.model.BPath.Label = GetLocalizedText( 14, &quot;...&quot;)
-	DChooseFormat.model.LFilename.Label = GetLocalizedText( 15, &quot;Filename:&quot; )
-	DChooseFormat.model.FCFileFormat.Label = GetLocalizedText( 16, &quot;File format&quot; )
+	DChooseFormat.model.Title = GetLocalizedText( 8, &quot;Choose file format&quot; )
+	DChooseFormat.model.LHelp.Label = GetLocalizedText( 9, &quot;Check format you want your file to be save as.&quot; )
+	DChooseFormat.model.BSave.Label = GetLocalizedText( 10,  &quot;Save&quot; )
+	DChooseFormat.model.BCancel.Label = GetLocalizedText( 11,  &quot;Cancel&quot;)
+	DChooseFormat.model.LPath.Label = GetLocalizedText( 12, &quot;Save in:&quot; )
+	DChooseFormat.model.BPath.Label = GetLocalizedText( 13, &quot;...&quot;)
+	DChooseFormat.model.LFilename.Label = GetLocalizedText( 14, &quot;Filename:&quot; )
+	DChooseFormat.model.FCFileFormat.Label = GetLocalizedText( 15, &quot;File format&quot; )
 
 End Function
 
@@ -712,7 +712,7 @@ End Function
 &apos; Localization functions and properties
 
 &apos; Number of the texts
-Const NumberOfTextIds = 18
+Const NumberOfTextIds = 16
 
 &apos; Global array for storing localized texts
 Dim LocalizedTexts( 0 to NumberOfTextIds) as string
@@ -746,15 +746,14 @@ Function InitializeLanguages()
 		LocalizedTexts(5)  = &quot;ligne&quot;
 		LocalizedTexts(6)  = &quot;Enregistrer sous&quot;
 		LocalizedTexts(7)  = &quot;Impossible de trouver le fichier image&quot;
-		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Choix du format d&apos;enregistrement&quot; &apos; DChooseFormat
-		LocalizedTexts(10) = &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; &apos;LHelp
-		LocalizedTexts(11) = &quot;Enregistrer&quot; &apos; BSave
-		LocalizedTexts(12) = &quot;Annuler&quot; &apos; BCancel
-		LocalizedTexts(13) = &quot;Enregistrer dans : &quot; &apos; LPath
-		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
-		LocalizedTexts(15) = &quot;Nom du fichier : &quot; &apos; LFilename
-		LocalizedTexts(16) = &quot;Formats de fichier&quot; &apos; FCFileFormat
+		LocalizedTexts(8)  = &quot;Choix du format d&apos;enregistrement&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Cocher pour choisir le(s) format(s) d&apos;enregistrement&quot; &apos;LHelp
+		LocalizedTexts(10) = &quot;Enregistrer&quot; &apos; BSave
+		LocalizedTexts(11) = &quot;Annuler&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Enregistrer dans : &quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Nom du fichier : &quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;Formats de fichier&quot; &apos; FCFileFormat
 
 	&apos; Finnish
 	ElseIf (OOoLang() = &quot;fi&quot;) Then
@@ -766,15 +765,14 @@ Function InitializeLanguages()
 		LocalizedTexts(5)  = &quot;rivi&quot;
 		LocalizedTexts(6)  = &quot;Valitse tallennuspaikka&quot;
 		LocalizedTexts(7)  = &quot;Kuvatiedostoa ei löydetty&quot;
-		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Tallenna valituissa tallennusmuodoissa&quot; &apos; DChooseFormat
-		LocalizedTexts(10) = &quot;Valitse tallennusmuodot, joissa haluat tiedoston tallentaa&quot; &apos;LHelp
-		LocalizedTexts(11) = &quot;Tallenna&quot; &apos; BSave
-		LocalizedTexts(12) = &quot;Peruuta&quot; &apos; BCancel
-		LocalizedTexts(13) = &quot;Tallennuspaikka : &quot; &apos; LPath
-		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
-		LocalizedTexts(15) = &quot;Tiedostonimi : &quot; &apos; LFilename
-		LocalizedTexts(16) = &quot;Tallennusmuoto&quot; &apos; FCFileFormat
+		LocalizedTexts(8)  = &quot;Tallenna valituissa tallennusmuodoissa&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Valitse tallennusmuodot, joissa haluat tiedoston tallentaa&quot; &apos;LHelp
+		LocalizedTexts(10) = &quot;Tallenna&quot; &apos; BSave
+		LocalizedTexts(11) = &quot;Peruuta&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Tallennuspaikka : &quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Tiedostonimi : &quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;Tallennusmuoto&quot; &apos; FCFileFormat
 
 	&apos; German
 	ElseIf (OOoLang() = &quot;de&quot;) Then
@@ -786,15 +784,14 @@ Function InitializeLanguages()
 		LocalizedTexts(5)  = &quot;Linie&quot;
 		LocalizedTexts(6)  = &quot;Speichern unter...&quot;
 		LocalizedTexts(7)  = &quot;Die Bild Datei konnte nicht gefunden werden.&quot;
-		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter nicht gefunden&quot;
-		LocalizedTexts(9)  = &quot;Wahl des Speicherformates&quot; &apos; DChooseFormat
-		LocalizedTexts(10) = &quot;Auswahl des zu speichernden Dateityps bzw. der zu speichernden Dateitypen&quot; &apos;LHelp
-		LocalizedTexts(11) = &quot;OK&quot; &apos; BSave
-		LocalizedTexts(12) = &quot;Abbrechen&quot; &apos; BCancel
-		LocalizedTexts(13) = &quot;Verzeichnis auswählen:&quot; &apos; LPath
-		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
-		LocalizedTexts(15) = &quot;Dateiname:&quot; &apos; LFilename
-		LocalizedTexts(16) = &quot;Dateien Formate&quot; &apos; FCFileFormat
+		LocalizedTexts(8)  = &quot;Wahl des Speicherformates&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Auswahl des zu speichernden Dateityps bzw. der zu speichernden Dateitypen&quot; &apos;LHelp
+		LocalizedTexts(10) = &quot;OK&quot; &apos; BSave
+		LocalizedTexts(11) = &quot;Abbrechen&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Verzeichnis auswählen:&quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Dateiname:&quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;Dateien Formate&quot; &apos; FCFileFormat
 
 	&apos; Spanish
 	ElseIf (OOoLang() = &quot;es&quot;) Then
@@ -806,15 +803,33 @@ Function InitializeLanguages()
 		LocalizedTexts(5)  = &quot;linea&quot;
 		LocalizedTexts(6)  = &quot;Guardar como&quot;
 		LocalizedTexts(7)  = &quot;Imposible encontar el archivo del icono&quot;
-		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter no definido&quot;
-		LocalizedTexts(9)  = &quot;Elige un formato de almacenamiento&quot; &apos; DChooseFormat
-		LocalizedTexts(10) = &quot;Click para seleccionar los formatos de almacenamiento&quot; &apos;LHelp
-		LocalizedTexts(11) = &quot;Guardar&quot; &apos; BSave
-		LocalizedTexts(12) = &quot;Cancelar&quot; &apos; BCancel
-		LocalizedTexts(13) = &quot;Guardar en : &quot; &apos; LPath
-		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
-		LocalizedTexts(15) = &quot;Nombre del archivo : &quot; &apos; LFilename
-		LocalizedTexts(16) = &quot;Formatos del archivo&quot; &apos; FCFileFormat
+		LocalizedTexts(8)  = &quot;Elige un formato de almacenamiento&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Click para seleccionar los formatos de almacenamiento&quot; &apos;LHelp
+		LocalizedTexts(10) = &quot;Guardar&quot; &apos; BSave
+		LocalizedTexts(11) = &quot;Cancelar&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Guardar en : &quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Nombre del archivo : &quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;Formatos del archivo&quot; &apos; FCFileFormat
+
+	&apos; Dutch
+	ElseIf (OOoLang() = &quot;nl&quot;) Then
+		LocalizedTexts(0)  = &quot;Er is geen pad ingevoerd&quot;
+		LocalizedTexts(1)  = &quot;Er is geen bestandsnaam ingevoerd&quot;
+		LocalizedTexts(2)  = &quot;U moet minstens 1 export-filter aanvinken&quot;
+		LocalizedTexts(3)  = &quot;Er is een fout opgetreden bij het opslaan, zorg dat de doelbestanden (MS en PDF) niet in gebruik zijn.&quot;
+		LocalizedTexts(4)  = &quot;Error&quot;
+		LocalizedTexts(5)  = &quot;lijn&quot;
+		LocalizedTexts(6)  = &quot;Opslaan in&quot;
+		LocalizedTexts(7)  = &quot;Kan het icoon niet vinden&quot;
+		LocalizedTexts(8)  = &quot;Kies bestandsformaat&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Vink het format waarin uw bestand opgeslagen moet worden aan.&quot; &apos;Lhelp
+		LocalizedTexts(10) = &quot;Opslaan&quot; &apos; Bsave
+		LocalizedTexts(11) = &quot;Annuleren&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Opslaan in:&quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Bestandsnaam:&quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;Bestandsformaat&quot; &apos; FCFileFormat
 
 	&apos; English (Default)
 	Else
@@ -826,16 +841,16 @@ Function InitializeLanguages()
 		LocalizedTexts(5)  = &quot;line&quot;
 		LocalizedTexts(6)  = &quot;Save in&quot;
 		LocalizedTexts(7)  = &quot;Can not find icon File&quot;
-		LocalizedTexts(8)  = &quot;ooSetupFactoryDefaultFilter not defined&quot;
-		LocalizedTexts(9)  = &quot;Choose file format&quot; &apos; DChooseFormat
-		LocalizedTexts(10) = &quot;Check format you want your file to be saved as&quot; &apos;Lhelp
-		LocalizedTexts(11) = &quot;Save&quot; &apos; Bsave
-		LocalizedTexts(12) = &quot;Cancel&quot; &apos; BCancel
-		LocalizedTexts(13) = &quot;Save in:&quot; &apos; LPath
-		LocalizedTexts(14) = &quot;...&quot; &apos; BPath
-		LocalizedTexts(15) = &quot;Filename:&quot; &apos; LFilename
-		LocalizedTexts(16) = &quot;File format&quot; &apos; FCFileFormat
+		LocalizedTexts(8)  = &quot;Choose file format&quot; &apos; DChooseFormat
+		LocalizedTexts(9) = &quot;Check format you want your file to be saved as.&quot; &apos;Lhelp
+		LocalizedTexts(10) = &quot;Save&quot; &apos; Bsave
+		LocalizedTexts(11) = &quot;Cancel&quot; &apos; BCancel
+		LocalizedTexts(12) = &quot;Save in:&quot; &apos; LPath
+		LocalizedTexts(13) = &quot;...&quot; &apos; BPath
+		LocalizedTexts(14) = &quot;Filename:&quot; &apos; LFilename
+		LocalizedTexts(15) = &quot;File format&quot; &apos; FCFileFormat
     EndIf
+
 End Function
 
 
