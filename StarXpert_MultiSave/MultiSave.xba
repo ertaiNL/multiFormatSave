@@ -23,13 +23,8 @@
 &apos; Thanks to DannyB for a lot of good examples on ooomacros
 
 &apos; Improvements possible :
-&apos;- send by mail
 &apos;- check if the file has been modified
 &apos;- move the localization stuff to another file
-
-&apos; NOTE :
-&apos; The mailing part does not work for Win 98 !!!!!!!!!!!!!!!!!!!!!!
-
 
 Option Explicit
 
@@ -422,10 +417,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
 End	Function
 
-Sub MultiSave_Cancel
-   DChooseFormat.endExecute
-End Sub
-
 Sub MultiSave_ChoosePath
 	Dim Folder,FileName As String
 
@@ -507,10 +498,6 @@ Sub IMSO_click
 	DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
 End sub
 
-Sub showHelp
-	MsgBox &quot;Rob Snelders&gt;&quot;+chr(13)+ &quot;LGPL - &quot;+sVersion
-End Sub
-
 function getImagePath(nomModule as String, nomImage as String) as String
 &apos; hugly hack to get folder of the package// FIXME
     Dim oPaths as Object, PathsModule as String, sValue as String, sPath as String, oSettings as Object, oPathSettings as Object
@@ -564,7 +551,7 @@ Function GetDocumentType(oDocument)
    ElseIf oDocument.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
       GetDocumentType() = &quot;swriter&quot;
    ElseIf oDocument.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
-	  GetDocumentType() = &quot;simpress&quot; &apos; Impress is also a drawingdocument.
+      GetDocumentType() = &quot;simpress&quot; &apos; Impress is also a drawingdocument.
    ElseIf oDocument.SupportsService(&quot;com.sun.star.drawing.DrawingDocument&quot;) Then
       GetDocumentType() = &quot;sdraw&quot;
    ElseIf oDocument.SupportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) Then
