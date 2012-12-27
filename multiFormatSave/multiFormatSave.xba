@@ -140,13 +140,12 @@ Sub OK
   next
 
   DChooseFormat.endExecute
-  goto endsub
+  exit sub
 
   &apos; Something bad happened when saving file
   ErrorHandler:
     MsgBox GetLocalizedText(3, &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;)
     MsgBox (GetLocalizedText(4, &quot;Error&quot;) &amp; ERR &amp; GetLocalizedText( 5, &quot; line &quot;) &amp; Erl &amp; &quot;.&quot; &amp; chr$(13) &amp; ERROR$)
-  endsub:
 End Sub
 
 &apos;getCurrentFormat()------------------------------------------------------------------
@@ -805,47 +804,33 @@ Function OOoLang() as string
   Dim oSet
   Dim oConfigProvider
   Dim oParm(0) As New com.sun.star.beans.PropertyValue
-  Dim sProvider$
-  Dim sAccess$
-  Dim OOLangue as string
-  sProvider = &quot;com.sun.star.configuration.ConfigurationProvider&quot;
-  sAccess = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
-  oConfigProvider = createUnoService(sProvider)
+  oConfigProvider = createUnoService(&quot;com.sun.star.configuration.ConfigurationProvider&quot;)
   oParm(0) = MakePropertyValue( &quot;nodepath&quot;, &quot;/org.openoffice.Setup/L10N&quot; )
-  oSet = oConfigProvider.createInstanceWithArguments(sAccess, oParm())
-  OOLangue= oSet.getbyname(&quot;ooLocale&quot;)
-  OOoLang=lcase(Left(trim(OOLangue),2))
+  oSet = oConfigProvider.createInstanceWithArguments(&quot;com.sun.star.configuration.ConfigurationAccess&quot;, oParm())
+  OOoLang=lcase(Left(trim(oSet.getbyname(&quot;ooLocale&quot;)),2))
 End Function
 
-&apos;isIn()---------------------------------------------------------------------------------
-&apos;@Task : check if a string is present in the array of strings
-&apos;@Parameters : str =&gt; string to seek in array
-&apos;			   list : array to read through
-&apos;@Returns : true if str is in the list, false else
-&apos;-----------------------------------------------------------------------------------------
+&apos; BASIC FUNCTIONS ------------------------------------------------
+
+&apos; Check if a string is present in the array of strings
+&apos; @param str  String to seek in array
+&apos; @param list Array to read through
+&apos; @return     Is the string in the list?
 Function isIn(str as string, list as array) as boolean
-  Dim found as boolean
-  found = false
-  Dim i as integer
-  i=0
+  Dim found as boolean &apos;By default false
+  Dim i as integer &apos;By default 0
   Do until found or i &gt; Ubound(list)
-    if ( str = list(i) ) then
-      found = true
-    else
-      found= false
-    endif
+    found = (str = list(i))
     i=i+1
   loop
   isIn = found
-End function
-
-&apos; BASIC FUNCTIONS ------------------------------------------------
+End function &apos; isIn
 
 &apos; Create and return a new com.sun.star.beans.PropertyValue.
 &apos; @param cName  The name of the property
 &apos; @param uValue The value to give the property
 &apos; @return       The created property
-Function MakePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
+Function makePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
   Dim oPropertyValue As New com.sun.star.beans.PropertyValue
   If Not IsMissing( cName ) Then
     oPropertyValue.Name = cName
@@ -853,7 +838,7 @@ Function MakePropertyValue( Optional cName As String, Optional uValue ) As com.s
   If Not IsMissing( uValue ) Then
     oPropertyValue.Value = uValue
   EndIf
-  MakePropertyValue() = oPropertyValue
-End Function
+  makePropertyValue() = oPropertyValue
+End Function &apos; makePropertyValue
 
 </script:module>
