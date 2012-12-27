@@ -4,7 +4,7 @@
     <node oor:name="Settings">
       <node oor:name="my.location" oor:op="replace">
         <prop oor:name="Setting" oor:type="xs:string">
-	  <value>%origin%/img/</value>
+	  <value>%origin%/../icons/</value>
         </prop>
       </node>
     </node>

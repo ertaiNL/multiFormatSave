@@ -73,9 +73,9 @@ Sub MultiSave
   DChooseFormat.model.TFFilename.text = ConvertFromURL(getFileName(thisComponent.Location))
 
   &apos; fix icon path
-  DChooseFormat.model.IODF.ImageURL = getImagePath(sZipName,&quot;ooo_gulls.xpm&quot;)
-  DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;imgms.xpm&quot;)
-  DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;pdf-ico.gif&quot;)
+  DChooseFormat.model.IODF.ImageURL = getImagePath(sZipName,&quot;ODF.png&quot;)
+  DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;MSO.png&quot;)
+  DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;PDF.png&quot;)
 
   DChooseFormat.execute
 End Sub
