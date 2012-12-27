@@ -77,11 +77,13 @@ Sub multiFormatSave
   DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;MSO.png&quot;)
   DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;PDF.png&quot;)
 
-  DChooseFormat.execute
+  if DChooseFormat.execute()=1 then
+    OK
+  end if
 End Sub
 
 &apos; goal: Function called when the &quot;Save&quot; button is clicked.
-Sub multiFormatSave_OK
+Sub OK
 
   &apos; verify parameters
   if DChooseFormat.model.TFPath.text  = &quot;&quot; then
@@ -100,49 +102,49 @@ Sub multiFormatSave_OK
   &apos; Error managment.
   On Local Error Goto ErrorHandler
 
-    &apos; -- Getting info from the UI. -------------------------------------------
-    &apos; Note : sPath is useless for Sending Mail
-    Dim sPath As String
-    Dim sPathURL As String
-    Dim fileName As String
-    Dim formats(2) as Boolean
+  &apos; -- Getting info from the UI. -------------------------------------------
+  &apos; Note : sPath is useless for Sending Mail
+  Dim sPath As String
+  Dim sPathURL As String
+  Dim fileName As String
+  Dim formats(2) as Boolean
 
-    GetUIProperties( sPath, fileName, formats() )
+  GetUIProperties( sPath, fileName, formats() )
 
-    &apos; Convert the path to a URL
-    sPathURL = ConvertToURL( sPath )
-    &apos; check the &quot;/&quot; at url end
-    if right(sPathURL,1) &lt;&gt; &quot;/&quot; Then
-      sPathURL = sPathURL+&quot;/&quot;
-    End If
+  &apos; Convert the path to a URL
+  sPathURL = ConvertToURL( sPath )
+  &apos; check the &quot;/&quot; at url end
+  if right(sPathURL,1) &lt;&gt; &quot;/&quot; Then
+    sPathURL = sPathURL+&quot;/&quot;
+  End If
 
-    &apos; -- module where the macro is called from : Writer, Calc or Impress ? ---
-    Dim oTextDoc as Object
-    Dim documentType As String
+  &apos; -- module where the macro is called from : Writer, Calc or Impress ? ---
+  Dim oTextDoc as Object
+  Dim documentType As String
 
-    oTextDoc = ThisComponent
-    documentType = GetDocumentType(oTextDoc)
+  oTextDoc = ThisComponent
+  documentType = GetDocumentType(oTextDoc)
 
-    &apos; -- Generate the info for the files to save. ----------------------------
-    Dim FileDescriptorList()
-    FileDescriptorList() = generateFileDescriptors( sPathURL, fileName, documentType, formats() )
+  &apos; -- Generate the info for the files to save. ----------------------------
+  Dim FileDescriptorList()
+  FileDescriptorList() = generateFileDescriptors( sPathURL, fileName, documentType, formats() )
 
-    &apos; -- Write the files to the disk. ----------------------------------------
-    Dim counter
-    for counter=0 to UBound( FileDescriptorList() )
+  &apos; -- Write the files to the disk. ----------------------------------------
+  Dim counter
+  for counter=0 to UBound( FileDescriptorList() )
 
-      &apos; Save As... Behavior : the file displayed is the OOo version just saved.
-      if FileDescriptorList( counter ).format = getCurrentFormat(fileName) then &apos;ODF then
-        &apos;print &quot;Save AS&quot;
-        oTextDoc.storeAsURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
-      Else
-        &apos;Export behavior
-        oTextDoc.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
-      End if
-    next
+    &apos; Save As... Behavior : the file displayed is the OOo version just saved.
+    if FileDescriptorList( counter ).format = getCurrentFormat(fileName) then &apos;ODF then
+      &apos;print &quot;Save AS&quot;
+      oTextDoc.storeAsURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
+    Else
+      &apos;Export behavior
+      oTextDoc.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
+    End if
+  next
 
-    DChooseFormat.endExecute
-    goto endsub
+  DChooseFormat.endExecute
+  goto endsub
 
   &apos; Something bad happened when saving file
   ErrorHandler:

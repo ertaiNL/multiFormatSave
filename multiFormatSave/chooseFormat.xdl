@@ -6,9 +6,7 @@
     <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="Microsoft" dlg:checked="false"/>
     <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="PDF" dlg:checked="true"/>
     <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="Check format you want your file to be saved as." dlg:multiline="true"/>
-    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="4" dlg:top="149" dlg:width="58" dlg:height="17" dlg:value="Save">
-      <script:event script:event-name="on-performaction" script:location="application" script:macro-name="Standard.florent.MultiFormatSave_OK" script:language="StarBasic"/>
-    </dlg:button>
+    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="4" dlg:top="149" dlg:width="58" dlg:height="17" dlg:button-type="ok" dlg:value="Save"/>
     <dlg:button dlg:id="BCancel" dlg:tab-index="11" dlg:left="124" dlg:top="149" dlg:width="58" dlg:height="17" dlg:button-type="cancel" dlg:value="Cancel"/>
     <dlg:text dlg:id="LPath" dlg:tab-index="12" dlg:left="8" dlg:top="3" dlg:width="69" dlg:height="9" dlg:value="Save in:"/>
     <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="15"/>
