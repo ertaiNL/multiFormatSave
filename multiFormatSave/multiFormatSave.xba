@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
-<script:module xmlns:script="http://openoffice.org/2000/script" script:name="MultiSave" script:language="StarBasic">REM  *****  BASIC  *****
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="multiFormatSave" script:language="StarBasic">REM  *****  BASIC  *****
 
 &apos;************************************************
 &apos;Copyright (C) 2004 - 2012 StarXpert -- Florent Manens (LGPL)
@@ -52,7 +52,7 @@ Type FileDescriptor
 End Type
 
 &apos; goal : record a file under different filter (word, pdf, OOo)
-Sub MultiSave
+Sub multiFormatSave
 
   InitializeLanguages
 
@@ -63,9 +63,9 @@ Sub MultiSave
   sVersion = &quot;v 1.3.3&quot;
   oTextDoc = ThisComponent
 
-  globalscope.Basiclibraries.Loadlibrary(&quot;StarXpert_MultiSave&quot;)
-  globalscope.DialogLibraries.LoadLibrary(&quot;StarXpert_MultiSave&quot;)
-  DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.StarXpert_MultiSave.chooseFormat)
+  globalscope.Basiclibraries.Loadlibrary(&quot;multiFormatSave&quot;)
+  globalscope.DialogLibraries.LoadLibrary(&quot;multiFormatSave&quot;)
+  DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   SetLocalizedDialogTexts(DChooseFormat)
   &apos; fix current file path
@@ -81,7 +81,7 @@ Sub MultiSave
 End Sub
 
 &apos; goal: Function called when the &quot;Save&quot; button is clicked.
-Sub MultiSave_OK
+Sub multiFormatSave_OK
 
   &apos; verify parameters
   if DChooseFormat.model.TFPath.text  = &quot;&quot; then
@@ -399,7 +399,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 End Function
 
 &apos; Goal: Set the file-name
-Sub MultiSave_ChoosePath
+Sub multiFormatSave_ChoosePath
   Dim Folder,FileName As String
 
   If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
@@ -626,7 +626,7 @@ Function GetMyLocation()
   Dim oMS As Object
 
   On error Goto fin
-  oConfigAccess = GetConfigAccess( &quot;/StarXpert_MultiSave.MultiSave.MultiSave/MultiSaveConfig&quot; )
+  oConfigAccess = GetConfigAccess( &quot;/multiFormatSave.multiFormatSave.multiFormatSave/multiFormatSaveConfig&quot; )
   oElement = oConfigAccess.getByName( &quot;Settings&quot; )
 
   if Not oElement.hasByName( &quot;my.location&quot; ) Then
