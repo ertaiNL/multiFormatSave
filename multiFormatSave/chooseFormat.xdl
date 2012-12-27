@@ -11,7 +11,7 @@
     <dlg:text dlg:id="LPath" dlg:tab-index="12" dlg:left="8" dlg:top="3" dlg:width="69" dlg:height="9" dlg:value="Save in:"/>
     <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="15"/>
     <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="...">
-      <script:event script:event-name="on-performaction" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.multiFormatSave_ChoosePath" script:language="StarBasic"/>
+      <script:event script:event-name="on-performaction" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.ChoosePath" script:language="StarBasic"/>
     </dlg:button>
     <dlg:text dlg:id="LFilename" dlg:tab-index="13" dlg:left="8" dlg:top="33" dlg:width="49" dlg:height="13" dlg:value="Filename:"/>
     <dlg:textfield dlg:id="TFFilename" dlg:tab-index="2" dlg:left="63" dlg:top="31" dlg:width="120" dlg:height="13"/>

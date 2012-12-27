@@ -29,7 +29,6 @@ Option Explicit
 
 Public DChooseFormat As Object
 Public sZipName As String
-Public sVersion As String
 
 &apos; Decleration of constants
 CONST MAX_DIFFERENT_FORMAT = 3
@@ -56,12 +55,9 @@ Sub multiFormatSave
 
   InitializeLanguages
 
-  Dim oTextDoc as Object
   &apos; Init globals
   &apos; Fix here the save name as the Zip in Makefile
   sZipName = &quot;MultiFormatSave.oxt&quot;
-  sVersion = &quot;v 1.3.3&quot;
-  oTextDoc = ThisComponent
 
   globalscope.Basiclibraries.Loadlibrary(&quot;multiFormatSave&quot;)
   globalscope.DialogLibraries.LoadLibrary(&quot;multiFormatSave&quot;)
@@ -173,16 +169,16 @@ Function getCurrentFormat(file_name as string) as integer
   ubParts = ubound(parts)
 
   &apos;default value : if file_name equals &quot;&quot; or if file_name have no extension
-  getCurrentFormat= ODF
+  getCurrentFormat = ODF
   if (ubParts &gt; 0) then
     &apos;here file_name is different than &quot;&quot; and it have an extension
     ext = parts(ubParts)
     if isIn(ext, tabOOo) then
-      getCurrentFormat= ODF
-    elseif  isIn(ext, tabMS) then
-      getCurrentFormat= OFFICE
+      getCurrentFormat = ODF
+    elseif isIn(ext, tabMS) then
+      getCurrentFormat = OFFICE
     else
-      getCurrentFormat= PDF
+      getCurrentFormat = PDF
     endif
   endif
 
@@ -239,11 +235,10 @@ End Sub
 &apos; to be returned based on the &quot;format()&quot; argument.
 Function generateFileDescriptors( directoryURL As String, documentName As String, documentType As String, formats() As Boolean )
 
-  Dim cDocumentTitle,cURL As String
+  Dim cDocumentTitle As String
+  Dim cURL As String
   Dim originalFilename As String
   Dim position as Integer
-  Dim oTextDoc as Object
-  oTextDoc = thisComponent
 
   &apos; Get the name of the file to be created.
   Dim listIterator As Integer
@@ -255,9 +250,9 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos; TODO: factorise
   &apos; Note : need 3 args because we return them by reference...
   &apos; ideas : We could write an array sto store things.
-  dim args1(0) as new com.sun.star.beans.PropertyValue
-  dim args2() as new com.sun.star.beans.PropertyValue
-  dim args3(1) as new com.sun.star.beans.PropertyValue
+  Dim args1(0) as new com.sun.star.beans.PropertyValue
+  Dim args2() as new com.sun.star.beans.PropertyValue
+  Dim args3(1) as new com.sun.star.beans.PropertyValue
 
   &apos; Note :
   &apos;FILTER_NAME = 0
@@ -401,8 +396,9 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 End Function
 
 &apos; Goal: Set the file-name
-Sub multiFormatSave_ChoosePath
-  Dim Folder,FileName As String
+Sub ChoosePath
+  Dim Folder As String
+  Dim FileName As String
 
   If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
     Folder = DChooseFormat.model.TFPath.text
@@ -489,8 +485,14 @@ End sub
 &apos; Goal: Get the path to get the images from
 function getImagePath(nomModule as String, nomImage as String) as String
 &apos; hugly hack to get folder of the package// FIXME
-  Dim oPaths as Object, PathsModule as String, sValue as String, sPath as String, oSettings as Object, oPathSettings as Object
+  Dim oPaths as Object
+  Dim PathsModule as String
+  Dim sValue as String
+  Dim sPath as String
+  Dim oSettings as Object
+  Dim oPathSettings as Object
   Dim sImagePath as string
+
   sImagePath = ConvertToUrl( GetMyLocation() + nomImage)
   If FileExists(sImagePath) Then
     getImagePath = sImagePath
@@ -539,17 +541,17 @@ Function GetDocumentType(oDocument)
   ElseIf oDocument.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
     GetDocumentType() = &quot;swriter&quot;
   ElseIf oDocument.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
-    GetDocumentType() = &quot;simpress&quot; &apos; Impress is also a drawingdocument.
+    GetDocumentType() = &quot;simpress&quot;
   ElseIf oDocument.SupportsService(&quot;com.sun.star.drawing.DrawingDocument&quot;) Then
     GetDocumentType() = &quot;sdraw&quot;
   ElseIf oDocument.SupportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) Then
     GetDocumentType() = &quot;smath&quot;
+  ElseIf oDocument.SupportsService(&quot;com.sun.star.database.OfficeDatabaseDocument&quot;) Then
+    GetDocumentType() = &quot;sbase&quot;
   End If
   NODOCUMENTTYPE:
     If Err &lt;&gt; 0 Then
       GetDocumentType = &quot;&quot;
-      Resume GOON
-  GOON:
     End If
 End Function
 
@@ -596,9 +598,7 @@ End Function
 &apos; Goal: Connect to the config-values
 Function GetConfigAccess( ByVal cNodePath As String, Optional bEnableSync, Optional bLazyWrite ) As Object
   Dim oConfigProvider As Object
-  Dim bWriteAccess As Boolean
   Dim cServiceName As String
-  Dim oConfigAccess As Object
 
   If IsMissing( bEnableSync ) Then
     bEnableSync = True
@@ -608,22 +608,19 @@ Function GetConfigAccess( ByVal cNodePath As String, Optional bEnableSync, Optio
   EndIf
 
   oConfigProvider = createUnoService( &quot;com.sun.star.configuration.ConfigurationProvider&quot; )
-  If bWriteAccess Then
-    cServiceName = &quot;com.sun.star.configuration.ConfigurationUpdateAccess&quot;
-  Else
-    cServiceName = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
-  EndIf
-
-  oConfigAccess = oConfigProvider.createInstanceWithArguments( cServiceName, _
+  cServiceName = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
+  GetConfigAccess() = oConfigProvider.createInstanceWithArguments( cServiceName, _
     Array( MakePropertyValue( &quot;nodepath&quot;, cNodePath ), _
     MakePropertyValue( &quot;lazywrite&quot;, bLazyWrite ) ) )
-
-  GetConfigAccess() = oConfigAccess
 End Function
 
 &apos; Goal: Get the location to save to
 Function GetMyLocation()
-  Dim oConfigAccess As Object, oElement As Object, oLocation As Object, cMyLocation As String, cMyLocations As Variant
+  Dim oConfigAccess As Object
+  Dim oElement As Object
+  Dim oLocation As Object
+  Dim cMyLocation As String
+  Dim cMyLocations As Variant
   Dim oSM As Object
   Dim oMS As Object
 
@@ -652,18 +649,6 @@ Function GetMyLocation()
 
   fin:
     GetMyLocation = &quot;&quot;
-End Function
-
-&apos; Goal: Create and return a new com.sun.star.beans.PropertyValue.
-Function MakePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
-  Dim oPropertyValue As New com.sun.star.beans.PropertyValue
-  If Not IsMissing( cName ) Then
-    oPropertyValue.Name = cName
-  EndIf
-  If Not IsMissing( uValue ) Then
-    oPropertyValue.Value = uValue
-  EndIf
-  MakePropertyValue() = oPropertyValue
 End Function
 
 &apos; Goal: Sets the localized texts to the dialog
@@ -817,18 +802,19 @@ End Function
 &apos; Returns the language of the OpenOffice.org
 &apos; Source of the code: &quot;Usefull macro Information for OpenOffice&quot; by Andrew Pitonyak
 Function OOoLang() as string
-  Dim oSet, oConfigProvider
+  Dim oSet
+  Dim oConfigProvider
   Dim oParm(0) As New com.sun.star.beans.PropertyValue
-  Dim sProvider$, sAccess$
+  Dim sProvider$
+  Dim sAccess$
+  Dim OOLangue as string
   sProvider = &quot;com.sun.star.configuration.ConfigurationProvider&quot;
   sAccess = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
   oConfigProvider = createUnoService(sProvider)
-  oParm(0).Name = &quot;nodepath&quot;
-  oParm(0).Value = &quot;/org.openoffice.Setup/L10N&quot;
+  oParm(0) = MakePropertyValue( &quot;nodepath&quot;, &quot;/org.openoffice.Setup/L10N&quot; )
   oSet = oConfigProvider.createInstanceWithArguments(sAccess, oParm())
-  Dim OOLangue as string
-  OOLangue= oSet.getbyname(&quot;ooLocale&quot;) &apos;en-US
-  OOoLang=lcase(Left(trim(OOLangue),2)) &apos;en
+  OOLangue= oSet.getbyname(&quot;ooLocale&quot;)
+  OOoLang=lcase(Left(trim(OOLangue),2))
 End Function
 
 &apos;isIn()---------------------------------------------------------------------------------
@@ -852,5 +838,22 @@ Function isIn(str as string, list as array) as boolean
   loop
   isIn = found
 End function
+
+&apos; BASIC FUNCTIONS ------------------------------------------------
+
+&apos; Create and return a new com.sun.star.beans.PropertyValue.
+&apos; @param cName  The name of the property
+&apos; @param uValue The value to give the property
+&apos; @return       The created property
+Function MakePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
+  Dim oPropertyValue As New com.sun.star.beans.PropertyValue
+  If Not IsMissing( cName ) Then
+    oPropertyValue.Name = cName
+  EndIf
+  If Not IsMissing( uValue ) Then
+    oPropertyValue.Value = uValue
+  EndIf
+  MakePropertyValue() = oPropertyValue
+End Function
 
 </script:module>
