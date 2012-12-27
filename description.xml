@@ -3,27 +3,31 @@
  xmlns="http://openoffice.org/extensions/description/2006"
  xmlns:dep="http://openoffice.org/extensions/description/2006"
  xmlns:xlink="http://www.w3.org/1999/xlink">
-	<identifier value="fr.starxpert.extensions.multisave"/>
-	<version value="1.3.3"/>
-	<dependencies>
-		<OpenOffice.org-minimal-version value="2.4" dep:name="OpenOffice.org 2.4"/>
-	</dependencies>
-	<platform value="all" />
-	<publisher>
-		<name xlink:href="http://www.ertai.nl/">Ertai_NL</name>
-	</publisher>
-	<display-name>
-		<name>MultiFormatSave</name>
-	</display-name>
-	<icon>
-		<default xlink:href="icons/multiFormatSave.png" />
-		<high-contrast xlink:href="icons/multiFormatSave.png" />
-	</icon>
-	<extension-description>
-		<src xlink:href="pkg-desc/pkg-description.en" lang="en" />
-		<src xlink:href="pkg-desc/pkg-description.fr" lang="fr" />
-		<src xlink:href="pkg-desc/pkg-description.nl" lang="nl" />
-	</extension-description>
-	<registration>
-	</registration>
+  <identifier value="fr.starxpert.extensions.multisave"/>
+  <version value="1.3.3"/>
+  <dependencies>
+    <OpenOffice.org-minimal-version value="2.4" dep:name="OpenOffice.org 2.4"/>
+  </dependencies>
+  <platform value="all" />
+  <registration>
+    <simple-license  accept-by="admin" default-license-id="ID0" suppress-on-update="true" >
+      <license-text xlink:href="LICENSE" lang="en" license-id="ID0" />
+      <license-text xlink:href="LICENSE" lang="en-US" />
+    </simple-license>
+  </registration>
+  <publisher>
+    <name xlink:href="http://www.ertai.nl/">Ertai_NL</name>
+  </publisher>
+  <display-name>
+    <name>MultiFormatSave</name>
+  </display-name>
+  <icon>
+    <default xlink:href="icons/multiFormatSave.png" />
+    <high-contrast xlink:href="icons/multiFormatSave.png" />
+  </icon>
+  <extension-description>
+    <src xlink:href="pkg-desc/pkg-description.en" lang="en" />
+    <src xlink:href="pkg-desc/pkg-description.fr" lang="fr" />
+    <src xlink:href="pkg-desc/pkg-description.nl" lang="nl" />
+  </extension-description>
 </description>
