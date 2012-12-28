@@ -6,10 +6,10 @@
     <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="&amp;chooseDialog.CBMSO.value" dlg:checked="false"/>
     <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="&amp;chooseDialog.CBPDF.value" dlg:checked="true"/>
     <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="&amp;chooseDialog.LHelp.value" dlg:multiline="true"/>
-    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="4" dlg:top="149" dlg:width="58" dlg:height="17" dlg:button-type="ok" dlg:value="&amp;chooseDialog.BSave.value"/>
-    <dlg:button dlg:id="BCancel" dlg:tab-index="11" dlg:left="124" dlg:top="149" dlg:width="58" dlg:height="17" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
+    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="59" dlg:top="149" dlg:width="55" dlg:height="13" dlg:button-type="ok" dlg:value="&amp;chooseDialog.BSave.value"/>
+    <dlg:button dlg:id="BCancel" dlg:tab-index="11" dlg:left="124" dlg:top="149" dlg:width="55" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
     <dlg:text dlg:id="LPath" dlg:tab-index="12" dlg:left="8" dlg:top="3" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>
-    <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="15"/>
+    <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="13"/>
     <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="&amp;chooseDialog.BPath.value">
       <script:event script:event-name="on-performaction" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.ChoosePath" script:language="StarBasic"/>
     </dlg:button>
