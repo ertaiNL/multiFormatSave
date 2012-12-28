@@ -20,7 +20,7 @@
               <value xml:lang="en">MultiFormatSave</value>
             </prop>
             <prop oor:name="URL" oor:type="xs:string">
-              <value>vnd.sun.star.script:multiFormatSave.multiiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
+              <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
             </prop>
             <prop oor:name="Target" oor:type="xs:string">
               <value>_self</value>
