@@ -33,7 +33,7 @@ Public sZipName As String
 &apos; Decleration of constants
 CONST MAX_DIFFERENT_FORMAT = 3
 CONST ODF = 0
-CONST OFFICE = 1
+CONST MSO = 1
 CONST PDF = 2
 CONST FILTER_NAME = 0
 CONST COMPRESS_MODE = 1
@@ -46,7 +46,7 @@ Dim LocalizedTexts( 0 to NUM_TRANSLATIONS ) as string
 Type FileDescriptor
   URL As String
   atype As String   &apos; scalc, swriter, simpress
-  format As Integer &apos; ODF, OFFICE, PDF
+  format As Integer &apos; ODF, MSO, PDF
   info              &apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
 End Type
 
@@ -151,7 +151,7 @@ End Sub
 &apos;
 &apos;@Task : provide format of the current document (ODF, MS)
 &apos;@Parameters : file_name =&gt; current document name with its extension
-&apos;@Returns : an integer which represents current format : ODF or OFFICE
+&apos;@Returns : an integer which represents current format : ODF or MSO
 &apos;------------------------------------------------------------------------------------
 Function getCurrentFormat(file_name as string) as integer
   &apos;msgbox file_name
@@ -174,7 +174,7 @@ Function getCurrentFormat(file_name as string) as integer
     if isIn(ext, tabOOo) then
       getCurrentFormat = ODF
     elseif isIn(ext, tabMS) then
-      getCurrentFormat = OFFICE
+      getCurrentFormat = MSO
     else
       getCurrentFormat = PDF
     endif
@@ -187,23 +187,23 @@ End function
 &apos; Parameters :
 &apos; - sPath [OUT] : path were to save the file (useless for SendMail).
 &apos; - fileName [OUT] : name from the text-box
-&apos; - formats [OUT] : slected format(s) (ODF, MS OFFICE or PDF).
+&apos; - formats [OUT] : slected format(s) (ODF, MSO or PDF).
 &apos;
 Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
   sPath = DChooseFormat.model.TFPath.text
   FileName = DChooseFormat.model.TFFilename.text
 
-  &apos; Format required : ODF, OFFICE or PDF format ?
+  &apos; Format required : ODF, MSO or PDF format ?
   Dim counter as Integer
   for counter = 0 to 2
     formats( counter ) = FALSE
   next
 
-  &apos; MS Office (doc, xls, ppt).
+  &apos; MSO (doc, xls, ppt).
   if DChooseFormat.model.CBMSO.state = 1 then
-    formats(OFFICE) = TRUE
+    formats(MSO) = TRUE
   end if
-  &apos; OpenOffice (odt, ods or odp).
+  &apos; ODF (odt, ods or odp).
   if DChooseFormat.model.CBODF.state = 1 then
     formats(ODF) = TRUE
   end if
@@ -220,7 +220,7 @@ End Sub
 &apos; - directoryURL [IN] : URL of the directory where to save the files.
 &apos; - documentName [IN] : generic name of the file to be save (name with no extension).
 &apos; - documentType [IN] : scalc, swriter or simpress ?
-&apos; - formats() [IN] : list of the format (ODF, MS Office, PDF) to save the file to.
+&apos; - formats() [IN] : list of the format (ODF, MSO, PDF) to save the file to.
 &apos;
 &apos; Returns :
 &apos; - the list of FileDescriptor structure :
@@ -242,7 +242,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   Dim listIterator As Integer
   listIterator = 0
 
-  &apos; Note : 3 is the maximum length of the table (odf, ms office, pdf).
+  &apos; Note : 3 is the maximum length of the table (odf, mso, pdf).
   Dim FileDescriptorList( MAX_DIFFERENT_FORMAT ) As FileDescriptor
 
   &apos; TODO: factorise
@@ -279,12 +279,12 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   if documentType = &quot;scalc&quot; Then
 
     &apos; Save as MS Office format (XLS).
-    if formats(OFFICE) = TRUE then
+    if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
       args1( FILTER_NAME ).Value = &quot;MS Excel 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
       FileDescriptorList( listIterator ).atype = documentType
-      FileDescriptorList( listIterator ).format = OFFICE
+      FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
     end if
@@ -316,12 +316,12 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   ElseIf documentType = &quot;swriter&quot; Then
 
     &apos; Save a backup as DOC
-    if formats(OFFICE) = TRUE then
+    if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
       args1( FILTER_NAME ).Value = &quot;MS Word 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
       FileDescriptorList( listIterator ).atype = documentType
-      FileDescriptorList( listIterator ).format = OFFICE
+      FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
     end if
@@ -353,12 +353,12 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   ElseIf documentType = &quot;simpress&quot; Then
 
     &apos; Save a backup as PPT
-    if formats(OFFICE) = TRUE then
+    if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
       args1( FILTER_NAME ).Value = &quot;MS PowerPoint 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
       FileDescriptorList( listIterator ).atype = documentType
-      FileDescriptorList( listIterator ).format = OFFICE
+      FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
     end if
