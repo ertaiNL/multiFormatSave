@@ -37,7 +37,7 @@ CONST OFFICE = 1
 CONST PDF = 2
 CONST FILTER_NAME = 0
 CONST COMPRESS_MODE = 1
-CONST NUM_TRANSLATIONS = 8
+CONST NUM_TRANSLATIONS = 7
 
 &apos; Global array for storing localized texts
 Dim LocalizedTexts( 0 to NUM_TRANSLATIONS ) as string
@@ -523,7 +523,6 @@ function getImagePath(nomModule as String, nomImage as String) as String
       If sValue &lt;&gt; &quot;&quot; Then
         getImagePath =PathsModule+sValue+nomImage
       Else
-        MsgBox GetLocalizedText(7, &quot;Can not find icon File&quot;)
         getImagePath = &quot;&quot;
       End If
     End If
@@ -677,7 +676,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Erreur&quot;
     LocalizedTexts(5)  = &quot;ligne&quot;
     LocalizedTexts(6)  = &quot;Enregistrer sous&quot;
-    LocalizedTexts(7)  = &quot;Impossible de trouver le fichier image&quot;
 
   &apos; Finnish
   ElseIf (OOoLang() = &quot;fi&quot;) Then
@@ -688,7 +686,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Virhe&quot;
     LocalizedTexts(5)  = &quot;rivi&quot;
     LocalizedTexts(6)  = &quot;Valitse tallennuspaikka&quot;
-    LocalizedTexts(7)  = &quot;Kuvatiedostoa ei löydetty&quot;
 
   &apos; German
   ElseIf (OOoLang() = &quot;de&quot;) Then
@@ -699,7 +696,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Fehler&quot;
     LocalizedTexts(5)  = &quot;Linie&quot;
     LocalizedTexts(6)  = &quot;Speichern unter...&quot;
-    LocalizedTexts(7)  = &quot;Die Bild Datei konnte nicht gefunden werden.&quot;
 
   &apos; Spanish
   ElseIf (OOoLang() = &quot;es&quot;) Then
@@ -710,7 +706,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Error&quot;
     LocalizedTexts(5)  = &quot;linea&quot;
     LocalizedTexts(6)  = &quot;Guardar como&quot;
-    LocalizedTexts(7)  = &quot;Imposible encontar el archivo del icono&quot;
 
   &apos; Dutch
   ElseIf (OOoLang() = &quot;nl&quot;) Then
@@ -721,7 +716,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Error&quot;
     LocalizedTexts(5)  = &quot;lijn&quot;
     LocalizedTexts(6)  = &quot;Opslaan in&quot;
-    LocalizedTexts(7)  = &quot;Kan het icoon niet vinden&quot;
 
   &apos; English (Default)
   Else
@@ -732,7 +726,6 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Error&quot;
     LocalizedTexts(5)  = &quot;line&quot;
     LocalizedTexts(6)  = &quot;Save in&quot;
-    LocalizedTexts(7)  = &quot;Can not find icon File&quot;
   EndIf
 
 End Function
