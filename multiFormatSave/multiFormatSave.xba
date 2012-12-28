@@ -64,8 +64,8 @@ Sub multiFormatSave
   DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   &apos; fix current file path
-  DChooseFormat.model.TFPath.text = ConvertFromURL(getFileDir(thisComponent.Location))
-  DChooseFormat.model.TFFilename.text = ConvertFromURL(getFileName(thisComponent.Location))
+  DChooseFormat.model.TFPath.text = ConvertFromURL(getFile(thisComponent.Location, true))
+  DChooseFormat.model.TFFilename.text = ConvertFromURL(getFile(thisComponent.Location, false))
 
   &apos; fix icon path
   DChooseFormat.model.IODF.ImageURL = getImagePath(sZipName,&quot;ODF.png&quot;)
@@ -400,7 +400,7 @@ Sub ChoosePath
   If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
     Folder = DChooseFormat.model.TFPath.text
   ElseIf thisComponent.Location &lt;&gt; &quot;&quot; Then
-    Folder = getFileDir(thisComponent.Location)
+    Folder = getFile(thisComponent.Location, true)
   Else
     Folder = &quot;~/&quot;
   End If
@@ -423,42 +423,6 @@ Sub OpenFolderDialog(Folder As String) As String
     OpenFolderDialog = oFolderPicker.Directory
   End If
 End Sub
-
-&apos; Goal: Get the directory where to save to from the filepath
-Function getFileDir(FileLocation As String) As String
-  &apos; find last  &quot;/&quot;
-  &apos; extract first part
-  Dim pos as integer
-  Dim StringEnd as integer
-
-  pos=1
-  While (pos &lt;&gt; 0)
-    pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
-    If pos &lt;&gt; 0 Then
-      StringEnd=pos
-      pos=pos+1
-    End If
-  Wend
-  getFileDir=left(FileLocation,StringEnd)
-End Function
-
-&apos; Goal: Get the filename where to save to from the filepath
-Function getFileName(FileLocation As String) As String
-  &apos; find last  &quot;/&quot;
-  &apos; extract last part
-  Dim pos as integer
-  Dim StringEnd as integer
-
-  pos=1
-  while (pos &lt;&gt; 0)
-    pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
-    if pos &lt;&gt; 0 then
-      StringEnd=pos
-      pos=pos+1
-    End If
-  wend
-  getFileName=right(FileLocation,len(FileLocation) -StringEnd)
-End Function
 
 &apos; Goal: Invert the selection of CBODF
 Sub IODF_click
@@ -738,6 +702,31 @@ Function OOoLang() as string
 End Function
 
 &apos; BASIC FUNCTIONS ------------------------------------------------
+
+&apos; Get the directory where to save to from the filepath
+&apos; @param FileLocation The location where the file is
+&apos; @param ReturnPath   True then give fileName, False then give filePath
+&apos; @return             The filename or filepath depending on ReturnPath
+Function getFile(FileLocation As String, ReturnPath As boolean) As String
+  &apos; find last  &quot;/&quot;
+  &apos; extract first part
+  Dim pos as integer
+  Dim StringEnd as integer
+
+  pos=1
+  While (pos &lt;&gt; 0)
+    pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
+    If pos &lt;&gt; 0 Then
+      StringEnd=pos
+      pos=pos+1
+    End If
+  Wend
+  if ReturnPath then
+    getFile=left(FileLocation,StringEnd)
+  else
+    getFile=right(FileLocation,len(FileLocation) -StringEnd)
+  end if
+End Function &apos;getFile
 
 &apos; Check if a string is present in the array of strings
 &apos; @param str  String to seek in array
