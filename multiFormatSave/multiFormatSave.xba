@@ -396,23 +396,18 @@ End Function
 &apos; Goal: Set the file-name
 Sub ChoosePath
   Dim Folder As String
-  Dim FileName As String
 
   If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
     Folder = DChooseFormat.model.TFPath.text
-  Else
+  ElseIf thisComponent.Location &lt;&gt; &quot;&quot; Then
     Folder = getFileDir(thisComponent.Location)
-  End If
-  If DChooseFormat.model.TFFilename.text &lt;&gt; &quot;&quot; Then
-    FileName = DChooseFormat.model.TFFilename.text
   Else
-    FileName = getFileName(thisComponent.Location)
+    Folder = &quot;~/&quot;
   End If
   Folder = OpenFolderDialog(ConvertToURL(Folder))
   if Folder &lt;&gt; &quot;&quot; then
     DChooseFormat.model.TFPath.text = ConvertFromURL(Folder)
   end if
-  DChooseFormat.model.TFFilename.text = FileName
 End Sub
 
 &apos; Goal: Open the folder-dialog with the given folder
@@ -749,8 +744,8 @@ End Function
 &apos; @param list Array to read through
 &apos; @return     Is the string in the list?
 Function isIn(str as string, list as array) as boolean
-  Dim found as boolean &apos;By default false
-  Dim i as integer &apos;By default 0
+  Dim found as boolean &apos;False
+  Dim i as integer &apos;0
   Do until found or i &gt; Ubound(list)
     found = (str = list(i))
     i=i+1
