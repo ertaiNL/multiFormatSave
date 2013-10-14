@@ -75,6 +75,8 @@ Sub multiFormatSave
   if DChooseFormat.execute()=1 then
     OK
   end if
+
+  DChooseFormat.execute
 End Sub
 
 &apos; goal: Function called when the &quot;Save&quot; button is clicked.
@@ -675,6 +677,16 @@ Function InitializeLanguages()
     LocalizedTexts(4)  = &quot;Error&quot;
     LocalizedTexts(5)  = &quot;lijn&quot;
     LocalizedTexts(6)  = &quot;Opslaan in&quot;
+
+  &apos; Hungarian
+  ElseIf (OOoLang() = &quot;hu&quot;) Then
+    LocalizedTexts(0)  = &quot;Meg kell adni a mentés útvonalát.&quot;
+    LocalizedTexts(1)  = &quot;Meg kell adni az állománynevet.&quot;
+    LocalizedTexts(2)  = &quot;Meg kell adni legalább egy formátumot.&quot;
+    LocalizedTexts(3)  = &quot;Hibás mentés! Győzödjön meg róla, hogy a célállományok (MS és PDF) nincsenek máshol megnyitva.&quot;
+    LocalizedTexts(4)  = &quot;Hiba&quot;
+    LocalizedTexts(5)  = &quot;sor&quot;
+    LocalizedTexts(6)  = &quot;Mentés ide&quot;
 
   &apos; English (Default)
   Else
