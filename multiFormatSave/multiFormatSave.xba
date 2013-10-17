@@ -72,10 +72,6 @@ Sub multiFormatSave
   DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;MSO.png&quot;)
   DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;PDF.png&quot;)
 
-  if DChooseFormat.execute()=1 then
-    OK
-  end if
-
   DChooseFormat.execute
 End Sub
 
