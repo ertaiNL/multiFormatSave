@@ -498,25 +498,6 @@ Function getCommonExtention(DocumentTitle)
   getCommonExtention=result
 End Function
 
-&apos; Goal: Connect to the config-values
-Function GetConfigAccess( ByVal cNodePath As String, Optional bEnableSync, Optional bLazyWrite ) As Object
-  Dim oConfigProvider As Object
-  Dim cServiceName As String
-
-  If IsMissing( bEnableSync ) Then
-    bEnableSync = True
-  EndIf
-  If IsMissing( bLazyWrite ) Then
-    bLazyWrite = False
-  EndIf
-
-  oConfigProvider = createUnoService( &quot;com.sun.star.configuration.ConfigurationProvider&quot; )
-  cServiceName = &quot;com.sun.star.configuration.ConfigurationAccess&quot;
-  GetConfigAccess() = oConfigProvider.createInstanceWithArguments( cServiceName, _
-    Array( MakePropertyValue( &quot;nodepath&quot;, cNodePath ), _
-    MakePropertyValue( &quot;lazywrite&quot;, bLazyWrite ) ) )
-End Function
-
 &apos; Goal: Get the location to of the Extension
 Function GetMyLocation()
   Dim oPIP As Object
