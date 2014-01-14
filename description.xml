@@ -20,7 +20,6 @@
   </display-name>
   <icon>
     <default xlink:href="icons/multiFormatSave.png" />
-    <high-contrast xlink:href="icons/multiFormatSave.png" />
   </icon>
   <extension-description>
     <src xlink:href="pkg-desc/pkg-description.en" lang="en" />
