@@ -51,7 +51,7 @@ Type FileDescriptor
 End Type
 
 &apos; goal : record a file under different filter (word, pdf, OOo)
-Sub multiFormatSave
+Sub multiFormatSaveAs
 
   InitializeLanguages
 
