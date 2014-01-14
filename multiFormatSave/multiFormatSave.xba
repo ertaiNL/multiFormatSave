@@ -28,7 +28,6 @@
 Option Explicit
 
 Public DChooseFormat As Object
-Public sZipName As String
 
 &apos; Decleration of constants
 CONST MAX_DIFFERENT_FORMAT = 3
@@ -38,6 +37,7 @@ CONST PDF = 2
 CONST FILTER_NAME = 0
 CONST COMPRESS_MODE = 1
 CONST NUM_TRANSLATIONS = 7
+CONST EXTENSION_ID = "extensions.multiFormatSave"
 
 &apos; Global array for storing localized texts
 Dim LocalizedTexts( 0 to NUM_TRANSLATIONS ) as string
@@ -55,10 +55,6 @@ Sub multiFormatSave
 
   InitializeLanguages
 
-  &apos; Init globals
-  &apos; Fix here the save name as the Zip in Makefile
-  sZipName = &quot;MultiFormatSave.oxt&quot;
-
   globalscope.Basiclibraries.Loadlibrary(&quot;multiFormatSave&quot;)
   globalscope.DialogLibraries.LoadLibrary(&quot;multiFormatSave&quot;)
   DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
@@ -68,9 +64,11 @@ Sub multiFormatSave
   DChooseFormat.model.TFFilename.text = ConvertFromURL(getFile(thisComponent.Location, false))
 
   &apos; fix icon path
-  DChooseFormat.model.IODF.ImageURL = getImagePath(sZipName,&quot;ODF.png&quot;)
-  DChooseFormat.model.IMSO.ImageURL = getImagePath(sZipName,&quot;MSO.png&quot;)
-  DChooseFormat.model.IPDF.ImageURL = getImagePath(sZipName,&quot;PDF.png&quot;)
+  Dim Location As String
+  Location = GetMyLocation()
+  DChooseFormat.model.IODF.ImageURL = Location + "/icons/ODF.png"
+  DChooseFormat.model.IMSO.ImageURL = Location + "/icons/MSO.png"
+  DChooseFormat.model.IPDF.ImageURL = Location + "/icons/PDF.png"
 
   DChooseFormat.execute
 End Sub
@@ -437,55 +435,6 @@ Sub IMSO_click
 	DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
 End sub
 
-&apos; Goal: Get the path to get the images from
-function getImagePath(nomModule as String, nomImage as String) as String
-&apos; hugly hack to get folder of the package// FIXME
-  Dim oPaths as Object
-  Dim PathsModule as String
-  Dim sValue as String
-  Dim sPath as String
-  Dim oSettings as Object
-  Dim oPathSettings as Object
-  Dim sImagePath as string
-
-  sImagePath = ConvertToUrl( GetMyLocation() + nomImage)
-  If FileExists(sImagePath) Then
-    getImagePath = sImagePath
-  Else
-    oPathSettings = createUnoService(&quot;com.sun.star.util.PathSettings&quot;)
-    sPath = oPathSettings.GetPropertyValue(&quot;Bitmap&quot;)
-    sImagePath = ConvertToUrl(sPath) + nomImage
-    If FileExists(sImagePath) Then
-      &apos;Macro has been delivered during the installation, images are in share/config/symbol
-      getImagePath = sImagePath
-    Else
-      &apos; Macro has been delivered as a package, images are under the package directory
-      &apos; Go to Modeles Path
-      oPaths = createUnoService(&quot;com.sun.star.util.PathSettings&quot;)
-      PathsModule = oPaths.Module + &quot;/../share/uno_packages/cache/uno_packages/&quot;
-      sValue = Dir(PathsModule,16)
-      Do
-	sValue = Dir
-      Loop Until instr(sValue,nomModule)&lt;&gt;0 or sValue=&quot;&quot; &apos; verify if package present ? //FIXME
-
-      If sValue = &quot;&quot; Then
-        &apos; look into user&apos;s modules
-        PathsModule = oPaths.UserConfig + &quot;/../uno_packages/cache/uno_packages/&quot;
-        sValue = Dir(PathsModule,16)
-        Do
-          sValue = Dir
-        Loop Until instr(sValue, nomModule) &lt;&gt; 0 or sValue=&quot;&quot;
-      End if
-
-      If sValue &lt;&gt; &quot;&quot; Then
-        getImagePath =PathsModule+sValue+nomImage
-      Else
-        getImagePath = &quot;&quot;
-      End If
-    End If
-  End If
-End Function
-
 &apos; Goal: Get the current document-type
 Function GetDocumentType(oDocument)
 
@@ -568,41 +517,11 @@ Function GetConfigAccess( ByVal cNodePath As String, Optional bEnableSync, Optio
     MakePropertyValue( &quot;lazywrite&quot;, bLazyWrite ) ) )
 End Function
 
-&apos; Goal: Get the location to save to
+&apos; Goal: Get the location to of the Extension
 Function GetMyLocation()
-  Dim oConfigAccess As Object
-  Dim oElement As Object
-  Dim oLocation As Object
-  Dim cMyLocation As String
-  Dim cMyLocations As Variant
-  Dim oSM As Object
-  Dim oMS As Object
-
-  On error Goto fin
-  oConfigAccess = GetConfigAccess( &quot;/multiFormatSave.multiFormatSave.multiFormatSave/multiFormatSaveConfig&quot; )
-  oElement = oConfigAccess.getByName( &quot;Settings&quot; )
-
-  if Not oElement.hasByName( &quot;my.location&quot; ) Then
-    MsgBox &quot;my.location not defined&quot;
-    Exit Function
-  EndIf
-
-  oLocation = oElement.getByName( &quot;my.location&quot; )
-  cMyLocation = oLocation.Setting
-  &apos;cut the vnd.sun.star.expand: part
-  cMyLocations = Split(cMyLocation, &quot;vnd.sun.star.expand:&quot;)
-  cMyLocation = cMyLocations(1)
-
-  &apos;Expand the macrofield expression
-  oSM = getProcessServiceManager
-
-  oMS = oSM.DefaultContext.getValueByName(&quot;/singletons/com.sun.star.util.theMacroExpander&quot;)
-  cMyLocation = oMS.ExpandMacros(cMyLocation)
-  GetMyLocation() = cMyLocation
-  Exit Function
-
-  fin:
-    GetMyLocation = &quot;&quot;
+  Dim oPIP As Object
+  oPIP = GetDefaultContext().getByName( "/singletons/com.sun.star.deployment.PackageInformationProvider")
+  GetMyLocation = oPIP.getPackageLocation(EXTENSION_ID)
 End Function
 
 &apos; Returns text in given language.

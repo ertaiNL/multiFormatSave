@@ -7,7 +7,7 @@
   </dependencies>
   <platform value="all" />
   <registration>
-    <simple-license  accept-by="admin" default-license-id="ID0" suppress-on-update="true" >
+    <simple-license accept-by="admin" default-license-id="ID0" suppress-on-update="true" >
       <license-text xlink:href="LICENSE" lang="en" license-id="ID0" />
       <license-text xlink:href="LICENSE" lang="en-US" />
     </simple-license>
