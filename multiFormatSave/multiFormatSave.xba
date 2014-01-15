@@ -45,7 +45,6 @@ Dim LocalizedTexts( 0 to NUM_TRANSLATIONS ) as string
 &apos; Informations about a file.
 Type FileDescriptor
   URL As String
-  atype As String   &apos; scalc, swriter, simpress
   format As Integer &apos; ODF, MSO, PDF
   info              &apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
 End Type
@@ -109,16 +108,9 @@ Sub OK
     sPathURL = sPathURL+&quot;/&quot;
   End If
 
-  &apos; -- module where the macro is called from : Writer, Calc or Impress ? ---
-  Dim oTextDoc as Object
-  Dim documentType As String
-
-  oTextDoc = ThisComponent
-  documentType = GetDocumentType(oTextDoc)
-
   &apos; -- Generate the info for the files to save. ----------------------------
   Dim FileDescriptorList()
-  FileDescriptorList() = generateFileDescriptors( sPathURL, fileName, documentType, formats() )
+  FileDescriptorList() = generateFileDescriptors( sPathURL, fileName, formats() )
 
   &apos; -- Write the files to the disk. ----------------------------------------
   Dim counter
@@ -127,10 +119,10 @@ Sub OK
     &apos; Save As... Behavior : the file displayed is the OOo version just saved.
     if FileDescriptorList( counter ).format = getCurrentFormat(fileName) then &apos;ODF then
       &apos;print &quot;Save AS&quot;
-      oTextDoc.storeAsURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
+      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
     Else
       &apos;Export behavior
-      oTextDoc.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
+      ThisComponent.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
     End if
   next
 
@@ -215,7 +207,6 @@ End Sub
 &apos; Parameters :
 &apos; - directoryURL [IN] : URL of the directory where to save the files.
 &apos; - documentName [IN] : generic name of the file to be save (name with no extension).
-&apos; - documentType [IN] : scalc, swriter or simpress ?
 &apos; - formats() [IN] : list of the format (ODF, MSO, PDF) to save the file to.
 &apos;
 &apos; Returns :
@@ -227,7 +218,7 @@ End Sub
 &apos;
 &apos; TODO : we can avoid the &quot;redim&quot; at the end by defining the value of fileDescriptors
 &apos; to be returned based on the &quot;format()&quot; argument.
-Function generateFileDescriptors( directoryURL As String, documentName As String, documentType As String, formats() As Boolean )
+Function generateFileDescriptors( directoryURL As String, documentName As String, formats() As Boolean )
 
   Dim cDocumentTitle As String
   Dim cURL As String
@@ -272,14 +263,13 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Calc
   &apos;*********************************************
-  if documentType = &quot;scalc&quot; Then
+  If ThisComponent.SupportsService(&quot;com.sun.star.sheet.SpreadsheetDocument&quot;) Then
 
     &apos; Save as MS Office format (XLS).
     if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
       args1( FILTER_NAME ).Value = &quot;MS Excel 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -289,7 +279,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
     if formats(ODF) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.ods&quot; )
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -300,7 +289,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
       cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       args3( FILTER_NAME ).Value = &quot;calc_pdf_Export&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
@@ -309,14 +297,13 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Writer
   &apos;*********************************************
-  ElseIf documentType = &quot;swriter&quot; Then
+  ElseIf ThisComponent.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
 
     &apos; Save a backup as DOC
     if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
       args1( FILTER_NAME ).Value = &quot;MS Word 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -326,7 +313,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
     if formats(ODF) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.odt&quot; )
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -337,7 +323,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
       cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       args3( FILTER_NAME ).Value = &quot;writer_pdf_Export&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
@@ -346,14 +331,13 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Impress
   &apos;*********************************************
-  ElseIf documentType = &quot;simpress&quot; Then
+  ElseIf ThisComponent.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
 
     &apos; Save a backup as PPT
     if formats(MSO) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
       args1( FILTER_NAME ).Value = &quot;MS PowerPoint 97&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -363,7 +347,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
     if formats(ODF) = TRUE then
       cURL = ConvertToURL( cDocumentTitle + &quot;.odp&quot; )
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -374,7 +357,6 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
       cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       args3( FILTER_NAME ).Value = &quot;impress_pdf_Export&quot;
       FileDescriptorList( listIterator ).URL = cURL
-      FileDescriptorList( listIterator ).atype = documentType
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
@@ -434,29 +416,6 @@ End sub
 Sub IMSO_click
 	DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
 End sub
-
-&apos; Goal: Get the current document-type
-Function GetDocumentType(oDocument)
-
-  On Local Error GoTo NODOCUMENTTYPE
-  If oDocument.SupportsService(&quot;com.sun.star.sheet.SpreadsheetDocument&quot;) Then
-    GetDocumentType() = &quot;scalc&quot;
-  ElseIf oDocument.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
-    GetDocumentType() = &quot;swriter&quot;
-  ElseIf oDocument.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
-    GetDocumentType() = &quot;simpress&quot;
-  ElseIf oDocument.SupportsService(&quot;com.sun.star.drawing.DrawingDocument&quot;) Then
-    GetDocumentType() = &quot;sdraw&quot;
-  ElseIf oDocument.SupportsService(&quot;com.sun.star.formula.FormulaProperties&quot;) Then
-    GetDocumentType() = &quot;smath&quot;
-  ElseIf oDocument.SupportsService(&quot;com.sun.star.database.OfficeDatabaseDocument&quot;) Then
-    GetDocumentType() = &quot;sbase&quot;
-  End If
-  NODOCUMENTTYPE:
-    If Err &lt;&gt; 0 Then
-      GetDocumentType = &quot;&quot;
-    End If
-End Function
 
 &apos; Goal: Get the extension for the documenttitle
 Function getCommonExtention(DocumentTitle)
