@@ -34,8 +34,6 @@ CONST MAX_DIFFERENT_FORMAT = 3
 CONST ODF = 0
 CONST MSO = 1
 CONST PDF = 2
-CONST FILTER_NAME = 0
-CONST COMPRESS_MODE = 1
 CONST NUM_TRANSLATIONS = 7
 CONST EXTENSION_ID = "extensions.multiFormatSave"
 
@@ -254,7 +252,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as MS Office format (XLS).
     if formats(MSO) = TRUE then
-      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Excel 97&quot; )
+      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Excel 97&quot; )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
@@ -271,8 +269,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as PDF format
     if formats(PDF) = TRUE then
-      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;calc_pdf_Export&quot; )
-      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;calc_pdf_Export&quot; )
+      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
@@ -286,7 +284,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as DOC
     if formats(MSO) = TRUE then
-      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Word 97&quot; )
+      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Word 97&quot; )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
@@ -303,8 +301,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;writer_pdf_Export&quot; )
-      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;writer_pdf_Export&quot; )
+      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
@@ -318,7 +316,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as PPT
     if formats(MSO) = TRUE then
-      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS PowerPoint 97&quot; )
+      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS PowerPoint 97&quot; )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
@@ -335,8 +333,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;impress_pdf_Export&quot; )
-      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;impress_pdf_Export&quot; )
+      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
       FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
