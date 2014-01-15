@@ -221,8 +221,6 @@ End Sub
 Function generateFileDescriptors( directoryURL As String, documentName As String, formats() As Boolean )
 
   Dim cDocumentTitle As String
-  Dim cURL As String
-  Dim originalFilename As String
   Dim position as Integer
 
   &apos; Get the name of the file to be created.
@@ -230,7 +228,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   listIterator = 0
 
   &apos; Note : 3 is the maximum length of the table (odf, mso, pdf).
-  Dim FileDescriptorList( MAX_DIFFERENT_FORMAT ) As FileDescriptor
+  Dim FileDescriptorList( MAX_DIFFERENT_FORMAT - 1 ) As FileDescriptor
 
   &apos; TODO: factorise
   &apos; Note : need 3 args because we return them by reference...
@@ -239,19 +237,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   Dim args2() as new com.sun.star.beans.PropertyValue
   Dim args3(1) as new com.sun.star.beans.PropertyValue
 
-  &apos; Note :
-  &apos;FILTER_NAME = 0
-  &apos;COMPRESS_MODE = 1
-
-  &apos; Default Initialization (all this is not necessary -&gt;)
-  args1(FILTER_NAME).Name = &quot;FilterName&quot;
-  args3(FILTER_NAME).Name = &quot;FilterName&quot;
-  args3( COMPRESS_MODE ).Name = &quot;CompressMode&quot;
-  args3( COMPRESS_MODE ).Value = 0
-
   &apos; Path to the document (without extension).
   cDocumentTitle = directoryURL + documentName
-  originalFilename = cDocumentTitle
 
   &apos; -- if it exist, delete the extension from the file (&quot;test.odt&quot; -&gt; &quot;test&quot;). ---
   position = getCommonExtention(cDocumentTitle)
@@ -267,9 +254,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as MS Office format (XLS).
     if formats(MSO) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
-      args1( FILTER_NAME ).Value = &quot;MS Excel 97&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Excel 97&quot; )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -277,8 +263,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as OpenOffice format (ODS)
     if formats(ODF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.ods&quot; )
-      FileDescriptorList( listIterator ).URL = cURL
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.ods&quot; )
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -286,9 +271,9 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as PDF format
     if formats(PDF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      args3( FILTER_NAME ).Value = &quot;calc_pdf_Export&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;calc_pdf_Export&quot; )
+      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
@@ -301,9 +286,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as DOC
     if formats(MSO) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
-      args1( FILTER_NAME ).Value = &quot;MS Word 97&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Word 97&quot; )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -311,8 +295,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save the document as ODT
     if formats(ODF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.odt&quot; )
-      FileDescriptorList( listIterator ).URL = cURL
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.odt&quot; )
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -320,9 +303,9 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      args3( FILTER_NAME ).Value = &quot;writer_pdf_Export&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;writer_pdf_Export&quot; )
+      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
@@ -335,9 +318,8 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as PPT
     if formats(MSO) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
-      args1( FILTER_NAME ).Value = &quot;MS PowerPoint 97&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args1( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS PowerPoint 97&quot; )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
       FileDescriptorList( listIterator ).format = MSO
       FileDescriptorList( listIterator ).info = args1()
       listIterator = listIterator + 1
@@ -345,8 +327,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save the document as SXI or ODP
     if formats(ODF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.odp&quot; )
-      FileDescriptorList( listIterator ).URL = cURL
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.odp&quot; )
       FileDescriptorList( listIterator ).format = ODF
       FileDescriptorList( listIterator ).info = args2()
       listIterator = listIterator + 1
@@ -354,9 +335,9 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      cURL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      args3( FILTER_NAME ).Value = &quot;impress_pdf_Export&quot;
-      FileDescriptorList( listIterator ).URL = cURL
+      args3( FILTER_NAME ) = MakePropertyValue( &quot;FilterName&quot;, &quot;impress_pdf_Export&quot; )
+      args3( COMPRESS_MODE ).Name = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
       FileDescriptorList( listIterator ).format = PDF
       FileDescriptorList( listIterator ).info = args3()
       listIterator = listIterator + 1
