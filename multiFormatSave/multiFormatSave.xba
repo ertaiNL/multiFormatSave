@@ -30,7 +30,7 @@ Option Explicit
 Public DChooseFormat As Object
 
 &apos; Decleration of constants
-CONST MAX_DIFFERENT_FORMAT = 3
+CONST DIFFERENT_FORMATS = 3
 CONST ODF = 0
 CONST MSO = 1
 CONST PDF = 2
@@ -95,7 +95,7 @@ Sub OK
   Dim sPath As String
   Dim sPathURL As String
   Dim fileName As String
-  Dim formats(2) as Boolean
+  Dim formats( DIFFERENT_FORMATS - 1 ) as Boolean
 
   GetUIProperties( sPath, fileName, formats() )
 
@@ -225,23 +225,12 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   Dim listIterator As Integer
   listIterator = 0
 
-  &apos; Note : 3 is the maximum length of the table (odf, mso, pdf).
-  Dim FileDescriptorList( MAX_DIFFERENT_FORMAT - 1 ) As FileDescriptor
-
-  &apos; TODO: factorise
-  &apos; Note : need 3 args because we return them by reference...
-  &apos; ideas : We could write an array sto store things.
-  Dim args1(0) as new com.sun.star.beans.PropertyValue
-  Dim args2() as new com.sun.star.beans.PropertyValue
-  Dim args3(1) as new com.sun.star.beans.PropertyValue
+  Dim FileDescriptorList( UBOUND( formats() ) ) As FileDescriptor
 
   &apos; Path to the document (without extension).
   cDocumentTitle = directoryURL + documentName
-
-  &apos; -- if it exist, delete the extension from the file (&quot;test.odt&quot; -&gt; &quot;test&quot;). ---
   position = getCommonExtention(cDocumentTitle)
   if (position &lt;&gt; 0) then
-    &apos;user write extention
     cdocumenttitle = left(cdocumenttitle,(position - 1))
   end if
 
@@ -252,28 +241,19 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save as MS Office format (XLS).
     if formats(MSO) = TRUE then
-      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Excel 97&quot; )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.xls&quot; )
-      FileDescriptorList( listIterator ).format = MSO
-      FileDescriptorList( listIterator ).info = args1()
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.xls&quot;, &quot;MS Excel 97&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save as OpenOffice format (ODS)
     if formats(ODF) = TRUE then
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.ods&quot; )
-      FileDescriptorList( listIterator ).format = ODF
-      FileDescriptorList( listIterator ).info = args2()
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.ods&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save as PDF format
     if formats(PDF) = TRUE then
-      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;calc_pdf_Export&quot; )
-      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      FileDescriptorList( listIterator ).format = PDF
-      FileDescriptorList( listIterator ).info = args3()
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;calc_pdf_Export&quot;, 0 )
       listIterator = listIterator + 1
     End if
 
@@ -284,28 +264,19 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as DOC
     if formats(MSO) = TRUE then
-      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS Word 97&quot; )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.doc&quot; )
-      FileDescriptorList( listIterator ).format = MSO
-      FileDescriptorList( listIterator ).info = args1()
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.doc&quot;, &quot;MS Word 97&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save the document as ODT
     if formats(ODF) = TRUE then
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.odt&quot; )
-      FileDescriptorList( listIterator ).format = ODF
-      FileDescriptorList( listIterator ).info = args2()
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.odt&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;writer_pdf_Export&quot; )
-      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      FileDescriptorList( listIterator ).format = PDF
-      FileDescriptorList( listIterator ).info = args3()
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;writer_pdf_Export&quot;, 0 )
       listIterator = listIterator + 1
     End if
 
@@ -316,28 +287,19 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
 
     &apos; Save a backup as PPT
     if formats(MSO) = TRUE then
-      args1( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;MS PowerPoint 97&quot; )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.ppt&quot; )
-      FileDescriptorList( listIterator ).format = MSO
-      FileDescriptorList( listIterator ).info = args1()
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.ppt&quot;, &quot;MS PowerPoint 97&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save the document as SXI or ODP
     if formats(ODF) = TRUE then
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.odp&quot; )
-      FileDescriptorList( listIterator ).format = ODF
-      FileDescriptorList( listIterator ).info = args2()
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.odp&quot; )
       listIterator = listIterator + 1
     end if
 
     &apos; Save a backup as a PDF
     if formats(PDF) = TRUE then
-      args3( 0 ) = MakePropertyValue( &quot;FilterName&quot;, &quot;impress_pdf_Export&quot; )
-      args3( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
-      FileDescriptorList( listIterator ).URL = ConvertToURL( cDocumentTitle + &quot;.pdf&quot; )
-      FileDescriptorList( listIterator ).format = PDF
-      FileDescriptorList( listIterator ).info = args3()
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;impress_pdf_Export&quot;, 0 )
       listIterator = listIterator + 1
     End If
   End If
@@ -587,6 +549,26 @@ Function isIn(str as string, list as array) as boolean
   loop
   isIn = found
 End function &apos; isIn
+
+&apos; Create and return a filedescriptor
+&apos; @param uFileDesc The var to save the fileDescriptor in
+&apos; @param cFormat   The format to save the file in
+&apos; @param cPath     The path to save the file to
+&apos; @param cFilter   The name of the Filter to use (optional)
+&apos; @param nCompress The level of compress (optional)
+Function createFileDescriptor( uFileDescriptor As FileDescriptor, cFormat As Integer, cPath As String, Optional cFilter As String, Optional nCompress As Integer )
+  Dim uArgs(2) As New com.sun.star.beans.PropertyValue
+  If Not IsMissing( cFilter ) Then
+    uArgs( 0 ) = MakePropertyValue( &quot;FilterName&quot;, cFilter )
+  EndIf
+  If Not IsMissing( nCompress ) Then
+    uArgs( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, nCompress )
+  EndIf
+  uFileDescriptor.URL = ConvertToURL( cPath )
+  uFileDescriptor.format = cFormat
+  uFileDescriptor.info = uArgs()
+End Function &apos; createFileDescriptor
+
 
 &apos; Create and return a new com.sun.star.beans.PropertyValue.
 &apos; @param cName  The name of the property
