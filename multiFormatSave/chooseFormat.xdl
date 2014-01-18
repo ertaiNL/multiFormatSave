@@ -3,7 +3,7 @@
 <dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="chooseFormat" dlg:left="146" dlg:top="89" dlg:width="185" dlg:height="184" dlg:closeable="true" dlg:moveable="true" dlg:title="&amp;chooseDialog.Title">
   <dlg:bulletinboard>
     <dlg:checkbox dlg:id="CBODF" dlg:tab-index="4" dlg:left="24" dlg:top="97" dlg:width="64" dlg:height="11" dlg:value="&amp;chooseDialog.CBODF.value" dlg:checked="true"/>
-    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="&amp;chooseDialog.CBMSO.value" dlg:checked="false"/>
+    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="&amp;chooseDialog.CBMSO.value" dlg:checked="true"/>
     <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="&amp;chooseDialog.CBPDF.value" dlg:checked="true"/>
     <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="&amp;chooseDialog.LHelp.value" dlg:multiline="true"/>
     <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="59" dlg:top="149" dlg:width="55" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value">

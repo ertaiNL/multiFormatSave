@@ -169,35 +169,16 @@ Function getCurrentFormat(file_name as string) as integer
 End function
 
 &apos; Get the values from the interface&apos;s widgets.
-&apos;
-&apos; Parameters :
-&apos; - sPath [OUT] : path were to save the file (useless for SendMail).
-&apos; - fileName [OUT] : name from the text-box
-&apos; - formats [OUT] : slected format(s) (ODF, MSO or PDF).
+&apos; @param sPath    The path were to save the file (output).
+&apos; @param fileName The name from the text-box (output)
+&apos; @param formats  The selected formats. (output)
 &apos;
 Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
   sPath = DChooseFormat.model.TFPath.text
   FileName = DChooseFormat.model.TFFilename.text
-
-  &apos; Format required : ODF, MSO or PDF format ?
-  Dim counter as Integer
-  for counter = 0 to 2
-    formats( counter ) = FALSE
-  next
-
-  &apos; MSO (doc, xls, ppt).
-  if DChooseFormat.model.CBMSO.state = 1 then
-    formats(MSO) = TRUE
-  end if
-  &apos; ODF (odt, ods or odp).
-  if DChooseFormat.model.CBODF.state = 1 then
-    formats(ODF) = TRUE
-  end if
-  &apos; PDF
-  if DChooseFormat.model.CBPDF.state = 1 then
-    formats(PDF) = TRUE
-  end if
-
+  formats(MSO) = DChooseFormat.model.CBMSO.state
+  formats(ODF) = DChooseFormat.model.CBODF.state
+  formats(PDF) = DChooseFormat.model.CBPDF.state
 End Sub
 
 &apos; Saves to  function
@@ -568,7 +549,6 @@ Function createFileDescriptor( uFileDescriptor As FileDescriptor, cFormat As Int
   uFileDescriptor.format = cFormat
   uFileDescriptor.info = uArgs()
 End Function &apos; createFileDescriptor
-
 
 &apos; Create and return a new com.sun.star.beans.PropertyValue.
 &apos; @param cName  The name of the property
