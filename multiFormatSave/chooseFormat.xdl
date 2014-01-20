@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
-<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="chooseFormat" dlg:left="146" dlg:top="89" dlg:width="185" dlg:height="184" dlg:closeable="true" dlg:moveable="true" dlg:title="&amp;chooseDialog.Title">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="chooseFormat" dlg:left="146" dlg:top="89" dlg:width="185" dlg:height="144" dlg:closeable="true" dlg:moveable="true" dlg:title="&amp;chooseDialog.Title">
   <dlg:styles>
     <dlg:style dlg:style-id="0" dlg:text-color="0xff3333"/>
   </dlg:styles>
   <dlg:bulletinboard>
-    <dlg:checkbox dlg:id="CBODF" dlg:tab-index="4" dlg:left="24" dlg:top="97" dlg:width="64" dlg:height="11" dlg:value="&amp;chooseDialog.CBODF.value" dlg:checked="true"/>
-    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="97" dlg:width="45" dlg:height="11" dlg:value="&amp;chooseDialog.CBMSO.value" dlg:checked="true"/>
-    <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="97" dlg:width="34" dlg:height="11" dlg:value="&amp;chooseDialog.CBPDF.value" dlg:checked="true"/>
-    <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="117" dlg:width="162" dlg:height="19" dlg:value="&amp;chooseDialog.LHelp.value" dlg:multiline="true" dlg:style-id="0"/>
-    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="59" dlg:top="149" dlg:width="55" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value" enabled="false">
+    <dlg:checkbox dlg:id="CBODF" dlg:tab-index="4" dlg:left="24" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
+    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
+    <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
+    <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="90" dlg:width="162" dlg:height="19" dlg:multiline="true" dlg:style-id="0"/>
+    <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="59" dlg:top="120" dlg:width="55" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value" enabled="false">
        <script:event script:event-name="on-performaction" script:location="application" script:macro-name="multiFormatSave.multiFormatSave.OK" script:language="StarBasic"/>
     </dlg:button>
-    <dlg:button dlg:id="BCancel" dlg:tab-index="11" dlg:left="124" dlg:top="149" dlg:width="55" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
+    <dlg:button dlg:id="BCancel" dlg:tab-index="11" dlg:left="124" dlg:top="120" dlg:width="55" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
     <dlg:text dlg:id="LPath" dlg:tab-index="12" dlg:left="8" dlg:top="3" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>
     <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="13"/>
     <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="&amp;chooseDialog.BPath.value">
@@ -20,16 +20,7 @@
     </dlg:button>
     <dlg:text dlg:id="LFilename" dlg:tab-index="13" dlg:left="8" dlg:top="33" dlg:width="49" dlg:height="13" dlg:value="&amp;chooseDialog.LFilename.value"/>
     <dlg:textfield dlg:id="TFFilename" dlg:tab-index="2" dlg:left="63" dlg:top="31" dlg:width="120" dlg:height="13"/>
-    <dlg:img dlg:id="IODF" dlg:tab-index="3" dlg:left="26" dlg:top="65" dlg:width="21" dlg:height="25">
-      <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.IODF_click" script:language="StarBasic"/>
-    </dlg:img>
-    <dlg:img dlg:id="IMSO" dlg:tab-index="5" dlg:left="81" dlg:top="65" dlg:width="21" dlg:height="25">
-      <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.IMSO_click" script:language="StarBasic"/>
-    </dlg:img>
-    <dlg:img dlg:id="IPDF" dlg:tab-index="8" dlg:left="133" dlg:top="65" dlg:width="21" dlg:height="25">
-      <script:event script:event-name="on-mousedown" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.IPDF_click" script:language="StarBasic"/>
-    </dlg:img>
-    <dlg:titledbox dlg:id="FCFileFormat" dlg:tab-index="14" dlg:left="5" dlg:top="52" dlg:width="173" dlg:height="61">
+    <dlg:titledbox dlg:id="FCFileFormat" dlg:tab-index="14" dlg:left="5" dlg:top="52" dlg:width="173" dlg:height="32">
       <dlg:title dlg:value="&amp;chooseDialog.FCFileFormat.Title"/>
     </dlg:titledbox>
   </dlg:bulletinboard>

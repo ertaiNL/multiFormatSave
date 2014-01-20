@@ -57,9 +57,9 @@ Sub multiFormatSaveAs
   &apos; fix icon path
   Dim Location As String
   Location = GetMyLocation()
-  DChooseFormat.model.IODF.ImageURL = Location + "/icons/ODF.png"
-  DChooseFormat.model.IMSO.ImageURL = Location + "/icons/MSO.png"
-  DChooseFormat.model.IPDF.ImageURL = Location + "/icons/PDF.png"
+  DChooseFormat.model.CBODF.ImageURL = Location + "/icons/ODF.png"
+  DChooseFormat.model.CBMSO.ImageURL = Location + "/icons/MSO.png"
+  DChooseFormat.model.CBPDF.ImageURL = Location + "/icons/PDF.png"
 
   DChooseFormat.model.LHelp.Label = ""
 
@@ -310,24 +310,6 @@ Sub OpenFolderDialog(Folder As String) As String
     OpenFolderDialog = oFolderPicker.Directory
   End If
 End Sub
-
-&apos; Goal: Invert the selection of CBODF
-Sub IODF_click
-  DChooseFormat.model.CBODF.state = 1 xor DChooseFormat.model.CBODF.state
-  BSave_Enable
-End sub
-
-&apos; Goal: Invert the selection of CBPDF
-Sub IPDF_click
-  DChooseFormat.model.CBPDF.state = 1 xor DChooseFormat.model.CBPDF.state
-  BSave_Enable
-End sub
-
-&apos; Goal: Invert the selection of CBMSO
-Sub IMSO_click
-  DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
-  BSave_Enable
-End sub
 
 &apos; Goal: Check if the save-button needs to be enabled
 Sub BSave_Enable
