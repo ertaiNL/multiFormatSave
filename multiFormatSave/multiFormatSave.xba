@@ -21,10 +21,6 @@
 &apos;************************************************
 &apos; Thanks to DannyB for a lot of good examples on ooomacros
 
-&apos; Improvements possible :
-&apos;- check if the file has been modified
-&apos;- move the localization stuff to another file
-
 Option Explicit
 
 Public DChooseFormat As Object
@@ -34,20 +30,21 @@ CONST DIFFERENT_FORMATS = 3
 CONST ODF = 0
 CONST MSO = 1
 CONST PDF = 2
-CONST EXTENSION_ID = "extensions.multiFormatSave"
+CONST EXTENSION_NAME = "multiFormatSave"
 
 &apos; Informations about a file.
 Type FileDescriptor
   URL As String
-  format As Integer &apos; ODF, MSO, PDF
+  format As Integer
   info              &apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
 End Type
 
 &apos; goal : record a file under different filter (word, pdf, OOo)
 Sub multiFormatSaveAs
 
-  globalscope.Basiclibraries.Loadlibrary(&quot;multiFormatSave&quot;)
-  globalscope.DialogLibraries.LoadLibrary(&quot;multiFormatSave&quot;)
+  globalscope.Basiclibraries.Loadlibrary(EXTENSION_NAME)
+  globalscope.DialogLibraries.LoadLibrary(EXTENSION_NAME)
+
   DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   &apos; fix current file path
@@ -60,8 +57,6 @@ Sub multiFormatSaveAs
   DChooseFormat.model.CBODF.ImageURL = Location + "/icons/ODF.png"
   DChooseFormat.model.CBMSO.ImageURL = Location + "/icons/MSO.png"
   DChooseFormat.model.CBPDF.ImageURL = Location + "/icons/PDF.png"
-
-  DChooseFormat.model.LHelp.Label = ""
 
   DChooseFormat.execute
 End Sub
@@ -300,10 +295,8 @@ End Sub
 
 &apos; Goal: Open the folder-dialog with the given folder
 Sub OpenFolderDialog(Folder As String) As String
-  Dim sFolderPickerArgs as Variant
   Dim oFolderPicker as Object
 
-  sFolderPickerArgs = Array(com.sun.star.ui.dialogs.TemplateDescription.FILESAVE_SIMPLE )
   oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
   oFolderPicker.setDisplayDirectory( Folder )
   If oFolderPicker.execute() Then
@@ -366,7 +359,7 @@ End Function
 Function GetMyLocation()
   Dim oPIP As Object
   oPIP = GetDefaultContext().getByName( "/singletons/com.sun.star.deployment.PackageInformationProvider")
-  GetMyLocation = oPIP.getPackageLocation(EXTENSION_ID)
+  GetMyLocation = oPIP.getPackageLocation("extensions." + EXTENSION_NAME)
 End Function
 
 &apos; Get the directory where to save to from the filepath

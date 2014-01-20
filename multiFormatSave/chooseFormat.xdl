@@ -5,9 +5,15 @@
     <dlg:style dlg:style-id="0" dlg:text-color="0xff3333"/>
   </dlg:styles>
   <dlg:bulletinboard>
-    <dlg:checkbox dlg:id="CBODF" dlg:tab-index="4" dlg:left="24" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
-    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
-    <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true"/>
+    <dlg:checkbox dlg:id="CBODF" dlg:tab-index="4" dlg:left="24" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true">
+      <script:event script:event-name="on-itemstatechange" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.BSave_Enable" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="6" dlg:left="77" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true">
+    <script:event script:event-name="on-itemstatechange" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.BSave_Enable" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="7" dlg:left="132" dlg:top="62" dlg:width="34" dlg:height="28" dlg:checked="true">
+    <script:event script:event-name="on-itemstatechange" script:location="document" script:macro-name="multiFormatSave.multiFormatSave.BSave_Enable" script:language="StarBasic"/>
+    </dlg:checkbox>
     <dlg:text dlg:id="LHelp" dlg:tab-index="10" dlg:left="11" dlg:top="90" dlg:width="162" dlg:height="19" dlg:multiline="true" dlg:style-id="0"/>
     <dlg:button dlg:id="BSave" dlg:tab-index="9" dlg:left="59" dlg:top="120" dlg:width="55" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value" enabled="false">
        <script:event script:event-name="on-performaction" script:location="application" script:macro-name="multiFormatSave.multiFormatSave.OK" script:language="StarBasic"/>
