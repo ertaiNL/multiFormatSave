@@ -34,11 +34,7 @@ CONST DIFFERENT_FORMATS = 3
 CONST ODF = 0
 CONST MSO = 1
 CONST PDF = 2
-CONST NUM_TRANSLATIONS = 7
 CONST EXTENSION_ID = "extensions.multiFormatSave"
-
-&apos; Global array for storing localized texts
-Dim LocalizedTexts( 0 to NUM_TRANSLATIONS ) as string
 
 &apos; Informations about a file.
 Type FileDescriptor
@@ -49,8 +45,6 @@ End Type
 
 &apos; goal : record a file under different filter (word, pdf, OOo)
 Sub multiFormatSaveAs
-
-  InitializeLanguages
 
   globalscope.Basiclibraries.Loadlibrary(&quot;multiFormatSave&quot;)
   globalscope.DialogLibraries.LoadLibrary(&quot;multiFormatSave&quot;)
@@ -67,6 +61,8 @@ Sub multiFormatSaveAs
   DChooseFormat.model.IMSO.ImageURL = Location + "/icons/MSO.png"
   DChooseFormat.model.IPDF.ImageURL = Location + "/icons/PDF.png"
 
+  DChooseFormat.model.LHelp.Label = ""
+
   DChooseFormat.execute
 End Sub
 
@@ -74,16 +70,8 @@ End Sub
 Sub OK
 
   &apos; verify parameters
-  if DChooseFormat.model.TFPath.text  = &quot;&quot; then
-    MsgBox GetLocalizedText( 0, &quot;You must provide a Path&quot;)
-    exit sub
-  end if
-  if DChooseFormat.model.TFFilename.text = &quot;&quot; then
-    MsgBox GetLocalizedText( 1, &quot;You must provide a file name&quot;)
-    exit sub
-  end if
-  if DChooseFormat.model.CBMSO.state=0 and DChooseFormat.model.CBODF.state=0 and DChooseFormat.model.CBPDF.state=0 Then
-    Msgbox GetLocalizedText( 2, &quot;You must choose at least one export filter&quot;)
+  if DChooseFormat.model.TFPath.text  = &quot;&quot; or DChooseFormat.model.TFFilename.text = &quot;&quot; then
+    DChooseFormat.model.LHelp.Label = "&amp;InputError"
     exit sub
   end if
 
@@ -129,8 +117,8 @@ Sub OK
 
   &apos; Something bad happened when saving file
   ErrorHandler:
-    MsgBox GetLocalizedText(3, &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;)
-    MsgBox (GetLocalizedText(4, &quot;Error&quot;) &amp; ERR &amp; GetLocalizedText( 5, &quot; line &quot;) &amp; Erl &amp; &quot;.&quot; &amp; chr$(13) &amp; ERROR$)
+    DChooseFormat.model.LHelp.Label = "&amp;SaveError"
+    MsgBox &quot;Error&quot; &amp; ERR &amp; &quot; on line &quot; &amp; Erl &amp; &quot;. &quot; &amp; chr$(13) &amp; ERROR$
 End Sub
 
 &apos;getCurrentFormat()------------------------------------------------------------------
@@ -315,9 +303,8 @@ Sub OpenFolderDialog(Folder As String) As String
   Dim sFolderPickerArgs as Variant
   Dim oFolderPicker as Object
 
-  sFolderPickerArgs = Array(com.sun.star.ui.dialogs.TemplateDescription.FILEOPEN_SIMPLE )
+  sFolderPickerArgs = Array(com.sun.star.ui.dialogs.TemplateDescription.FILESAVE_SIMPLE )
   oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
-  oFolderPicker.setTitle( GetLocalizedText( 6, &quot;Save in&quot;) )
   oFolderPicker.setDisplayDirectory( Folder )
   If oFolderPicker.execute() Then
     OpenFolderDialog = oFolderPicker.Directory
@@ -326,17 +313,29 @@ End Sub
 
 &apos; Goal: Invert the selection of CBODF
 Sub IODF_click
-	DChooseFormat.model.CBODF.state = 1 xor DChooseFormat.model.CBODF.state
+  DChooseFormat.model.CBODF.state = 1 xor DChooseFormat.model.CBODF.state
+  BSave_Enable
 End sub
 
 &apos; Goal: Invert the selection of CBPDF
 Sub IPDF_click
-	DChooseFormat.model.CBPDF.state = 1 xor	DChooseFormat.model.CBPDF.state
+  DChooseFormat.model.CBPDF.state = 1 xor DChooseFormat.model.CBPDF.state
+  BSave_Enable
 End sub
 
 &apos; Goal: Invert the selection of CBMSO
 Sub IMSO_click
-	DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
+  DChooseFormat.model.CBMSO.state = 1 xor DChooseFormat.model.CBMSO.state
+  BSave_Enable
+End sub
+
+&apos; Goal: Check if the save-button needs to be enabled
+Sub BSave_Enable
+  If DChooseFormat.model.CBODF.state = 1 or DChooseFormat.model.CBMSO.state = 1 or DChooseFormat.model.CBPDF.state = 1 then
+    DChooseFormat.model.BSave.enabled = true
+  Else
+    DChooseFormat.model.BSave.enabled = false
+  EndIf
 End sub
 
 &apos; Goal: Get the extension for the documenttitle
@@ -379,118 +378,14 @@ Function getCommonExtention(DocumentTitle)
   getCommonExtention=result
 End Function
 
+&apos; BASIC FUNCTIONS ------------------------------------------------
+
 &apos; Goal: Get the location to of the Extension
 Function GetMyLocation()
   Dim oPIP As Object
   oPIP = GetDefaultContext().getByName( "/singletons/com.sun.star.deployment.PackageInformationProvider")
   GetMyLocation = oPIP.getPackageLocation(EXTENSION_ID)
 End Function
-
-&apos; Returns text in given language.
-&apos; If there is no text with the given id default text is returned.
-Function GetLocalizedText( uId as Integer, cDefaultText as String)
-  &apos; Check that the ids is valid
-  GetLocalizedText = &quot;&quot;
-  if (uId &gt;=0 and uId &lt; NUM_TRANSLATIONS) then
-    GetLocalizedText = LocalizedTexts(uId)
-  EndIf
-
-  &apos; If the localized text could not be found use default text
-  If (GetLocalizedText = &quot;&quot;) Then
-    GetLocalizedText = cDefaultText
-  EndIf
-End Function
-
-&apos; Initiliazes the localized texts based on the OpenOffice.org language
-&apos; New languages can be added to the function
-Function InitializeLanguages()
-
-  &apos; French
-  If (OOoLang() = &quot;fr&quot;) Then
-    LocalizedTexts(0)  = &quot;Vous devez préciser un chemin&quot;
-    LocalizedTexts(1)  = &quot;Vous devez préciser un nom de fichier&quot;
-    LocalizedTexts(2)  = &quot;Vous devez au moins choisir un format d&apos;export&quot;
-    LocalizedTexts(3)  = &quot;Une erreur s&apos;est produite lors de l&apos;enregistrement des fichiers, assurez vous que les fichiers de destination (MS and PDF) sont fermés.&quot;
-    LocalizedTexts(4)  = &quot;Erreur&quot;
-    LocalizedTexts(5)  = &quot;ligne&quot;
-    LocalizedTexts(6)  = &quot;Enregistrer sous&quot;
-
-  &apos; Finnish
-  ElseIf (OOoLang() = &quot;fi&quot;) Then
-    LocalizedTexts(0)  = &quot;Määrittele tallennuspaikka.&quot;
-    LocalizedTexts(1)  = &quot;Määrittele tiedostonimi.&quot;
-    LocalizedTexts(2)  = &quot;Valitse vähintään yksi tallennusmuoto.&quot;
-    LocalizedTexts(3)  = &quot;Virhe tapahtui tiedoston tallennuksen yhteydessä. Varmista että kohdetiedostot (MS ja PDF) ovat suljettuja.&quot;
-    LocalizedTexts(4)  = &quot;Virhe&quot;
-    LocalizedTexts(5)  = &quot;rivi&quot;
-    LocalizedTexts(6)  = &quot;Valitse tallennuspaikka&quot;
-
-  &apos; German
-  ElseIf (OOoLang() = &quot;de&quot;) Then
-    LocalizedTexts(0)  = &quot;Sie müssen einen Dateinamen angeben&quot;
-    LocalizedTexts(1)  = &quot;Sie müssen einen Verzeichnispfad angeben&quot;
-    LocalizedTexts(2)  = &quot;Sie müssen wenigstens ein Dateiformat zum Exportieren wählen&quot;
-    LocalizedTexts(3)  = &quot;Ein Fehler ist wärend des Speichervorgangs der Datei aufgetreten, versichern Sie sich das die ausgesuchten Dateien (MS und PDF) geschlossen sind.&quot;
-    LocalizedTexts(4)  = &quot;Fehler&quot;
-    LocalizedTexts(5)  = &quot;Linie&quot;
-    LocalizedTexts(6)  = &quot;Speichern unter...&quot;
-
-  &apos; Spanish
-  ElseIf (OOoLang() = &quot;es&quot;) Then
-    LocalizedTexts(0)  = &quot;Es necesario introducir un directorio de almacenamiento&quot;
-    LocalizedTexts(1)  = &quot;Es necesario introducir el nombre de un archivo&quot;
-    LocalizedTexts(2)  = &quot;Es necesario elegir al menos un formato de exportacion&quot;
-    LocalizedTexts(3)  = &quot;Se ha producido un error durante el almacenamiento del archivo, asegerate de que los archivos de destino (MS y PDF) estᮠcerrados.&quot;
-    LocalizedTexts(4)  = &quot;Error&quot;
-    LocalizedTexts(5)  = &quot;linea&quot;
-    LocalizedTexts(6)  = &quot;Guardar como&quot;
-
-  &apos; Dutch
-  ElseIf (OOoLang() = &quot;nl&quot;) Then
-    LocalizedTexts(0)  = &quot;Er is geen pad ingevoerd&quot;
-    LocalizedTexts(1)  = &quot;Er is geen bestandsnaam ingevoerd&quot;
-    LocalizedTexts(2)  = &quot;U moet minstens 1 export-filter aanvinken&quot;
-    LocalizedTexts(3)  = &quot;Er is een fout opgetreden bij het opslaan, zorg dat de doelbestanden (MS en PDF) niet in gebruik zijn.&quot;
-    LocalizedTexts(4)  = &quot;Error&quot;
-    LocalizedTexts(5)  = &quot;lijn&quot;
-    LocalizedTexts(6)  = &quot;Opslaan in&quot;
-
-  &apos; Hungarian
-  ElseIf (OOoLang() = &quot;hu&quot;) Then
-    LocalizedTexts(0)  = &quot;Meg kell adni a mentés útvonalát.&quot;
-    LocalizedTexts(1)  = &quot;Meg kell adni az állománynevet.&quot;
-    LocalizedTexts(2)  = &quot;Meg kell adni legalább egy formátumot.&quot;
-    LocalizedTexts(3)  = &quot;Hibás mentés! Győzödjön meg róla, hogy a célállományok (MS és PDF) nincsenek máshol megnyitva.&quot;
-    LocalizedTexts(4)  = &quot;Hiba&quot;
-    LocalizedTexts(5)  = &quot;sor&quot;
-    LocalizedTexts(6)  = &quot;Mentés ide&quot;
-
-  &apos; English (Default)
-  Else
-    LocalizedTexts(0)  = &quot;You must provide a Path&quot;
-    LocalizedTexts(1)  = &quot;You must provide a file name&quot;
-    LocalizedTexts(2)  = &quot;You must choose at least one export filter&quot;
-    LocalizedTexts(3)  = &quot;Something bad happened when saving file, be sure that target files (MS and PDF) are closed.&quot;
-    LocalizedTexts(4)  = &quot;Error&quot;
-    LocalizedTexts(5)  = &quot;line&quot;
-    LocalizedTexts(6)  = &quot;Save in&quot;
-  EndIf
-
-End Function
-
-&apos; Returns the language of the OpenOffice.org
-&apos; Source of the code: &quot;Usefull macro Information for OpenOffice&quot; by Andrew Pitonyak
-Function OOoLang() as string
-  Dim oSet
-  Dim oConfigProvider
-  Dim oParm(0) As New com.sun.star.beans.PropertyValue
-  oConfigProvider = createUnoService(&quot;com.sun.star.configuration.ConfigurationProvider&quot;)
-  oParm(0) = MakePropertyValue( &quot;nodepath&quot;, &quot;/org.openoffice.Setup/L10N&quot; )
-  oSet = oConfigProvider.createInstanceWithArguments(&quot;com.sun.star.configuration.ConfigurationAccess&quot;, oParm())
-  OOoLang=lcase(Left(trim(oSet.getbyname(&quot;ooLocale&quot;)),2))
-End Function
-
-&apos; BASIC FUNCTIONS ------------------------------------------------
 
 &apos; Get the directory where to save to from the filepath
 &apos; @param FileLocation The location where the file is
