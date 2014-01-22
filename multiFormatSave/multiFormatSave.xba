@@ -46,11 +46,8 @@ End Type
 &apos; goal : record a file under different filter (word, pdf, OOo)
 Sub multiFormatSaveAs
 
-  If (Not GlobalScope.DialogLibraries.isLibraryLoaded("tools")) Then
-    GlobalScope.DialogLibraries.Loadlibrary("tools")
-  EndIf
-  If (Not GlobalScope.BasicLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
-    GlobalScope.Basiclibraries.Loadlibrary(EXTENSION_NAME)
+  If (Not GlobalScope.BasicLibraries.isLibraryLoaded("Tools")) Then
+    GlobalScope.BasicLibraries.Loadlibrary("Tools")
   EndIf
   If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
     GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
@@ -60,10 +57,11 @@ Sub multiFormatSaveAs
   &apos; fix current file path
   If (ThisComponent.hasLocation()) Then
     DChooseFormat.model.TFPath.text = ConvertFromURL(DirectoryNameoutofPath(thisComponent.Location, "/"))
-    DChooseFormat.model.TFFilename.text = ConvertFromURL(FileNameoutofPath(thisComponent.Location, "/"))
+    DChooseFormat.model.TFFile.text = ConvertFromURL(FileNameoutofPath(thisComponent.Location, "/"))
   Else
     DChooseFormat.model.TFPath.text = ConvertFromURL(GetPathSettings("Work"))
   EndIf
+  BSave_Enable()
 
   &apos; fix icon path
   Dim Location As String
@@ -79,7 +77,7 @@ End Sub
 Sub OK
 
   &apos; verify parameters
-  if DChooseFormat.model.TFPath.text  = &quot;&quot; or DChooseFormat.model.TFFilename.text = &quot;&quot; then
+  if DChooseFormat.model.TFPath.text  = &quot;&quot; or DChooseFormat.model.TFFile.text = &quot;&quot; then
     DChooseFormat.model.LHelp.Label = "&amp;InputError"
     exit sub
   end if
@@ -113,9 +111,9 @@ Sub OK
 
     If (Not ThisComponent.hasLocation() And FileDescriptorList( counter ).format = ODF) Then &apos;Save as ODF
       ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
-    ElseIf ((ThisComponent.hasLocation()) and (ThisComponent.getURL() = FileDescriptorList( counter ).URL)) Then &apos;Save current document
+    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = FileDescriptorList( counter ).URL) Then &apos;Save current document
       ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
-    Else &apso;Save other documents
+    Else &apos;Save other documents
       ThisComponent.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
     EndIf
   Next
@@ -136,7 +134,7 @@ End Sub
 &apos;
 Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
   sPath = DChooseFormat.model.TFPath.text
-  FileName = DChooseFormat.model.TFFilename.text
+  FileName = DChooseFormat.model.TFFile.text
   formats(MSO) = DChooseFormat.model.CBMSO.state
   formats(ODF) = DChooseFormat.model.CBODF.state
   formats(PDF) = DChooseFormat.model.CBPDF.state
@@ -258,12 +256,9 @@ End Function
 Sub ChoosePath
   Dim Folder As String
 
-  If DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; Then
-    Folder = DChooseFormat.model.TFPath.text
-  ElseIf thisComponent.Location &lt;&gt; &quot;&quot; Then
-    Folder = getFile(thisComponent.Location, true)
-  Else
-    Folder = &quot;~/&quot;
+  Folder = DChooseFormat.model.TFPath.text
+  If Folder = &quot;&quot; Then
+    Folder = GetPathSettings("Work")
   End If
   Folder = OpenFolderDialog(ConvertToURL(Folder))
   if Folder &lt;&gt; &quot;&quot; then
@@ -284,10 +279,9 @@ End Sub
 
 &apos; Goal: Check if the save-button needs to be enabled
 Sub BSave_Enable
-  If DChooseFormat.model.CBODF.state = 1 or DChooseFormat.model.CBMSO.state = 1 or DChooseFormat.model.CBPDF.state = 1 then
-    DChooseFormat.model.BSave.enabled = true
-  Else
-    DChooseFormat.model.BSave.enabled = false
+  DChooseFormat.model.BSave.enabled = (DChooseFormat.model.CBODF.state or DChooseFormat.model.CBMSO.state or DChooseFormat.model.CBPDF.state)
+  If DChooseFormat.model.BSave.enabled Then
+    DChooseFormat.model.BSave.enabled = (DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; and DChooseFormat.model.TFFile.text &lt;&gt; &quot;&quot;)
   EndIf
 End sub
 
