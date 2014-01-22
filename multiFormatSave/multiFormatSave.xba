@@ -32,6 +32,10 @@ CONST MSO = 1
 CONST PDF = 2
 CONST EXTENSION_NAME = "multiFormatSave"
 
+CONST DOC_WRITER = "com.sun.star.text.TextDocument"
+CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
+CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
+
 &apos; Informations about a file.
 Type FileDescriptor
   URL As String
@@ -42,9 +46,12 @@ End Type
 &apos; goal : record a file under different filter (word, pdf, OOo)
 Sub multiFormatSaveAs
 
-  globalscope.Basiclibraries.Loadlibrary(EXTENSION_NAME)
-  globalscope.DialogLibraries.LoadLibrary(EXTENSION_NAME)
-
+  If (Not GlobalScope.BasicLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
+    GlobalScope.Basiclibraries.Loadlibrary(EXTENSION_NAME)
+  EndIf
+  If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
+    GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
+  EndIf
   DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   &apos; fix current file path
@@ -97,59 +104,23 @@ Sub OK
   Dim counter
   for counter=0 to UBound( FileDescriptorList() )
 
-    &apos; Save As... Behavior : the file displayed is the OOo version just saved.
-    if FileDescriptorList( counter ).format = getCurrentFormat(fileName) then &apos;ODF then
-      &apos;print &quot;Save AS&quot;
-      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
-    Else
-      &apos;Export behavior
+    If (Not ThisComponent.hasLocation() And FileDescriptorList( counter ).format = ODF) Then 'Save as ODF
+      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
+    ElseIf ((ThisComponent.hasLocation()) and (ThisComponent.getURL() = FileDescriptorList( counter ).URL)) Then 'Save current document
+      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
+    Else 'Save other documents
       ThisComponent.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
-    End if
-  next
+    EndIf
+  Next
 
   DChooseFormat.endExecute
-  exit sub
+  Exit sub
 
   &apos; Something bad happened when saving file
   ErrorHandler:
     DChooseFormat.model.LHelp.Label = "&amp;SaveError"
     MsgBox &quot;Error&quot; &amp; ERR &amp; &quot; on line &quot; &amp; Erl &amp; &quot;. &quot; &amp; chr$(13) &amp; ERROR$
 End Sub
-
-&apos;getCurrentFormat()------------------------------------------------------------------
-&apos;
-&apos;@Task : provide format of the current document (ODF, MS)
-&apos;@Parameters : file_name =&gt; current document name with its extension
-&apos;@Returns : an integer which represents current format : ODF or MSO
-&apos;------------------------------------------------------------------------------------
-Function getCurrentFormat(file_name as string) as integer
-  &apos;msgbox file_name
-  Dim parts()
-  Dim ext as string
-  Dim tabOOo(), tabMS() as string
-  parts = split(file_name,&quot;.&quot;)
-
-  tabOOo = array(&quot;sxw&quot;, &quot;sxc&quot;, &quot;sxi&quot;, &quot;stw&quot;,&quot;stc&quot;, &quot;sti&quot;, &quot;sxd&quot;, &quot;odt&quot;, &quot;ods&quot;, &quot;odp&quot;, &quot;ott&quot;, &quot;ots&quot;, &quot;otp&quot;, &quot;odg&quot;)
-  tabMS = array(&quot;doc&quot;, &quot;xls&quot;, &quot;ppt&quot;, &quot;dot&quot;, &quot;xlt&quot;, &quot;pot&quot;, &quot;docx&quot;, &quot;docm&quot;, &quot;dotx&quot;, &quot;dotm&quot;, &quot;xlsx&quot;, &quot;xlsm&quot;, &quot;xltx&quot;, &quot;xltm&quot;, &quot;xlsb&quot;, &quot;pptx&quot;, &quot;pptm&quot;, &quot;ppsx&quot;, &quot;ppsm&quot;, &quot;potx&quot;, &quot;potm&quot;, &quot;sldx&quot;, &quot;sldm&quot;)
-
-  Dim ubParts as long
-  ubParts = ubound(parts)
-
-  &apos;default value : if file_name equals &quot;&quot; or if file_name have no extension
-  getCurrentFormat = ODF
-  if (ubParts &gt; 0) then
-    &apos;here file_name is different than &quot;&quot; and it have an extension
-    ext = parts(ubParts)
-    if isIn(ext, tabOOo) then
-      getCurrentFormat = ODF
-    elseif isIn(ext, tabMS) then
-      getCurrentFormat = MSO
-    else
-      getCurrentFormat = PDF
-    endif
-  endif
-
-End function
 
 &apos; Get the values from the interface&apos;s widgets.
 &apos; @param sPath    The path were to save the file (output).
@@ -201,7 +172,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Calc
   &apos;*********************************************
-  If ThisComponent.SupportsService(&quot;com.sun.star.sheet.SpreadsheetDocument&quot;) Then
+  If ThisComponent.SupportsService(DOC_CALC) Then
 
     &apos; Save as MS Office format (XLS).
     if formats(MSO) = TRUE then
@@ -224,7 +195,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Writer
   &apos;*********************************************
-  ElseIf ThisComponent.SupportsService(&quot;com.sun.star.text.TextDocument&quot;) Then
+  ElseIf ThisComponent.SupportsService(DOC_WRITER) Then
 
     &apos; Save a backup as DOC
     if formats(MSO) = TRUE then
@@ -247,7 +218,7 @@ Function generateFileDescriptors( directoryURL As String, documentName As String
   &apos;*********************************************
   &apos;Working in Impress
   &apos;*********************************************
-  ElseIf ThisComponent.SupportsService(&quot;com.sun.star.presentation.PresentationDocument&quot;) Then
+  ElseIf ThisComponent.SupportsService(DOC_IMPRESS) Then
 
     &apos; Save a backup as PPT
     if formats(MSO) = TRUE then
