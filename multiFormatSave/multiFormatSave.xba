@@ -46,6 +46,9 @@ End Type
 &apos; goal : record a file under different filter (word, pdf, OOo)
 Sub multiFormatSaveAs
 
+  If (Not GlobalScope.DialogLibraries.isLibraryLoaded("tools")) Then
+    GlobalScope.DialogLibraries.Loadlibrary("tools")
+  EndIf
   If (Not GlobalScope.BasicLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
     GlobalScope.Basiclibraries.Loadlibrary(EXTENSION_NAME)
   EndIf
@@ -56,10 +59,10 @@ Sub multiFormatSaveAs
 
   &apos; fix current file path
   If (ThisComponent.hasLocation()) Then
-    DChooseFormat.model.TFPath.text = ConvertFromURL(getFile(thisComponent.Location, true))
-    DChooseFormat.model.TFFilename.text = ConvertFromURL(getFile(thisComponent.Location, false))
+    DChooseFormat.model.TFPath.text = ConvertFromURL(DirectoryNameoutofPath(thisComponent.Location, "/"))
+    DChooseFormat.model.TFFilename.text = ConvertFromURL(FileNameoutofPath(thisComponent.Location, "/"))
   Else
-    DChooseFormat.model.TFPath.text = ConvertFromURL(CreateUnoService("com.sun.star.util.PathSettings").work)
+    DChooseFormat.model.TFPath.text = ConvertFromURL(GetPathSettings("Work"))
   EndIf
 
   &apos; fix icon path
@@ -361,20 +364,6 @@ Function getFile(FileLocation As String, ReturnPath As boolean) As String
     getFile=right(FileLocation,len(FileLocation) -StringEnd)
   end if
 End Function &apos;getFile
-
-&apos; Check if a string is present in the array of strings
-&apos; @param str  String to seek in array
-&apos; @param list Array to read through
-&apos; @return     Is the string in the list?
-Function isIn(str as string, list as array) as boolean
-  Dim found as boolean &apos;False
-  Dim i as integer &apos;0
-  Do until found or i &gt; Ubound(list)
-    found = (str = list(i))
-    i=i+1
-  loop
-  isIn = found
-End function &apos; isIn
 
 &apos; Create and return a filedescriptor
 &apos; @param uFileDesc The var to save the fileDescriptor in
