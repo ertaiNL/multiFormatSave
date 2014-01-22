@@ -55,8 +55,12 @@ Sub multiFormatSaveAs
   DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   &apos; fix current file path
-  DChooseFormat.model.TFPath.text = ConvertFromURL(getFile(thisComponent.Location, true))
-  DChooseFormat.model.TFFilename.text = ConvertFromURL(getFile(thisComponent.Location, false))
+  If (ThisComponent.hasLocation()) Then
+    DChooseFormat.model.TFPath.text = ConvertFromURL(getFile(thisComponent.Location, true))
+    DChooseFormat.model.TFFilename.text = ConvertFromURL(getFile(thisComponent.Location, false))
+  Else
+    DChooseFormat.model.TFPath.text = ConvertFromURL(CreateUnoService("com.sun.star.util.PathSettings").work)
+  EndIf
 
   &apos; fix icon path
   Dim Location As String
@@ -104,11 +108,11 @@ Sub OK
   Dim counter
   for counter=0 to UBound( FileDescriptorList() )
 
-    If (Not ThisComponent.hasLocation() And FileDescriptorList( counter ).format = ODF) Then 'Save as ODF
+    If (Not ThisComponent.hasLocation() And FileDescriptorList( counter ).format = ODF) Then &apos;Save as ODF
       ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
-    ElseIf ((ThisComponent.hasLocation()) and (ThisComponent.getURL() = FileDescriptorList( counter ).URL)) Then 'Save current document
+    ElseIf ((ThisComponent.hasLocation()) and (ThisComponent.getURL() = FileDescriptorList( counter ).URL)) Then &apos;Save current document
       ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
-    Else 'Save other documents
+    Else &apso;Save other documents
       ThisComponent.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
     EndIf
   Next
