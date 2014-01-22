@@ -340,31 +340,6 @@ Function GetMyLocation()
   GetMyLocation = oPIP.getPackageLocation("extensions." + EXTENSION_NAME)
 End Function
 
-&apos; Get the directory where to save to from the filepath
-&apos; @param FileLocation The location where the file is
-&apos; @param ReturnPath   True then give fileName, False then give filePath
-&apos; @return             The filename or filepath depending on ReturnPath
-Function getFile(FileLocation As String, ReturnPath As boolean) As String
-  &apos; find last  &quot;/&quot;
-  &apos; extract first part
-  Dim pos as integer
-  Dim StringEnd as integer
-
-  pos=1
-  While (pos &lt;&gt; 0)
-    pos = InStr(pos,FileLocation,&quot;/&quot;) &apos; should i use split ?
-    If pos &lt;&gt; 0 Then
-      StringEnd=pos
-      pos=pos+1
-    End If
-  Wend
-  if ReturnPath then
-    getFile=left(FileLocation,StringEnd)
-  else
-    getFile=right(FileLocation,len(FileLocation) -StringEnd)
-  end if
-End Function &apos;getFile
-
 &apos; Create and return a filedescriptor
 &apos; @param uFileDesc The var to save the fileDescriptor in
 &apos; @param cFormat   The format to save the file in
