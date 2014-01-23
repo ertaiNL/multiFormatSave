@@ -76,12 +76,6 @@ End Sub
 &apos; goal: Function called when the &quot;Save&quot; button is clicked.
 Sub OK
 
-  &apos; verify parameters
-  if DChooseFormat.model.TFPath.text  = &quot;&quot; or DChooseFormat.model.TFFile.text = &quot;&quot; then
-    DChooseFormat.model.LHelp.Label = "&amp;InputError"
-    exit sub
-  end if
-
   &apos; Error managment.
   On Local Error Goto ErrorHandler
 
@@ -279,9 +273,15 @@ End Sub
 
 &apos; Goal: Check if the save-button needs to be enabled
 Sub BSave_Enable
-  DChooseFormat.model.BSave.enabled = (DChooseFormat.model.CBODF.state or DChooseFormat.model.CBMSO.state or DChooseFormat.model.CBPDF.state)
-  If DChooseFormat.model.BSave.enabled Then
-    DChooseFormat.model.BSave.enabled = (DChooseFormat.model.TFPath.text &lt;&gt; &quot;&quot; and DChooseFormat.model.TFFile.text &lt;&gt; &quot;&quot;)
+  If (Not DChooseFormat.model.CBODF.state = True And Not DChooseFormat.model.CBMSO.state = True And Not DChooseFormat.model.CBPDF.state = True) Then
+    DChooseFormat.model.BSave.enabled = false
+    DChooseFormat.model.LHelp.Label = &quot;&amp;InputFormatError&quot;
+  ElseIf (DChooseFormat.model.TFFile.text = &quot;&quot; or DChooseFormat.model.TFPath.text = &quot;&quot;) Then
+    DChooseFormat.model.BSave.enabled = false
+    DChooseFormat.model.LHelp.Label = &quot;&amp;InputTextError&quot;
+  Else
+    DChooseFormat.model.BSave.enabled = true
+    DChooseFormat.model.LHelp.Label = &quot;&quot;
   EndIf
 End sub
 
