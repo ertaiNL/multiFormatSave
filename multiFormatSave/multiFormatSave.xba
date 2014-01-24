@@ -27,6 +27,7 @@ Public dChooseFormat As Object
 
 &apos; Decleration of constants
 CONST DIFFERENT_FORMATS = 3
+CONST PROGRAMS = 3
 CONST ODF = 0
 CONST MSO = 1
 CONST PDF = 2
@@ -36,7 +37,7 @@ CONST DOC_WRITER = "com.sun.star.text.TextDocument"
 CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
 CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
 
-&apos; Informations about a file.
+&apos; Information about a file
 Type FileDescriptor
   URL As String
   format As Integer
@@ -62,12 +63,7 @@ Function multiFormatSaveAs()
   EndIf
   enableSaveButton()
 
-  &apos; fix icon path
-  Dim extensionPath As String
-  extensionPath = getExtensionPath()
-  dChooseFormat.model.CBODF.ImageURL = extensionPath + "/icons/ODF.png"
-  dChooseFormat.model.CBMSO.ImageURL = extensionPath + "/icons/MSO.png"
-  dChooseFormat.model.CBPDF.ImageURL = extensionPath + "/icons/PDF.png"
+  initUI()
 
   DChooseFormat.execute
 End Function &apos; multiFormatSaveAs
@@ -318,15 +314,26 @@ Function getPositionExtensionInPath( sPath As String ) As Integer
   getPositionExtensionInPath=result
 End Function &apos; getPositionExtensionInPath
 
-&apos; BASIC FUNCTIONS ------------------------------------------------
+&apos; UI FUNCTIONS ---------------------------------------------------
 
-&apos; Get the path to the extension
-&apos; @return The found path
-Function getExtensionPath()
-  Dim oPIP As Object
-  oPIP = GetDefaultContext().getByName( "/singletons/com.sun.star.deployment.PackageInformationProvider")
-  GetExtensionPath = oPIP.getPackageLocation("extensions." + EXTENSION_NAME)
-End Function &apos; getExtensionPath
+&apos; Sets initialization of the UI
+Function initUI()
+  If ThisComponent.SupportsService( DOC_CALC ) Then
+    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS Excel 97&quot;) + &quot; (xls)&quot;
+    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;calc8&quot;) + &quot; (ods)&quot;
+    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;calc_pdf_Export&quot;) + &quot; (pdf)&quot;
+  ElseIf ThisComponent.SupportsService( DOC_WRITER ) Then
+    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS Word 97&quot;) + &quot; (doc)&quot;
+    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;writer8&quot;) + &quot; (odt)&quot;
+    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;writer_pdf_Export&quot;) + &quot; (pdf)&quot;
+  ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
+    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS PowerPoint 97&quot;) + &quot; (ppt)&quot;
+    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;impress8&quot;) + &quot; (odp)&quot;
+    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;impress_pdf_Export&quot;) + &quot; (pdf)&quot;
+  EndIf
+End Function &apos; initUI
+
+&apos; BASIC FUNCTIONS ------------------------------------------------
 
 &apos; Create and return a filedescriptor
 &apos; @param uFileDesc The var to save the fileDescriptor in
