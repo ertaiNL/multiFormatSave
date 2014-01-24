@@ -56,10 +56,9 @@ Sub multiFormatSaveAs
 
   &apos; fix current file path
   If (ThisComponent.hasLocation()) Then
-    DChooseFormat.model.TFPath.text = ConvertFromURL(DirectoryNameoutofPath(thisComponent.Location, "/"))
-    DChooseFormat.model.TFFile.text = ConvertFromURL(FileNameoutofPath(thisComponent.Location, "/"))
+    SetUIProperties(DirectoryNameoutofPath(thiscomponent.Location, "/"), FileNameoutofPath(thiscomponent.Location, "/"))
   Else
-    DChooseFormat.model.TFPath.text = ConvertFromURL(GetPathSettings("Work"))
+    SetUIProperties(GetPathSettings("Work"), "")
   EndIf
   BSave_Enable()
 
@@ -82,22 +81,14 @@ Sub OK
   &apos; -- Getting info from the UI. -------------------------------------------
   &apos; Note : sPath is useless for Sending Mail
   Dim sPath As String
-  Dim sPathURL As String
   Dim fileName As String
   Dim formats( DIFFERENT_FORMATS - 1 ) as Boolean
 
   GetUIProperties( sPath, fileName, formats() )
 
-  &apos; Convert the path to a URL
-  sPathURL = ConvertToURL( sPath )
-  &apos; check the &quot;/&quot; at url end
-  if right(sPathURL,1) &lt;&gt; &quot;/&quot; Then
-    sPathURL = sPathURL+&quot;/&quot;
-  End If
-
   &apos; -- Generate the info for the files to save. ----------------------------
   Dim FileDescriptorList()
-  FileDescriptorList() = generateFileDescriptors( sPathURL, fileName, formats() )
+  FileDescriptorList() = generateFileDescriptors( sPath, fileName, formats() )
 
   &apos; -- Write the files to the disk. ----------------------------------------
   Dim counter
@@ -122,17 +113,31 @@ Sub OK
 End Sub
 
 &apos; Get the values from the interface&apos;s widgets.
-&apos; @param sPath    The path were to save the file (output).
+&apos; @param sPath    The URL-path were to save the file (output).
 &apos; @param fileName The name from the text-box (output)
 &apos; @param formats  The selected formats. (output)
 &apos;
 Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
-  sPath = DChooseFormat.model.TFPath.text
+  sPath = ConvertToURL(DChooseFormat.model.TFPath.text)
   FileName = DChooseFormat.model.TFFile.text
   formats(MSO) = DChooseFormat.model.CBMSO.state
   formats(ODF) = DChooseFormat.model.CBODF.state
   formats(PDF) = DChooseFormat.model.CBPDF.state
+  &apos; check the &quot;/&quot; at url end
+  if right(sPath,1) &lt;&gt; &quot;/&quot; Then
+    sPath = sPath+&quot;/&quot;
+  End If
 End Sub
+
+&apos; Get the values from the interface&apos;s widgets.
+&apos; @param sPath    The URL-path were to save the file (input).
+&apos; @param fileName The name from the text-box (input)
+&apos;
+Sub SetUIProperties( sPath As String, fileName As String )
+  DChooseFormat.model.TFPath.text = ConvertFromURL(sPath)
+  DChooseFormat.model.TFFile.text = fileName
+End Sub
+
 
 &apos; Saves to  function
 &apos;
