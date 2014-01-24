@@ -18,12 +18,12 @@
 
 &apos;You should have received a copy of the GNU General Public License
 &apos;along with this program.  If not, see http://www.gnu.org/licenses/
-&apos;************************************************
+&apos;************7************************************
 &apos; Thanks to DannyB for a lot of good examples on ooomacros
 
 Option Explicit
 
-Public DChooseFormat As Object
+Public dChooseFormat As Object
 
 &apos; Decleration of constants
 CONST DIFFERENT_FORMATS = 3
@@ -43,8 +43,8 @@ Type FileDescriptor
   info              &apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
 End Type
 
-&apos; goal : record a file under different filter (word, pdf, OOo)
-Sub multiFormatSaveAs
+&apos; Function called when the Dialog is started.
+Function multiFormatSaveAs()
 
   If (Not GlobalScope.BasicLibraries.isLibraryLoaded("Tools")) Then
     GlobalScope.BasicLibraries.Loadlibrary("Tools")
@@ -52,246 +52,234 @@ Sub multiFormatSaveAs
   If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
     GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
   EndIf
-  DChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
+  dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
   &apos; fix current file path
   If (ThisComponent.hasLocation()) Then
-    SetUIProperties(DirectoryNameoutofPath(thiscomponent.Location, "/"), FileNameoutofPath(thiscomponent.Location, "/"))
+    setUIProperties(DirectoryNameoutofPath(thiscomponent.Location, "/"), FileNameoutofPath(thiscomponent.Location, "/"))
   Else
-    SetUIProperties(GetPathSettings("Work"), "")
+    setUIProperties(GetPathSettings("Work"), "")
   EndIf
-  BSave_Enable()
+  enableSaveButton()
 
   &apos; fix icon path
-  Dim Location As String
-  Location = GetMyLocation()
-  DChooseFormat.model.CBODF.ImageURL = Location + "/icons/ODF.png"
-  DChooseFormat.model.CBMSO.ImageURL = Location + "/icons/MSO.png"
-  DChooseFormat.model.CBPDF.ImageURL = Location + "/icons/PDF.png"
+  Dim extensionPath As String
+  extensionPath = getExtensionPath()
+  dChooseFormat.model.CBODF.ImageURL = extensionPath + "/icons/ODF.png"
+  dChooseFormat.model.CBMSO.ImageURL = extensionPath + "/icons/MSO.png"
+  dChooseFormat.model.CBPDF.ImageURL = extensionPath + "/icons/PDF.png"
 
   DChooseFormat.execute
-End Sub
+End Function &apos; multiFormatSaveAs
 
-&apos; goal: Function called when the &quot;Save&quot; button is clicked.
-Sub OK
+&apos; This saves the files
+&apos; Function called when the &quot;Save&quot; button is clicked.
+Function saveFiles()
 
   &apos; Error managment.
   On Local Error Goto ErrorHandler
 
   &apos; -- Getting info from the UI. -------------------------------------------
-  &apos; Note : sPath is useless for Sending Mail
-  Dim sPath As String
+  Dim path As String
   Dim fileName As String
-  Dim formats( DIFFERENT_FORMATS - 1 ) as Boolean
+  Dim formats( DIFFERENT_FORMATS - 1 ) As Boolean
 
-  GetUIProperties( sPath, fileName, formats() )
+  getUIProperties( path, fileName, formats() )
 
   &apos; -- Generate the info for the files to save. ----------------------------
-  Dim FileDescriptorList()
-  FileDescriptorList() = generateFileDescriptors( sPath, fileName, formats() )
+  Dim fileDescriptorList()
+  fileDescriptorList() = getFileDescriptors( path, fileName, formats() )
 
   &apos; -- Write the files to the disk. ----------------------------------------
   Dim counter
   for counter=0 to UBound( FileDescriptorList() )
 
-    If (Not ThisComponent.hasLocation() And FileDescriptorList( counter ).format = ODF) Then &apos;Save as ODF
-      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
-    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = FileDescriptorList( counter ).URL) Then &apos;Save current document
-      ThisComponent.storeAsURL( FileDescriptorList( counter ).URL, Array() )
+    If (Not ThisComponent.hasLocation() And fileDescriptorList( counter ).format = ODF) Then &apos;Save as ODF
+      ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
+    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = fileDescriptorList( counter ).URL) Then &apos;Save current document
+      ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
     Else &apos;Save other documents
-      ThisComponent.storeToURL( FileDescriptorList( counter ).URL, FileDescriptorList( counter ).info() )
+      ThisComponent.storeToURL( fileDescriptorList( counter ).URL, fileDescriptorList( counter ).info() )
     EndIf
   Next
 
-  DChooseFormat.endExecute
-  Exit sub
+  dChooseFormat.endExecute
+  Exit Function
 
   &apos; Something bad happened when saving file
   ErrorHandler:
-    DChooseFormat.model.LHelp.Label = "&amp;SaveError"
+    dChooseFormat.model.LHelp.Label = &quot;&amp;SaveError&quot;
     MsgBox &quot;Error&quot; &amp; ERR &amp; &quot; on line &quot; &amp; Erl &amp; &quot;. &quot; &amp; chr$(13) &amp; ERROR$
-End Sub
+End Function &apos; saveFiles
 
 &apos; Get the values from the interface&apos;s widgets.
-&apos; @param sPath    The URL-path were to save the file (output).
-&apos; @param fileName The name from the text-box (output)
-&apos; @param formats  The selected formats. (output)
-&apos;
-Sub GetUIProperties( sPath As String, fileName As String, formats() as Boolean )
-  sPath = ConvertToURL(DChooseFormat.model.TFPath.text)
-  FileName = DChooseFormat.model.TFFile.text
-  formats(MSO) = DChooseFormat.model.CBMSO.state
-  formats(ODF) = DChooseFormat.model.CBODF.state
-  formats(PDF) = DChooseFormat.model.CBPDF.state
+&apos; @param sPath    The URL-path were to save the file
+&apos; @param sFileName The name from the text-box
+&apos; @param aFormats  The selected formats
+Function getUIProperties( sPath As String, sFileName As String, aFormats() as Boolean )
+  sPath = ConvertToURL( dChooseFormat.model.TFPath.text )
+  sFileName = dChooseFormat.model.TFFile.text
+  aFormats( MSO ) = dChooseFormat.model.CBMSO.state
+  aFormats( ODF ) = dChooseFormat.model.CBODF.state
+  aFormats( PDF ) = dChooseFormat.model.CBPDF.state
   &apos; check the &quot;/&quot; at url end
-  if right(sPath,1) &lt;&gt; &quot;/&quot; Then
-    sPath = sPath+&quot;/&quot;
-  End If
-End Sub
+  If right( sPath, 1 ) &lt;&gt; &quot;/&quot; Then
+    sPath = sPath + &quot;/&quot;
+  EndIf
+End Function &apos; getUIProperties
 
 &apos; Get the values from the interface&apos;s widgets.
-&apos; @param sPath    The URL-path were to save the file (input).
-&apos; @param fileName The name from the text-box (input)
-&apos;
-Sub SetUIProperties( sPath As String, fileName As String )
-  DChooseFormat.model.TFPath.text = ConvertFromURL(sPath)
-  DChooseFormat.model.TFFile.text = fileName
-End Sub
+&apos; @param sPath     The URL-path were to save the file
+&apos; @param sFileName The name from the text-box
+Function setUIProperties( sPath As String, sFileName As String )
+  dChooseFormat.model.TFPath.text = ConvertFromURL( sPath )
+  dChooseFormat.model.TFFile.text = sFileName
+End Function &apos; setUIProperties
 
+&apos; Creates the FileDescriptors to be able to save the files
+&apos; @param sDirectory  URL of the directory where to save the files.
+&apos; @param sFileName   Generic name of the file to be save.
+&apos; @param aFormats	  List of the format (ODF, MSO, PDF) to save the file to.
+&apos; @return		  List with FileDescriptors
+Function getFileDescriptors( sDirectory As String, sFileName As String, aFormats() As Boolean ) As Array
 
-&apos; Saves to  function
-&apos;
-&apos; Parameters :
-&apos; - directoryURL [IN] : URL of the directory where to save the files.
-&apos; - documentName [IN] : generic name of the file to be save (name with no extension).
-&apos; - formats() [IN] : list of the format (ODF, MSO, PDF) to save the file to.
-&apos;
-&apos; Returns :
-&apos; - the list of FileDescriptor structure :
-&apos;	Struct FileDescriptor {
-&apos;		URL : URL to the file
-&apos;		info : list of &quot;com.sun.star.beans.PropertyValue&quot; useful for saving a file.
-&apos;	}
-&apos;
-&apos; TODO : we can avoid the &quot;redim&quot; at the end by defining the value of fileDescriptors
-&apos; to be returned based on the &quot;format()&quot; argument.
-Function generateFileDescriptors( directoryURL As String, documentName As String, formats() As Boolean )
-
-  Dim cDocumentTitle As String
+  Dim documentTitle As String
   Dim position as Integer
-
-  &apos; Get the name of the file to be created.
   Dim listIterator As Integer
   listIterator = 0
 
-  Dim FileDescriptorList( UBOUND( formats() ) ) As FileDescriptor
+  Dim FileDescriptorList( DIFFERENT_FORMATS ) As FileDescriptor
 
   &apos; Path to the document (without extension).
-  cDocumentTitle = directoryURL + documentName
-  position = getCommonExtention(cDocumentTitle)
+  documentTitle = sDirectory + sFileName
+  position = getPositionExtensionInPath( documentTitle )
   if (position &lt;&gt; 0) then
-    cdocumenttitle = left(cdocumenttitle,(position - 1))
+    documentTitle = left( documentTitle, ( position - 1 ) )
   end if
 
   &apos;*********************************************
   &apos;Working in Calc
   &apos;*********************************************
-  If ThisComponent.SupportsService(DOC_CALC) Then
+  If ThisComponent.SupportsService( DOC_CALC ) Then
 
     &apos; Save as MS Office format (XLS).
-    if formats(MSO) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.xls&quot;, &quot;MS Excel 97&quot; )
+    If aFormats( MSO ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.xls&quot;, &quot;MS Excel 97&quot; )
       listIterator = listIterator + 1
-    end if
+    endIf
 
     &apos; Save as OpenOffice format (ODS)
-    if formats(ODF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.ods&quot; )
+    If aFormats( ODF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.ods&quot; )
       listIterator = listIterator + 1
-    end if
+    endIf
 
-    &apos; Save as PDF format
-    if formats(PDF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;calc_pdf_Export&quot;, 0 )
+    &apos; Save as PDF format (PDF)
+    If aFormats( PDF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;calc_pdf_Export&quot; )
       listIterator = listIterator + 1
-    End if
+    EndIf
 
   &apos;*********************************************
   &apos;Working in Writer
   &apos;*********************************************
-  ElseIf ThisComponent.SupportsService(DOC_WRITER) Then
+  ElseIf ThisComponent.SupportsService( DOC_WRITER ) Then
 
-    &apos; Save a backup as DOC
-    if formats(MSO) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.doc&quot;, &quot;MS Word 97&quot; )
+    &apos; Save as MS Office format (DOC).
+    If aFormats( MSO ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.doc&quot;, &quot;MS Word 97&quot; )
       listIterator = listIterator + 1
-    end if
+    EndIf
 
-    &apos; Save the document as ODT
-    if formats(ODF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.odt&quot; )
+    &apos; Save as OpenOffice format (ODT)
+    If aFormats( ODF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.odt&quot; )
       listIterator = listIterator + 1
-    end if
+    EndIf
 
-    &apos; Save a backup as a PDF
-    if formats(PDF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;writer_pdf_Export&quot;, 0 )
+    &apos; Save as PDF format (PDF)
+    If aFormats( PDF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;writer_pdf_Export&quot; )
       listIterator = listIterator + 1
-    End if
+    EndIf
 
   &apos;*********************************************
   &apos;Working in Impress
   &apos;*********************************************
-  ElseIf ThisComponent.SupportsService(DOC_IMPRESS) Then
+  ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
 
-    &apos; Save a backup as PPT
-    if formats(MSO) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, cDocumentTitle + &quot;.ppt&quot;, &quot;MS PowerPoint 97&quot; )
+    &apos; Save as MS Office format (PPT).
+    If aFormats( MSO ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.ppt&quot;, &quot;MS PowerPoint 97&quot; )
       listIterator = listIterator + 1
-    end if
+    EndIf
 
-    &apos; Save the document as SXI or ODP
-    if formats(ODF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, cDocumentTitle + &quot;.odp&quot; )
+    &apos; Save as OpenOffice format (ODP)
+    If aFormats( ODF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.odp&quot; )
       listIterator = listIterator + 1
-    end if
+    EndIf
 
-    &apos; Save a backup as a PDF
-    if formats(PDF) = TRUE then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, cDocumentTitle + &quot;.pdf&quot;, &quot;impress_pdf_Export&quot;, 0 )
+    &apos; Save as PDF format (PDF)
+    If aFormats( PDF ) = TRUE Then
+      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;impress_pdf_Export&quot; )
       listIterator = listIterator + 1
-    End If
-  End If
+    EndIf
+  EndIf
 
-  &apos; Resize the table so that it fits exactly the numer of files to be created.
+  &apos; Resize the table and return
   Redim Preserve FileDescriptorList( listIterator - 1 ) As FileDescriptor
+  getFileDescriptors = FileDescriptorList()
+End Function &apos; getFileDescriptors
 
-  &apos; Returns the list of fileDescriptor.
-  generateFileDescriptors = FileDescriptorList()
-
-End Function
-
-&apos; Goal: Set the file-name
-Sub ChoosePath
+&apos; let the user choose a path where to save the documents
+&apos; and save it in the TFPath
+&apos; Function called when the &quot;...&quot; button is clicked.
+Function chooseFolder()
   Dim Folder As String
 
   Folder = DChooseFormat.model.TFPath.text
   If Folder = &quot;&quot; Then
     Folder = GetPathSettings("Work")
   End If
-  Folder = OpenFolderDialog(ConvertToURL(Folder))
+  Folder = openFolderDialog(ConvertToURL(Folder))
   if Folder &lt;&gt; &quot;&quot; then
     DChooseFormat.model.TFPath.text = ConvertFromURL(Folder)
   end if
-End Sub
+End Function &apos; choosePath
 
-&apos; Goal: Open the folder-dialog with the given folder
-Sub OpenFolderDialog(Folder As String) As String
+&apos; Let the user select a path where to save the documents
+&apos; @param sFolder The folder to start the dialog
+&apos; @return	      The folder the user selected
+Function openFolderDialog(sFolder As String) As String
   Dim oFolderPicker as Object
 
   oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
-  oFolderPicker.setDisplayDirectory( Folder )
-  If oFolderPicker.execute() Then
-    OpenFolderDialog = oFolderPicker.Directory
-  End If
-End Sub
+  oFolderPicker.setDisplayDirectory( sFolder )
+  If ( oFolderPicker.execute() ) Then
+    openFolderDialog = oFolderPicker.Directory
+  EndIf
+End Function &apos; openFolderDialog
 
-&apos; Goal: Check if the save-button needs to be enabled
-Sub BSave_Enable
-  If (Not DChooseFormat.model.CBODF.state = True And Not DChooseFormat.model.CBMSO.state = True And Not DChooseFormat.model.CBPDF.state = True) Then
-    DChooseFormat.model.BSave.enabled = false
+&apos; Check if the save-button needs to be enabled
+&apos; Function called when one of the textFields or checkBoxes are changed.
+Function enableSaveButton()
+  If ( Not DChooseFormat.model.CBODF.state = TRUE And Not DChooseFormat.model.CBMSO.state = TRUE And Not DChooseFormat.model.CBPDF.state = TRUE ) Then
+    DChooseFormat.model.BSave.enabled = FALSE
     DChooseFormat.model.LHelp.Label = &quot;&amp;InputFormatError&quot;
-  ElseIf (DChooseFormat.model.TFFile.text = &quot;&quot; or DChooseFormat.model.TFPath.text = &quot;&quot;) Then
-    DChooseFormat.model.BSave.enabled = false
+  ElseIf ( DChooseFormat.model.TFFile.text = &quot;&quot; Or DChooseFormat.model.TFPath.text = &quot;&quot; ) Then
+    DChooseFormat.model.BSave.enabled = FALSE
     DChooseFormat.model.LHelp.Label = &quot;&amp;InputTextError&quot;
   Else
-    DChooseFormat.model.BSave.enabled = true
+    DChooseFormat.model.BSave.enabled = TRUE
     DChooseFormat.model.LHelp.Label = &quot;&quot;
   EndIf
-End sub
+End Function &apos; enableSaveButton
 
-&apos; Goal: Get the extension for the documenttitle
-Function getCommonExtention(DocumentTitle)
+&apos; Get the extension of the file
+&apos; @param sPath The path of the file
+&apos; @return      The position where the extension starts
+Function getPositionExtensionInPath( sPath As String ) As Integer
 
   Dim extentions As Variant
   Dim result As Variant
@@ -320,53 +308,50 @@ Function getCommonExtention(DocumentTitle)
     &quot;.dif&quot;, &quot;.dbf&quot;, &quot;.slk&quot;, &quot;.csv&quot;, _
     &quot;.sda&quot;)
   result=0
-  for ext = LBound(extentions) To UBound(extentions)
-    anExt = extentions(ext)
-    if (right(documentTitle, len(anExt)) = anExt) then
-      result=InStr(DocumentTitle,anExt)
+  For ext = 0 To UBound( extentions )
+    anExt = extentions( ext )
+    If ( right( sPath, len( anExt ) ) = anExt ) Then
+      result=InStr( sPath, anExt )
       Exit For
-    end if
-  Next ext
-  getCommonExtention=result
-End Function
+    EndIf
+  Next
+  getPositionExtensionInPath=result
+End Function &apos; getPositionExtensionInPath
 
 &apos; BASIC FUNCTIONS ------------------------------------------------
 
-&apos; Goal: Get the location to of the Extension
-Function GetMyLocation()
+&apos; Get the path to the extension
+&apos; @return The found path
+Function getExtensionPath()
   Dim oPIP As Object
   oPIP = GetDefaultContext().getByName( "/singletons/com.sun.star.deployment.PackageInformationProvider")
-  GetMyLocation = oPIP.getPackageLocation("extensions." + EXTENSION_NAME)
-End Function
+  GetExtensionPath = oPIP.getPackageLocation("extensions." + EXTENSION_NAME)
+End Function &apos; getExtensionPath
 
 &apos; Create and return a filedescriptor
 &apos; @param uFileDesc The var to save the fileDescriptor in
-&apos; @param cFormat   The format to save the file in
-&apos; @param cPath     The path to save the file to
-&apos; @param cFilter   The name of the Filter to use (optional)
-&apos; @param nCompress The level of compress (optional)
-Function createFileDescriptor( uFileDescriptor As FileDescriptor, cFormat As Integer, cPath As String, Optional cFilter As String, Optional nCompress As Integer )
+&apos; @param iFormat   The format to save the file in
+&apos; @param sPath     The path to save the file to
+&apos; @param sFilter   The name of the Filter to use (optional)
+Function createFileDescriptor( uFileDescriptor As FileDescriptor, iFormat As Integer, sPath As String, Optional sFilter As String )
   Dim uArgs(2) As New com.sun.star.beans.PropertyValue
-  If Not IsMissing( cFilter ) Then
-    uArgs( 0 ) = MakePropertyValue( &quot;FilterName&quot;, cFilter )
+  If Not IsMissing( sFilter ) Then
+    uArgs( 0 ) = MakePropertyValue( &quot;FilterName&quot;, sFilter )
   EndIf
-  If Not IsMissing( nCompress ) Then
-    uArgs( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, nCompress )
-  EndIf
-  uFileDescriptor.URL = ConvertToURL( cPath )
-  uFileDescriptor.format = cFormat
+  &apos; This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
+  uArgs( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+  uFileDescriptor.URL = ConvertToURL( sPath )
+  uFileDescriptor.format = iFormat
   uFileDescriptor.info = uArgs()
 End Function &apos; createFileDescriptor
 
 &apos; Create and return a new com.sun.star.beans.PropertyValue.
 &apos; @param cName  The name of the property
-&apos; @param uValue The value to give the property
+&apos; @param uValue The value to give the property (optional)
 &apos; @return       The created property
-Function makePropertyValue( Optional cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
+Function makePropertyValue( cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
   Dim oPropertyValue As New com.sun.star.beans.PropertyValue
-  If Not IsMissing( cName ) Then
-    oPropertyValue.Name = cName
-  EndIf
+  oPropertyValue.Name = cName
   If Not IsMissing( uValue ) Then
     oPropertyValue.Value = uValue
   EndIf
