@@ -2,60 +2,63 @@
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
 <script:module xmlns:script="http://openoffice.org/2000/script" script:name="multiFormatSave" script:language="StarBasic">REM  *****  BASIC  *****
 
-&apos;************************************************
-&apos;Copyright (C) 2004 - 2012 StarXpert -- Florent Manens (LGPL)
-&apos;Copyright (C) 2012 - 2013 Rob Snelders (GPL)
+'************************************************
+'Copyright (C) 2004 - 2012 StarXpert -- Florent Manens (LGPL)
+'Copyright (C) 2012 - 2013 Rob Snelders (GPL)
 
-&apos;This program is free software: you can redistribute it and/or modify
-&apos;it under the terms of the GNU General Public License as published by
-&apos;the Free Software Foundation, either version 3 of the License, or
-&apos;(at your option) any later version.
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
 
-&apos;This program is distributed in the hope that it will be useful,
-&apos;but WITHOUT ANY WARRANTY; without even the implied warranty of
-&apos;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-&apos;GNU General Public License for more details.
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
 
-&apos;You should have received a copy of the GNU General Public License
-&apos;along with this program.  If not, see http://www.gnu.org/licenses/
-&apos;************7************************************
-&apos; Thanks to DannyB for a lot of good examples on ooomacros
+'You should have received a copy of the GNU General Public License
+'along with this program.  If not, see http://www.gnu.org/licenses/
+'************************************************
+' Thanks to DannyB for a lot of good examples on ooomacros
 
 Option Explicit
 
 Public dChooseFormat As Object
 
-&apos; Decleration of constants
-CONST DIFFERENT_FORMATS = 3
-CONST PROGRAMS = 3
+' Decleration of constants
+CONST DIFFERENT_FORMATS = 4
 CONST ODF = 0
 CONST MSO = 1
-CONST PDF = 2
+CONST MSX = 2
+CONST PDF = 3
 CONST EXTENSION_NAME = "multiFormatSave"
 
 CONST DOC_WRITER = "com.sun.star.text.TextDocument"
 CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
 CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
 
-&apos; Information about a file
+' Information about a file
 Type FileDescriptor
   URL As String
   format As Integer
-  info              &apos; description() as &quot;com.sun.star.beans.PropertyValue&quot;
+  info              ' description() as "com.sun.star.beans.PropertyValue"
 End Type
 
-&apos; Function called when the Dialog is started.
+' Function called when the Dialog is started.
 Function multiFormatSaveAs()
 
   If (Not GlobalScope.BasicLibraries.isLibraryLoaded("Tools")) Then
     GlobalScope.BasicLibraries.Loadlibrary("Tools")
+  EndIf
+  If (Not GlobalScope.BasicLibraries.isLibraryLoaded("FormWizard")) Then
+    GlobalScope.BasicLibraries.Loadlibrary("FormWizard")
   EndIf
   If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
     GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
   EndIf
   dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 
-  &apos; fix current file path
+  ' fix current file path
   If (ThisComponent.hasLocation()) Then
     setUIProperties(DirectoryNameoutofPath(thiscomponent.Location, "/"), FileNameoutofPath(thiscomponent.Location, "/"))
   Else
@@ -66,35 +69,35 @@ Function multiFormatSaveAs()
   initUI()
 
   DChooseFormat.execute
-End Function &apos; multiFormatSaveAs
+End Function ' multiFormatSaveAs
 
-&apos; This saves the files
-&apos; Function called when the &quot;Save&quot; button is clicked.
+' This saves the files
+' Function called when the "Save" button is clicked.
 Function saveFiles()
 
-  &apos; Error managment.
+  ' Error managment.
   On Local Error Goto ErrorHandler
 
-  &apos; -- Getting info from the UI. -------------------------------------------
+  ' -- Getting info from the UI. -------------------------------------------
   Dim path As String
   Dim fileName As String
   Dim formats( DIFFERENT_FORMATS - 1 ) As Boolean
 
   getUIProperties( path, fileName, formats() )
 
-  &apos; -- Generate the info for the files to save. ----------------------------
+  ' -- Generate the info for the files to save. ----------------------------
   Dim fileDescriptorList()
   fileDescriptorList() = getFileDescriptors( path, fileName, formats() )
 
-  &apos; -- Write the files to the disk. ----------------------------------------
+  ' -- Write the files to the disk. ----------------------------------------
   Dim counter
   for counter=0 to UBound( FileDescriptorList() )
 
-    If (Not ThisComponent.hasLocation() And fileDescriptorList( counter ).format = ODF) Then &apos;Save as ODF
+    If (Not ThisComponent.hasLocation() And fileDescriptorList( counter ).format = ODF) Then 'Save as ODF
       ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
-    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = fileDescriptorList( counter ).URL) Then &apos;Save current document
+    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = fileDescriptorList( counter ).URL) Then 'Save current document
       ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
-    Else &apos;Save other documents
+    Else 'Save other documents
       ThisComponent.storeToURL( fileDescriptorList( counter ).URL, fileDescriptorList( counter ).info() )
     EndIf
   Next
@@ -102,41 +105,42 @@ Function saveFiles()
   dChooseFormat.endExecute
   Exit Function
 
-  &apos; Something bad happened when saving file
+  ' Something bad happened when saving file
   ErrorHandler:
-    dChooseFormat.model.LHelp.Label = &quot;&amp;SaveError&quot;
-    MsgBox &quot;Error&quot; &amp; ERR &amp; &quot; on line &quot; &amp; Erl &amp; &quot;. &quot; &amp; chr$(13) &amp; ERROR$
-End Function &apos; saveFiles
+    dChooseFormat.model.LHelp.Label = "&amp;SaveError"
+    MsgBox "Error" &amp; ERR &amp; " on line " &amp; Erl &amp; ". " &amp; chr$(13) &amp; ERROR$
+End Function ' saveFiles
 
-&apos; Get the values from the interface&apos;s widgets.
-&apos; @param sPath    The URL-path were to save the file
-&apos; @param sFileName The name from the text-box
-&apos; @param aFormats  The selected formats
+' Get the values from the interface's widgets.
+' @param sPath    The URL-path were to save the file
+' @param sFileName The name from the text-box
+' @param aFormats  The selected formats
 Function getUIProperties( sPath As String, sFileName As String, aFormats() as Boolean )
   sPath = ConvertToURL( dChooseFormat.model.TFPath.text )
   sFileName = dChooseFormat.model.TFFile.text
-  aFormats( MSO ) = dChooseFormat.model.CBMSO.state
   aFormats( ODF ) = dChooseFormat.model.CBODF.state
+  aFormats( MSO ) = dChooseFormat.model.CBMSO.state
+  aFormats( MSX ) = dChooseFormat.model.CBMSX.state    
   aFormats( PDF ) = dChooseFormat.model.CBPDF.state
-  &apos; check the &quot;/&quot; at url end
-  If right( sPath, 1 ) &lt;&gt; &quot;/&quot; Then
-    sPath = sPath + &quot;/&quot;
+  ' check the "/" at url end
+  If right( sPath, 1 ) &lt;&gt; "/" Then
+    sPath = sPath + "/"
   EndIf
-End Function &apos; getUIProperties
+End Function ' getUIProperties
 
-&apos; Get the values from the interface&apos;s widgets.
-&apos; @param sPath     The URL-path were to save the file
-&apos; @param sFileName The name from the text-box
+' Get the values from the interface's widgets.
+' @param sPath     The URL-path were to save the file
+' @param sFileName The name from the text-box
 Function setUIProperties( sPath As String, sFileName As String )
   dChooseFormat.model.TFPath.text = ConvertFromURL( sPath )
   dChooseFormat.model.TFFile.text = sFileName
-End Function &apos; setUIProperties
+End Function ' setUIProperties
 
-&apos; Creates the FileDescriptors to be able to save the files
-&apos; @param sDirectory  URL of the directory where to save the files.
-&apos; @param sFileName   Generic name of the file to be save.
-&apos; @param aFormats	  List of the format (ODF, MSO, PDF) to save the file to.
-&apos; @return		  List with FileDescriptors
+' Creates the FileDescriptors to be able to save the files
+' @param sDirectory  URL of the directory where to save the files.
+' @param sFileName   Generic name of the file to be save.
+' @param aFormats	  List of the format (ODF, MSO, PDF) to save the file to.
+' @return		  List with FileDescriptors
 Function getFileDescriptors( sDirectory As String, sFileName As String, aFormats() As Boolean ) As Array
 
   Dim documentTitle As String
@@ -146,135 +150,85 @@ Function getFileDescriptors( sDirectory As String, sFileName As String, aFormats
 
   Dim FileDescriptorList( DIFFERENT_FORMATS ) As FileDescriptor
 
-  &apos; Path to the document (without extension).
+  ' Path to the document (without extension).
   documentTitle = sDirectory + sFileName
   position = getPositionExtensionInPath( documentTitle )
   if (position &lt;&gt; 0) then
     documentTitle = left( documentTitle, ( position - 1 ) )
   end if
 
-  &apos;*********************************************
-  &apos;Working in Calc
-  &apos;*********************************************
-  If ThisComponent.SupportsService( DOC_CALC ) Then
-
-    &apos; Save as MS Office format (XLS).
-    If aFormats( MSO ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.xls&quot;, &quot;MS Excel 97&quot; )
-      listIterator = listIterator + 1
-    endIf
-
-    &apos; Save as OpenOffice format (ODS)
-    If aFormats( ODF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.ods&quot; )
-      listIterator = listIterator + 1
-    endIf
-
-    &apos; Save as PDF format (PDF)
-    If aFormats( PDF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;calc_pdf_Export&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-  &apos;*********************************************
-  &apos;Working in Writer
-  &apos;*********************************************
-  ElseIf ThisComponent.SupportsService( DOC_WRITER ) Then
-
-    &apos; Save as MS Office format (DOC).
-    If aFormats( MSO ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.doc&quot;, &quot;MS Word 97&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-    &apos; Save as OpenOffice format (ODT)
-    If aFormats( ODF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.odt&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-    &apos; Save as PDF format (PDF)
-    If aFormats( PDF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;writer_pdf_Export&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-  &apos;*********************************************
-  &apos;Working in Impress
-  &apos;*********************************************
+  '*********************************************
+  'Create the FileDescriptors Themselves
+  '*********************************************
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".odt" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".doc", "MS Word 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".docx", "MS Word 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "writer_pdf_Export" )
+  ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".ods" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".xls", "MS Excel 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".xlsx", "Calc MS Excel 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "calc_pdf_Export" )
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-
-    &apos; Save as MS Office format (PPT).
-    If aFormats( MSO ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), MSO, documentTitle + &quot;.ppt&quot;, &quot;MS PowerPoint 97&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-    &apos; Save as OpenOffice format (ODP)
-    If aFormats( ODF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), ODF, documentTitle + &quot;.odp&quot; )
-      listIterator = listIterator + 1
-    EndIf
-
-    &apos; Save as PDF format (PDF)
-    If aFormats( PDF ) = TRUE Then
-      createFileDescriptor( FileDescriptorList( listIterator ), PDF, documentTitle + &quot;.pdf&quot;, &quot;impress_pdf_Export&quot; )
-      listIterator = listIterator + 1
-    EndIf
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".odp" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".ppt", "MS PowerPoint 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".pptx", "Impress MS PowerPoint 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "impress_pdf_Export" )
   EndIf
 
-  &apos; Resize the table and return
+  ' Resize the table and return
   Redim Preserve FileDescriptorList( listIterator - 1 ) As FileDescriptor
   getFileDescriptors = FileDescriptorList()
-End Function &apos; getFileDescriptors
+End Function ' getFileDescriptors
 
-&apos; let the user choose a path where to save the documents
-&apos; and save it in the TFPath
-&apos; Function called when the &quot;...&quot; button is clicked.
+' let the user choose a path where to save the documents
+' and save it in the TFPath
+' Function called when the "..." button is clicked.
 Function chooseFolder()
   Dim Folder As String
 
   Folder = DChooseFormat.model.TFPath.text
-  If Folder = &quot;&quot; Then
+  If Folder = "" Then
     Folder = GetPathSettings("Work")
   End If
   Folder = openFolderDialog(ConvertToURL(Folder))
-  if Folder &lt;&gt; &quot;&quot; then
+  if Folder &lt;&gt; "" then
     DChooseFormat.model.TFPath.text = ConvertFromURL(Folder)
   end if
-End Function &apos; choosePath
+End Function ' choosePath
 
-&apos; Let the user select a path where to save the documents
-&apos; @param sFolder The folder to start the dialog
-&apos; @return	      The folder the user selected
+' Let the user select a path where to save the documents
+' @param sFolder The folder to start the dialog
+' @return	      The folder the user selected
 Function openFolderDialog(sFolder As String) As String
   Dim oFolderPicker as Object
 
-  oFolderPicker = CreateUnoService( &quot;com.sun.star.ui.dialogs.FolderPicker&quot; )
+  oFolderPicker = CreateUnoService( "com.sun.star.ui.dialogs.FolderPicker" )
   oFolderPicker.setDisplayDirectory( sFolder )
   If ( oFolderPicker.execute() ) Then
     openFolderDialog = oFolderPicker.Directory
   EndIf
-End Function &apos; openFolderDialog
+End Function ' openFolderDialog
 
-&apos; Check if the save-button needs to be enabled
-&apos; Function called when one of the textFields or checkBoxes are changed.
+' Check if the save-button needs to be enabled
+' Function called when one of the textFields or checkBoxes are changed.
 Function enableSaveButton()
-  If ( Not DChooseFormat.model.CBODF.state = TRUE And Not DChooseFormat.model.CBMSO.state = TRUE And Not DChooseFormat.model.CBPDF.state = TRUE ) Then
+  If ( Not DChooseFormat.model.CBODF.state = TRUE And Not DChooseFormat.model.CBMSO.state = TRUE And Not DChooseFormat.model.CBMSX.state = TRUE And Not DChooseFormat.model.CBPDF.state = TRUE ) Then
     DChooseFormat.model.BSave.enabled = FALSE
-    DChooseFormat.model.LHelp.Label = &quot;&amp;InputFormatError&quot;
-  ElseIf ( DChooseFormat.model.TFFile.text = &quot;&quot; Or DChooseFormat.model.TFPath.text = &quot;&quot; ) Then
+    DChooseFormat.model.LHelp.Label = "&amp;InputFormatError"
+  ElseIf ( DChooseFormat.model.TFFile.text = "" Or DChooseFormat.model.TFPath.text = "" ) Then
     DChooseFormat.model.BSave.enabled = FALSE
-    DChooseFormat.model.LHelp.Label = &quot;&amp;InputTextError&quot;
+    DChooseFormat.model.LHelp.Label = "&amp;InputTextError"
   Else
     DChooseFormat.model.BSave.enabled = TRUE
-    DChooseFormat.model.LHelp.Label = &quot;&quot;
+    DChooseFormat.model.LHelp.Label = ""
   EndIf
-End Function &apos; enableSaveButton
+End Function ' enableSaveButton
 
-&apos; Get the extension of the file
-&apos; @param sPath The path of the file
-&apos; @return      The position where the extension starts
+' Get the extension of the file
+' @param sPath The path of the file
+' @return      The position where the extension starts
 Function getPositionExtensionInPath( sPath As String ) As Integer
 
   Dim extentions As Variant
@@ -282,27 +236,27 @@ Function getPositionExtensionInPath( sPath As String ) As Integer
   Dim ext As Integer
   Dim anExt as string
 
-  &apos; list of common extentions
-  &apos; Following extensions are recognized:
-  &apos; OO.o 1.1.x    - sxw,sxc,sxi,stw,stc,sti,sxd
-  &apos; OO.o 2.x      - odt,ods,odp,ott,ots,otp,odg,odm
-  &apos; MS Office     - doc,xls,ppt,dot,xlt,pot
-  &apos; MS OOXML      - docx,docm,dotx,dotm,xlsx,xlsm,xltx,xltm,xlsb,pptx,pptm,ppsx,ppsm,potx,potm,sldx,sldm
-  &apos; MS Pocketpc   - psw,pxl
-  &apos; StarX         - sdw,sdc,sdd,vor
-  &apos; Writer Other  - rtf,xml,txt,pdb,html
-  &apos; Calc Other    - dif,dbf,slk,csv
-  &apos; Impress Other - sda
+  ' list of common extentions
+  ' Following extensions are recognized:
+  ' OO.o 1.1.x    - sxw,sxc,sxi,stw,stc,sti,sxd
+  ' OO.o 2.x      - odt,ods,odp,ott,ots,otp,odg,odm
+  ' MS Office     - doc,xls,ppt,dot,xlt,pot
+  ' MS OOXML      - docx,docm,dotx,dotm,xlsx,xlsm,xltx,xltm,xlsb,pptx,pptm,ppsx,ppsm,potx,potm,sldx,sldm
+  ' MS Pocketpc   - psw,pxl
+  ' StarX         - sdw,sdc,sdd,vor
+  ' Writer Other  - rtf,xml,txt,pdb,html
+  ' Calc Other    - dif,dbf,slk,csv
+  ' Impress Other - sda
 
-  extentions = Array(&quot;.sxw&quot;, &quot;.sxc&quot;, &quot;.sxi&quot;, &quot;.stw&quot;, &quot;.stc&quot;, &quot;.sti&quot;, &quot;.sxd&quot;, _
-    &quot;.odt&quot;, &quot;.ods&quot;, &quot;.odp&quot;, &quot;.ott&quot;, &quot;.ots&quot;, &quot;.otp&quot;, &quot;.odg&quot;, &quot;odm&quot;, _
-    &quot;.doc&quot;, &quot;.xls&quot;, &quot;.ppt&quot;, &quot;.dot&quot;, &quot;.xlt&quot;, &quot;.pot&quot;, _
-    &quot;.docx&quot;, &quot;.docm&quot;, &quot;.dotx&quot;, &quot;.dotm&quot;, &quot;.xlsx&quot;, &quot;.xlsm&quot;, &quot;.xltx&quot;, &quot;.xltm&quot;, &quot;.xlsb&quot;, &quot;.pptx&quot;, &quot;.pptm&quot;, &quot;.ppsx&quot;, &quot;.ppsm&quot;, &quot;.potx&quot;, &quot;.potm&quot;, &quot;.sldx&quot;, &quot;.sldm&quot;, _
-    &quot;.psw&quot;, &quot;.pxl&quot;, _
-    &quot;.sdw&quot;, &quot;.sdc&quot;, &quot;.sdd&quot;, &quot;.vor&quot;, _
-    &quot;.rtf&quot;, &quot;.xml&quot;, &quot;.txt&quot;, &quot;.pdb&quot;, &quot;.html&quot;, _
-    &quot;.dif&quot;, &quot;.dbf&quot;, &quot;.slk&quot;, &quot;.csv&quot;, _
-    &quot;.sda&quot;)
+  extentions = Array(".sxw", ".sxc", ".sxi", ".stw", ".stc", ".sti", ".sxd", _
+    ".odt", ".ods", ".odp", ".ott", ".ots", ".otp", ".odg", "odm", _
+    ".doc", ".xls", ".ppt", ".dot", ".xlt", ".pot", _
+    ".docx", ".docm", ".dotx", ".dotm", ".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb", ".pptx", ".pptm", ".ppsx", ".ppsm", ".potx", ".potm", ".sldx", ".sldm", _
+    ".psw", ".pxl", _
+    ".sdw", ".sdc", ".sdd", ".vor", _
+    ".rtf", ".xml", ".txt", ".pdb", ".html", _
+    ".dif", ".dbf", ".slk", ".csv", _
+    ".sda")
   result=0
   For ext = 0 To UBound( extentions )
     anExt = extentions( ext )
@@ -312,50 +266,59 @@ Function getPositionExtensionInPath( sPath As String ) As Integer
     EndIf
   Next
   getPositionExtensionInPath=result
-End Function &apos; getPositionExtensionInPath
+End Function ' getPositionExtensionInPath
 
-&apos; UI FUNCTIONS ---------------------------------------------------
+' UI FUNCTIONS ---------------------------------------------------
 
-&apos; Sets initialization of the UI
+' Sets initialization of the UI
 Function initUI()
-  If ThisComponent.SupportsService( DOC_CALC ) Then
-    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS Excel 97&quot;) + &quot; (xls)&quot;
-    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;calc8&quot;) + &quot; (ods)&quot;
-    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;calc_pdf_Export&quot;) + &quot; (pdf)&quot;
-  ElseIf ThisComponent.SupportsService( DOC_WRITER ) Then
-    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS Word 97&quot;) + &quot; (doc)&quot;
-    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;writer8&quot;) + &quot; (odt)&quot;
-    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;writer_pdf_Export&quot;) + &quot; (pdf)&quot;
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
+    dChooseFormat.model.CBODF.Label = GetFilterName("writer8") + " (odt)"
+    dChooseFormat.model.CBMSO.Label = GetFilterName("MS Word 97") + " (doc)"
+    dChooseFormat.model.CBMSX.Label = GetFilterName("MS Word 2007 XML") + " (docx)"
+    dChooseFormat.model.CBPDF.Label = GetFilterName("writer_pdf_Export") + " (pdf)"
+  ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
+    dChooseFormat.model.CBODF.Label = GetFilterName("calc8") + " (ods)"
+    dChooseFormat.model.CBMSO.Label = GetFilterName("MS Excel 97") + " (xls)"
+    dChooseFormat.model.CBMSX.Label = GetFilterName("Calc MS Excel 2007 XML") + " (xlsx)"
+    dChooseFormat.model.CBPDF.Label = GetFilterName("calc_pdf_Export") + " (pdf)"
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-    dChooseFormat.model.CBMSO.Label = GetFilterName(&quot;MS PowerPoint 97&quot;) + &quot; (ppt)&quot;
-    dChooseFormat.model.CBODF.Label = GetFilterName(&quot;impress8&quot;) + &quot; (odp)&quot;
-    dChooseFormat.model.CBPDF.Label = GetFilterName(&quot;impress_pdf_Export&quot;) + &quot; (pdf)&quot;
+    dChooseFormat.model.CBODF.Label = GetFilterName("impress8") + " (odp)"
+    dChooseFormat.model.CBMSO.Label = GetFilterName("MS PowerPoint 97") + " (ppt)"
+    dChooseFormat.model.CBMSX.Label = GetFilterName("Impress MS PowerPoint 2007 XML") + " (pptx)"
+    dChooseFormat.model.CBPDF.Label = GetFilterName("impress_pdf_Export") + " (pdf)"
   EndIf
-End Function &apos; initUI
+End Function ' initUI
 
-&apos; BASIC FUNCTIONS ------------------------------------------------
+' BASIC FUNCTIONS ------------------------------------------------
 
-&apos; Create and return a filedescriptor
-&apos; @param uFileDesc The var to save the fileDescriptor in
-&apos; @param iFormat   The format to save the file in
-&apos; @param sPath     The path to save the file to
-&apos; @param sFilter   The name of the Filter to use (optional)
-Function createFileDescriptor( uFileDescriptor As FileDescriptor, iFormat As Integer, sPath As String, Optional sFilter As String )
+' Create and return a filedescriptor
+' @param uFileDesc The var to save the fileDescriptor in
+' @param bCreate   Do we need to create the fileDescriptor
+' @param iCounter  De counter van de FileDescriptorList
+' @param iFormat   The format to save the file in
+' @param sPath     The path to save the file to
+' @param sFilter   The name of the Filter to use (optional)
+Function createFileDescriptor( uFileDescriptor As FileDescriptor, bCreate As Boolean, iCounter As Integer, iFormat As Integer, sPath As String, Optional sFilter As String )
+  If ( bCreate = FALSE ) Then
+    Exit Function
+  EndIf
   Dim uArgs(2) As New com.sun.star.beans.PropertyValue
   If Not IsMissing( sFilter ) Then
-    uArgs( 0 ) = MakePropertyValue( &quot;FilterName&quot;, sFilter )
+    uArgs( 0 ) = MakePropertyValue( "FilterName", sFilter )
   EndIf
-  &apos; This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
-  uArgs( 1 ) = MakePropertyValue( &quot;CompressMode&quot;, 0 )
+  ' This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
+  uArgs( 1 ) = MakePropertyValue( "CompressMode", 0 )
   uFileDescriptor.URL = ConvertToURL( sPath )
   uFileDescriptor.format = iFormat
   uFileDescriptor.info = uArgs()
-End Function &apos; createFileDescriptor
+  iCounter = iCounter + 1
+End Function ' createFileDescriptor
 
-&apos; Create and return a new com.sun.star.beans.PropertyValue.
-&apos; @param cName  The name of the property
-&apos; @param uValue The value to give the property (optional)
-&apos; @return       The created property
+' Create and return a new com.sun.star.beans.PropertyValue.
+' @param cName  The name of the property
+' @param uValue The value to give the property (optional)
+' @return       The created property
 Function makePropertyValue( cName As String, Optional uValue ) As com.sun.star.beans.PropertyValue
   Dim oPropertyValue As New com.sun.star.beans.PropertyValue
   oPropertyValue.Name = cName
@@ -363,6 +326,6 @@ Function makePropertyValue( cName As String, Optional uValue ) As com.sun.star.b
     oPropertyValue.Value = uValue
   EndIf
   makePropertyValue() = oPropertyValue
-End Function &apos; makePropertyValue
+End Function ' makePropertyValue
 
 </script:module>
