@@ -20,4 +20,4 @@ compose:
 	zip --exclude .git* --exclude .git\* -r multiFormatSave_v1-4-1.oxt .
 
 clean:
-	rm multiFormatSave.oxt
+	rm multiFormatSave_v1-4-1.oxt
