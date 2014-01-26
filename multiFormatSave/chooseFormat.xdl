@@ -26,7 +26,7 @@
     <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="8" dlg:top="12" dlg:width="159" dlg:height="13">
       <script:event script:event-name="on-textchange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
     </dlg:textfield>
-    <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="&amp;chooseDialog.BPath.value">
+    <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="170" dlg:top="12" dlg:width="13" dlg:height="15" dlg:value="...">
       <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.chooseFolder" script:language="StarBasic"/>
     </dlg:button>
     <dlg:text dlg:id="LFilename" dlg:tab-index="13" dlg:left="8" dlg:top="33" dlg:width="49" dlg:height="13" dlg:value="&amp;chooseDialog.LFilename.value"/>
