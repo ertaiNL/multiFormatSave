@@ -60,7 +60,7 @@ Function multiFormatSaveAs()
 
   ' fix current file path
   If (ThisComponent.hasLocation()) Then
-    setUIProperties(thiscomponent.Location)
+    setUIProperties(removeExtension(thiscomponent.Location))
   Else
     setUIProperties(GetPathSettings("Work"))
   EndIf
@@ -116,57 +116,46 @@ End Function ' saveFiles
 Function getUIProperties( sPath As String, aFormats() as Boolean )
   Dim fileName As String
   sPath = ConvertToURL( dChooseFormat.model.TFPath.text )
-  fileName = dChooseFormat.model.TFFile.text
   aFormats( ODF ) = dChooseFormat.model.CBODF.state
   aFormats( MSO ) = dChooseFormat.model.CBMSO.state
   aFormats( MSX ) = dChooseFormat.model.CBMSX.state
   aFormats( PDF ) = dChooseFormat.model.CBPDF.state
-  ' check the "/" at url end
-  If right( sPath, 1 ) &lt;&gt; "/" Then
-    sPath = sPath + "/"
-  EndIf
-  sPath = sPath + fileName
 End Function ' getUIProperties
 
 ' Get the values from the interface's widgets.
 ' @param sPath     The URL were to save the file
 Function setUIProperties( sPath As String )
-  dChooseFormat.model.TFPath.text = ConvertFromURL( DirectoryNameoutofPath( sPath, "/" ) )
-  dChooseFormat.model.TFFile.text = FileNameoutofPath( sPath, "/")
+  dChooseFormat.model.TFPath.text = ConvertFromURL( sPath )
 End Function ' setUIProperties
 
 ' Creates the FileDescriptors to be able to save the files
-' @param sPath    URL of where to save the files.
+' @param sPath    URL of where to save the files, without extension.
 ' @param aFormats List of the format (ODF, MSO, PDF) to save the file to.
 ' @return	  List with FileDescriptors
 Function getFileDescriptors( sPath As String, aFormats() As Boolean ) As Array
 
-  Dim documentTitle As String
   Dim listIterator As Integer
   listIterator = 0
   Dim FileDescriptorList( DIFFERENT_FORMATS ) As FileDescriptor
-
-  ' Path to the document (without extension).
-  documentTitle = removeExtension(sPath)
 
   '*********************************************
   'Create the FileDescriptors Themselves
   '*********************************************
   If ThisComponent.SupportsService( DOC_WRITER ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".odt" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".doc", "MS Word 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".docx", "MS Word 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "writer_pdf_Export" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".odt" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".doc", "MS Word 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".docx", "MS Word 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, sPath + ".pdf", "writer_pdf_Export" )
   ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".ods" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".xls", "MS Excel 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".xlsx", "Calc MS Excel 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "calc_pdf_Export" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".ods" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".xls", "MS Excel 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".xlsx", "Calc MS Excel 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, sPath + ".pdf", "calc_pdf_Export" )
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, documentTitle + ".odp" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, documentTitle + ".ppt", "MS PowerPoint 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, documentTitle + ".pptx", "Impress MS PowerPoint 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, documentTitle + ".pdf", "impress_pdf_Export" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".odp" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".ppt", "MS PowerPoint 97"  )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".pptx", "Impress MS PowerPoint 2007 XML" )
+    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, PDF, sPath + ".pdf", "impress_pdf_Export" )
   EndIf
 
   ' Resize the table and return
@@ -177,31 +166,52 @@ End Function ' getFileDescriptors
 ' let the user choose a path where to save the documents
 ' and save it in the TFPath
 ' Function called when the "..." button is clicked.
-Function chooseFolder()
-  Dim Folder As String
-
-  Folder = DChooseFormat.model.TFPath.text
-  If Folder = "" Then
-    Folder = GetPathSettings("Work")
-  End If
-  Folder = openFolderDialog(ConvertToURL(Folder))
-  if Folder &lt;&gt; "" then
-    DChooseFormat.model.TFPath.text = ConvertFromURL(Folder)
-  end if
+Function choosePath()
+  Dim path As String
+  path = DChooseFormat.model.TFPath.text
+  If path &lt;&gt; "" And right( path, 1 ) &lt;&gt; "/" Then
+	  path = saveFileDialog(DirectoryNameoutofPath(path, "/"), FileNameoutofPath(path, "/"))
+  ElseIf path &lt;&gt; "" Then
+  	  path = saveFileDialog(path)
+  Else
+      path = saveFileDialog(GetPathSettings("Work"))
+  EndIf
+  If path &lt;&gt; "" Then
+    DChooseFormat.model.TFPath.text = ConvertFromURL(path)
+  EndIf
+  enableSaveButton()
 End Function ' choosePath
 
 ' Let the user select a path where to save the documents
-' @param sFolder The folder to start the dialog
-' @return	      The folder the user selected
-Function openFolderDialog(sFolder As String) As String
-  Dim oFolderPicker as Object
+' @param sDirectory The directory to start with
+' @param sFileURL   The default file for the dialog
+' @return	        The fileURL the user selected
+Function saveFileDialog(sDirectory As String, Optional sFileURL As String) As String
+  Dim oFilePicker as Object
 
-  oFolderPicker = CreateUnoService( "com.sun.star.ui.dialogs.FolderPicker" )
-  oFolderPicker.setDisplayDirectory( sFolder )
-  If ( oFolderPicker.execute() ) Then
-    openFolderDialog = oFolderPicker.Directory + "/"
+  oFilePicker = CreateUnoService( "com.sun.star.ui.dialogs.FilePicker" )
+  'Pass some arguments to it
+  With oFilePicker
+      .initialize(Array(com.sun.star.ui.dialogs.TemplateDescription.FILESAVE_SIMPLE))
+      .SetDisplayDirectory( ConvertToURL(sDirectory) )
+      .setTitle( "Save As ..." )
+  End With
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
+    oFilePicker.appendFilter(GetFilterName("writer8"), "*.odt" )  
+  ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
+    oFilePicker.appendFilter(GetFilterName("calc8"), "*.ods" )    
+  ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
+    oFilePicker.appendFilter(GetFilterName("impress8"), "*.odp" )  
+  EndIf  
+  If Not IsMissing( sFileURL ) Then
+     oFilePicker.setDefaultName( sFileURL )
   EndIf
-End Function ' openFolderDialog
+
+  If oFilePicker.execute() Then
+      saveFileDialog = removeExtension( oFilePicker.getFiles()(0) )
+  EndIf
+  oFilePicker.Dispose()
+End Function ' saveFileDialog
 
 ' Check if the save-button needs to be enabled
 ' Function called when one of the textFields or checkBoxes are changed.
@@ -209,7 +219,7 @@ Function enableSaveButton()
   If ( Not DChooseFormat.model.CBODF.state = TRUE And Not DChooseFormat.model.CBMSO.state = TRUE And Not DChooseFormat.model.CBMSX.state = TRUE And Not DChooseFormat.model.CBPDF.state = TRUE ) Then
     DChooseFormat.model.BSave.enabled = FALSE
     DChooseFormat.model.LHelp.Label = "&amp;InputFormatError"
-  ElseIf ( DChooseFormat.model.TFFile.text = "" Or DChooseFormat.model.TFPath.text = "" ) Then
+  ElseIf ( DChooseFormat.model.TFPath.text = "" Or right( DChooseFormat.model.TFPath.text, 1) = "/") Then
     DChooseFormat.model.BSave.enabled = FALSE
     DChooseFormat.model.LHelp.Label = "&amp;InputTextError"
   Else
@@ -239,6 +249,7 @@ Function removeExtension( sPath As String ) As String
   ' Writer Other  - rtf,xml,txt,pdb,html
   ' Calc Other    - dif,dbf,slk,csv
   ' Impress Other - sda
+  ' PDF           - pdf
 
   extentions = Array(".sxw", ".sxc", ".sxi", ".stw", ".stc", ".sti", ".sxd", _
     ".odt", ".ods", ".odp", ".ott", ".ots", ".otp", ".odg", "odm", _
@@ -248,7 +259,8 @@ Function removeExtension( sPath As String ) As String
     ".sdw", ".sdc", ".sdd", ".vor", _
     ".rtf", ".xml", ".txt", ".pdb", ".html", _
     ".dif", ".dbf", ".slk", ".csv", _
-    ".sda")
+    ".sda", _
+    ".pdf")
   position=0
   For ext = 0 To UBound( extentions )
     anExt = extentions( ext )
