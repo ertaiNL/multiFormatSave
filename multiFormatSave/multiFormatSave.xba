@@ -60,9 +60,9 @@ Function multiFormatSaveAs()
 
   ' fix current file path
   If (ThisComponent.hasLocation()) Then
-    setUIProperties(DirectoryNameoutofPath(thiscomponent.Location, "/"), FileNameoutofPath(thiscomponent.Location, "/"))
+    setUIProperties(thiscomponent.Location)
   Else
-    setUIProperties(GetPathSettings("Work"), "")
+    setUIProperties(GetPathSettings("Work"))
   EndIf
   enableSaveButton()
 
@@ -80,14 +80,13 @@ Function saveFiles()
 
   ' -- Getting info from the UI. -------------------------------------------
   Dim path As String
-  Dim fileName As String
   Dim formats( DIFFERENT_FORMATS - 1 ) As Boolean
 
-  getUIProperties( path, fileName, formats() )
+  getUIProperties( path, formats() )
 
   ' -- Generate the info for the files to save. ----------------------------
   Dim fileDescriptorList()
-  fileDescriptorList() = getFileDescriptors( path, fileName, formats() )
+  fileDescriptorList() = getFileDescriptors( path, formats() )
 
   ' -- Write the files to the disk. ----------------------------------------
   Dim counter
@@ -112,12 +111,12 @@ Function saveFiles()
 End Function ' saveFiles
 
 ' Get the values from the interface's widgets.
-' @param sPath    The URL-path were to save the file
-' @param sFileName The name from the text-box
+' @param sPath    The URL were to save the file
 ' @param aFormats  The selected formats
-Function getUIProperties( sPath As String, sFileName As String, aFormats() as Boolean )
+Function getUIProperties( sPath As String, aFormats() as Boolean )
+  Dim fileName As String
   sPath = ConvertToURL( dChooseFormat.model.TFPath.text )
-  sFileName = dChooseFormat.model.TFFile.text
+  fileName = dChooseFormat.model.TFFile.text
   aFormats( ODF ) = dChooseFormat.model.CBODF.state
   aFormats( MSO ) = dChooseFormat.model.CBMSO.state
   aFormats( MSX ) = dChooseFormat.model.CBMSX.state
@@ -126,36 +125,29 @@ Function getUIProperties( sPath As String, sFileName As String, aFormats() as Bo
   If right( sPath, 1 ) &lt;&gt; "/" Then
     sPath = sPath + "/"
   EndIf
+  sPath = sPath + fileName
 End Function ' getUIProperties
 
 ' Get the values from the interface's widgets.
-' @param sPath     The URL-path were to save the file
-' @param sFileName The name from the text-box
-Function setUIProperties( sPath As String, sFileName As String )
-  dChooseFormat.model.TFPath.text = ConvertFromURL( sPath )
-  dChooseFormat.model.TFFile.text = sFileName
+' @param sPath     The URL were to save the file
+Function setUIProperties( sPath As String )
+  dChooseFormat.model.TFPath.text = ConvertFromURL( DirectoryNameoutofPath( sPath, "/" ) )
+  dChooseFormat.model.TFFile.text = FileNameoutofPath( sPath, "/")
 End Function ' setUIProperties
 
 ' Creates the FileDescriptors to be able to save the files
-' @param sDirectory  URL of the directory where to save the files.
-' @param sFileName   Generic name of the file to be save.
-' @param aFormats	  List of the format (ODF, MSO, PDF) to save the file to.
-' @return		  List with FileDescriptors
-Function getFileDescriptors( sDirectory As String, sFileName As String, aFormats() As Boolean ) As Array
+' @param sPath    URL of where to save the files.
+' @param aFormats List of the format (ODF, MSO, PDF) to save the file to.
+' @return	  List with FileDescriptors
+Function getFileDescriptors( sPath As String, aFormats() As Boolean ) As Array
 
   Dim documentTitle As String
-  Dim position as Integer
   Dim listIterator As Integer
   listIterator = 0
-
   Dim FileDescriptorList( DIFFERENT_FORMATS ) As FileDescriptor
 
   ' Path to the document (without extension).
-  documentTitle = sDirectory + sFileName
-  position = getPositionExtensionInPath( documentTitle )
-  if (position &lt;&gt; 0) then
-    documentTitle = left( documentTitle, ( position - 1 ) )
-  end if
+  documentTitle = removeExtension(sPath)
 
   '*********************************************
   'Create the FileDescriptors Themselves
@@ -207,7 +199,7 @@ Function openFolderDialog(sFolder As String) As String
   oFolderPicker = CreateUnoService( "com.sun.star.ui.dialogs.FolderPicker" )
   oFolderPicker.setDisplayDirectory( sFolder )
   If ( oFolderPicker.execute() ) Then
-    openFolderDialog = oFolderPicker.Directory
+    openFolderDialog = oFolderPicker.Directory + "/"
   EndIf
 End Function ' openFolderDialog
 
@@ -226,13 +218,13 @@ Function enableSaveButton()
   EndIf
 End Function ' enableSaveButton
 
-' Get the extension of the file
+' Removes the file-extension from a Path
 ' @param sPath The path of the file
-' @return      The position where the extension starts
-Function getPositionExtensionInPath( sPath As String ) As Integer
+' @return      The path without the extension
+Function removeExtension( sPath As String ) As String
 
   Dim extentions As Variant
-  Dim result As Variant
+  Dim position As Integer
   Dim ext As Integer
   Dim anExt as string
 
@@ -257,16 +249,20 @@ Function getPositionExtensionInPath( sPath As String ) As Integer
     ".rtf", ".xml", ".txt", ".pdb", ".html", _
     ".dif", ".dbf", ".slk", ".csv", _
     ".sda")
-  result=0
+  position=0
   For ext = 0 To UBound( extentions )
     anExt = extentions( ext )
     If ( right( sPath, len( anExt ) ) = anExt ) Then
-      result=InStr( sPath, anExt )
+      position=InStr( sPath, anExt )
       Exit For
     EndIf
   Next
-  getPositionExtensionInPath=result
-End Function ' getPositionExtensionInPath
+  If position &lt;&gt; 0 Then
+      removeExtension = left( sPath, ( position - 1 ) )
+  Else
+      removeExtension = sPath
+  EndIf
+End Function ' removeExtension
 
 ' UI FUNCTIONS ---------------------------------------------------
 
