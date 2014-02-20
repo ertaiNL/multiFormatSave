@@ -120,7 +120,7 @@ Function getUIProperties( sPath As String, sFileName As String, aFormats() as Bo
   sFileName = dChooseFormat.model.TFFile.text
   aFormats( ODF ) = dChooseFormat.model.CBODF.state
   aFormats( MSO ) = dChooseFormat.model.CBMSO.state
-  aFormats( MSX ) = dChooseFormat.model.CBMSX.state    
+  aFormats( MSX ) = dChooseFormat.model.CBMSX.state
   aFormats( PDF ) = dChooseFormat.model.CBPDF.state
   ' check the "/" at url end
   If right( sPath, 1 ) &lt;&gt; "/" Then
@@ -272,6 +272,8 @@ End Function ' getPositionExtensionInPath
 
 ' Sets initialization of the UI
 Function initUI()
+  dChooseFormat.model.CBMSX.Enabled = InStr(GetProductname(),"LibreOffice")
+  dChooseFormat.model.CBMSX.State = InStr(GetProductname(),"LibreOffice")
   If ThisComponent.SupportsService( DOC_WRITER ) Then
     dChooseFormat.model.CBODF.Label = GetFilterName("writer8") + " (odt)"
     dChooseFormat.model.CBMSO.Label = GetFilterName("MS Word 97") + " (doc)"
