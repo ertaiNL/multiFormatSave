@@ -19,7 +19,7 @@
     </dlg:checkbox>
     <dlg:text dlg:id="LHelp" dlg:left="6" dlg:top="90" dlg:width="144" dlg:height="10" dlg:multiline="true" dlg:style-id="0"/>
     <dlg:button dlg:id="BSave" dlg:tab-index="6" dlg:left="72" dlg:top="100" dlg:width="35" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value" enabled="false">
-       <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.saveFiles" script:language="StarBasic"/>
+       <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.saveButtonPressed" script:language="StarBasic"/>
     </dlg:button>
     <dlg:button dlg:id="BCancel" dlg:tab-index="7" dlg:left="115" dlg:top="100" dlg:width="35" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
     <dlg:text dlg:id="LPath" dlg:tab-index="8" dlg:left="6" dlg:top="6" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>

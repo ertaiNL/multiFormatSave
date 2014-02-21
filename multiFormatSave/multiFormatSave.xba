@@ -24,6 +24,8 @@
 Option Explicit
 
 Public dChooseFormat As Object
+Global currentFileURL As String
+Global saveFileURL As String
 
 ' Decleration of constants
 CONST DIFFERENT_FORMATS = 4
@@ -44,9 +46,24 @@ Type FileDescriptor
   info              ' description() as "com.sun.star.beans.PropertyValue"
 End Type
 
+' Function called when we want to save without dialog
+Function multiFormatSave()
+  initLibraries()
+  If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; currentFileURL Then
+    startDialog()
+  Else
+    saveFiles( saveFileURL, getFormatSettings() )
+  EndIf
+End Function ' mutliFormatSave
+
 ' Function called when the Dialog is started.
 Function multiFormatSaveAs()
+  initLibraries()
+  startDialog()
+End Function ' multiFormatSaveAs
 
+' Initializes the libraries we use in this plugin
+Function initLibraries()
   If (Not GlobalScope.BasicLibraries.isLibraryLoaded("Tools")) Then
     GlobalScope.BasicLibraries.Loadlibrary("Tools")
   EndIf
@@ -57,34 +74,44 @@ Function multiFormatSaveAs()
     GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
   EndIf
   dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
+End Function ' initLibraries
 
+' Starts the dialog when needed
+Function startDialog()
   initUI()
   ' fix current file path
-  If (ThisComponent.hasLocation()) Then
-    setUIProperties(removeExtension(thiscomponent.Location), GetFormatSettings())
+  If ThisComponent.hasLocation() = true And ThisComponent.getURL() = currentFileURL Then
+    setUIProperties(saveFileURL, getFormatSettings())
+  ElseIf (ThisComponent.hasLocation()) Then
+    setUIProperties(removeExtension(thiscomponent.Location), getFormatSettings())
   Else
-    setUIProperties(GetPathSettings("Work"), GetFormatSettings())
+    setUIProperties(GetPathSettings("Work"), getFormatSettings())
   EndIf
   enableSaveButton()
 
   DChooseFormat.execute
-End Function ' multiFormatSaveAs
+End Function ' startDialog
 
-' This saves the files
 ' Function called when the "Save" button is clicked.
-Function saveFiles()
-  On Local Error Goto ErrorHandler
-
-  ' -- Getting info from the UI. -------------------------------------------
+Function saveButtonPressed()
   Dim path As String
   Dim formats( DIFFERENT_FORMATS - 1 ) As Integer
+  
+  getUIProperties( path, formats() )
+  saveFiles( path, formats() )
+End Function ' saveButtonPressed
+
+' This saves the files
+' @param sPath    The path to save to
+' @param iFormats Which formats to save
+Function saveFiles( sPath As String, iFormats() As Integer )
+  On Local Error Goto ErrorHandler
+
   Dim counter As Integer
   Dim fileDescriptorList() 'No type here as that breaks
 
-  getUIProperties( path, formats() )
-
   ' -- Generate the info for the files to save. ----------------------------
-  fileDescriptorList() = getFileDescriptors( path, formats() )
+  fileDescriptorList() = getFileDescriptors( sPath, iFormats() )
 
   ' -- Write the files to the disk. ----------------------------------------
   for counter=0 to UBound( fileDescriptorList() )
@@ -98,7 +125,9 @@ Function saveFiles()
     EndIf
   Next
 
-  SetFormatSettings( formats() )
+  setFormatSettings( iFormats() )
+  saveFileURL = sPath
+  currentFileURL = thiscomponent.location
   dChooseFormat.endExecute
   Exit Function
 
@@ -243,17 +272,17 @@ End Function ' removeExtension
 
 ' Get the value of the formats in the settings-file
 ' @return The array with the settings for the formats
-Function GetFormatSettings() As Array
+Function getFormatSettings() As Array
   On Local Error Goto ErrorHandler
   Dim oConfigAccess As Object
   Dim formats( DIFFERENT_FORMATS - 1 ) As Integer
 
-  oConfigAccess = GetConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
+  oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   formats( ODF ) = oConfigAccess.ODF
   formats( MSO ) = oConfigAccess.MSO
   formats( MSX ) = oConfigAccess.MSX
   formats( PDF ) = oConfigAccess.PDF
-  GetFormatSettings() = formats()
+  getFormatSettings() = formats()
   Exit Function
 
   ErrorHandler:
@@ -261,21 +290,21 @@ Function GetFormatSettings() As Array
   formats( MSO ) = 1
   formats( MSX ) = 1
   formats( PDF ) = 1
-  GetFormatSettings() = formats()
-End Function ' GetFormatSettings
+  getFormatSettings() = formats()
+End Function ' getFormatSettings
 
 ' Get the value of the formats in the settings-file
 ' @param formats The array with the settings for the formats
-Function SetFormatSettings( formats() As Integer )
+Function setFormatSettings( formats() As Integer )
   Dim oConfigAccess As Object
 
-  oConfigAccess = GetConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
+  oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   oConfigAccess.ODF = formats( ODF )
   oConfigAccess.MSO = formats( MSO )
   oConfigAccess.MSX = formats( MSX )
   oConfigAccess.PDF = formats( PDF )
   oConfigAccess.commitChanges()
-End Function ' SetFormatSettings
+End Function ' setFormatSettings
 
 ' UI FUNCTIONS ---------------------------------------------------
 
@@ -366,10 +395,10 @@ End Function ' createFileDescriptor
 ' Connect to the config-values
 ' @param sNodePath The path to the properties
 ' @return          The properties
-Function GetConfigAccess( sNodePath As String ) As Object
+Function getConfigAccess( sNodePath As String ) As Object
   Dim oConfigProvider As Object
   oConfigProvider = createUnoService( "com.sun.star.configuration.ConfigurationProvider" )
-  GetConfigAccess() = oConfigProvider.createInstanceWithArguments( "com.sun.star.configuration.ConfigurationUpdateAccess", _
+  getConfigAccess() = oConfigProvider.createInstanceWithArguments( "com.sun.star.configuration.ConfigurationUpdateAccess", _
 	Array( MakePropertyValue( "nodepath", sNodePath ) ) )
 End Function ' GetConfigAccess
 
