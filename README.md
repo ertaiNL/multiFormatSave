@@ -9,6 +9,9 @@ This extension is based on the StarXpert MultiSave extension and has the LGPL-li
 # Changelog #
 
 ## v1.4.1 ##
+- Added support for Apache OpenOffice 4
+
+## v1.4.1 ##
 - Now able to save in Microsoft Office 2007 XML format
 - At unsaved document now the default directory is shown
 - At unsaved document and ODF selected it automaticly saves the current document
