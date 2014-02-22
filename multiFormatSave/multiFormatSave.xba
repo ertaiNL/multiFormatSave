@@ -24,8 +24,8 @@
 Option Explicit
 
 Public dChooseFormat As Object
-Global currentFileURL As String
-Global saveFileURL As String
+Global sCurrentURL As String
+Global sSaveURL As String
 
 ' Decleration of constants
 CONST DIFFERENT_FORMATS = 4
@@ -41,7 +41,7 @@ CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
 
 ' Information about a file
 Type FileDescriptor
-  URL As String
+  fileURL As String
   format As Integer
   info              ' description() as "com.sun.star.beans.PropertyValue"
 End Type
@@ -49,10 +49,10 @@ End Type
 ' Function called when we want to save without dialog
 Function multiFormatSave()
   initLibraries()
-  If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; currentFileURL Then
+  If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; sCurrentURL Then
     startDialog()
   Else
-    saveFiles( saveFileURL, getFormatSettings() )
+    saveFiles( sSaveURL, getFormatSettings() )
   EndIf
 End Function ' mutliFormatSave
 
@@ -83,9 +83,9 @@ End Function ' initLibraries
 ' Starts the dialog when needed
 Function startDialog()
   initUI()
-  ' fix current file path
-  If ThisComponent.hasLocation() = true And ThisComponent.getURL() = currentFileURL Then
-    setUIProperties(saveFileURL, getFormatSettings())
+  ' fix current file URL
+  If ThisComponent.hasLocation() = true And ThisComponent.getURL() = sCurrentURL Then
+    setUIProperties(sSaveURL, getFormatSettings())
   ElseIf (ThisComponent.hasLocation()) Then
     setUIProperties(removeExtension(thiscomponent.Location), getFormatSettings())
   Else
@@ -98,115 +98,112 @@ End Function ' startDialog
 
 ' Function called when the "Save" button is clicked.
 Function saveButtonPressed()
-  Dim path As String
-  Dim formats( DIFFERENT_FORMATS - 1 ) As Integer
+  Dim sURL As String
+  Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
   
-  getUIProperties( path, formats() )
-  saveFiles( path, formats() )
+  getUIProperties( sURL, aFormats() )
+  saveFiles( sURL, aFormats() )
 End Function ' saveButtonPressed
 
 ' This saves the files
-' @param sPath    The path to save to
-' @param iFormats Which formats to save
-Function saveFiles( sPath As String, iFormats() As Integer )
+' @param sURL     The URL to save to
+' @param aFormats Which formats to save
+Function saveFiles( sURL As String, aFormats() As Integer )
   On Local Error Goto ErrorHandler
 
-  Dim counter As Integer
-  Dim fileDescriptorList() 'No type here as that breaks
+  Dim iCounter As Integer
+  Dim aFileDescriptorList() 'No type here as that breaks
 
   ' -- Generate the info for the files to save. ----------------------------
-  fileDescriptorList() = getFileDescriptors( sPath, iFormats() )
+  aFileDescriptorList() = getFileDescriptors( sURL, aFormats() )
 
   ' -- Write the files to the disk. ----------------------------------------
-  for counter=0 to UBound( fileDescriptorList() )
+  for iCounter=0 to UBound( aFileDescriptorList() )
 
-    If (Not ThisComponent.hasLocation() And fileDescriptorList( counter ).format = ODF) Then 'Save as ODF
-      ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
-    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = fileDescriptorList( counter ).URL) Then 'Save current document
-      ThisComponent.storeAsURL( fileDescriptorList( counter ).URL, Array() )
+    If (Not ThisComponent.hasLocation() And aFileDescriptorList( iCounter ).format = ODF) Then 'Save as ODF
+      ThisComponent.storeAsURL( aFileDescriptorList( iCounter ).fileURL, Array() )
+    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = aFileDescriptorList( iCounter ).fileURL) Then 'Save current document
+      ThisComponent.storeAsURL( aFileDescriptorList( iCounter ).fileURL, Array() )
     Else 'Save other documents
-      ThisComponent.storeToURL( fileDescriptorList( counter ).URL, fileDescriptorList( counter ).info() )
+      ThisComponent.storeToURL( aFileDescriptorList( iCounter ).fileURL, aFileDescriptorList( iCounter ).info() )
     EndIf
   Next
 
-  setFormatSettings( iFormats() )
-  saveFileURL = sPath
-  currentFileURL = thiscomponent.location
+  setFormatSettings( aFormats() )
+  sSaveURL = sURL
+  sCurrentURL = ThisComponent.location
   dChooseFormat.endExecute
   Exit Function
 
   ' Something bad happened when saving file
   ErrorHandler:
     dChooseFormat.model.LHelp.Label = "&amp;SaveError"
-    MsgBox "Error" &amp; ERR &amp; " on line " &amp; Erl &amp; ". " &amp; chr$(13) &amp; ERROR$
+    MsgBox "Error" &amp; ERR &amp; " on line " &amp; ERL &amp; ". " &amp; chr$(13) &amp; ERROR$
 End Function ' saveFiles
 
 ' Creates the FileDescriptors to be able to save the files
-' @param sPath    URL of where to save the files, without extension.
+' @param sURL     URL of where to save the files, without extension.
 ' @param aFormats List of the format (ODF, MSO, PDF) to save the file to.
 ' @return	  List with FileDescriptors
-Function getFileDescriptors( sPath As String, aFormats() As Integer ) As Array
+Function getFileDescriptors( sURL As String, aFormats() As Integer ) As Array
+  Dim iCounter As Integer
+  iCounter = 0
+  Dim aFileDescriptorList( DIFFERENT_FORMATS - 1 ) As FileDescriptor
 
-  Dim listIterator As Integer
-  listIterator = 0
-  Dim FileDescriptorList( DIFFERENT_FORMATS - 1 ) As FileDescriptor
-
-  '*********************************************
   'Create the FileDescriptors Themselves
-  '*********************************************
   If ThisComponent.SupportsService( DOC_WRITER ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".odt" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".doc", "MS Word 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".docx", "MS Word 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( PDF ), listIterator, PDF, sPath + ".pdf", "writer_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odt" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".doc", "MS Word 97"  )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".docx", "MS Word 2007 XML" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "writer_pdf_Export" )
   ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".ods" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".xls", "MS Excel 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".xlsx", "Calc MS Excel 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( PDF ), listIterator, PDF, sPath + ".pdf", "calc_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".ods" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".xls", "MS Excel 97"  )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".xlsx", "Calc MS Excel 2007 XML" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "calc_pdf_Export" )
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( ODF ), listIterator, ODF, sPath + ".odp" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSO ), listIterator, MSO, sPath + ".ppt", "MS PowerPoint 97"  )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( MSX ), listIterator, MSX, sPath + ".pptx", "Impress MS PowerPoint 2007 XML" )
-    createFileDescriptor( FileDescriptorList( listIterator ), aFormats( PDF ), listIterator, PDF, sPath + ".pdf", "impress_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odp" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".ppt", "MS PowerPoint 97"  )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".pptx", "Impress MS PowerPoint 2007 XML" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "impress_pdf_Export" )
   EndIf
 
   ' Resize the table and return
-  Redim Preserve FileDescriptorList( listIterator - 1 ) As FileDescriptor
-  getFileDescriptors() = FileDescriptorList()
+  Redim Preserve aFileDescriptorList( iCounter - 1 ) As FileDescriptor
+  getFileDescriptors() = aFileDescriptorList()
 End Function ' getFileDescriptors
 
-' let the user choose a path where to save the documents
-' and save it in the TFPath
+' Lets the user choose a path where to save the documents and save it in the TFPath
 ' Function called when the "..." button is clicked.
 Function choosePath()
-  Dim path As String
-  path = DChooseFormat.model.TFPath.text
-  If path &lt;&gt; "" And right( path, 1 ) &lt;&gt; "/" Then
-	  path = saveFileDialog(DirectoryNameoutofPath(path, "/"), FileNameoutofPath(path, "/"))
-  ElseIf path &lt;&gt; "" Then
-	  path = saveFileDialog(path)
+  Dim sPath As String
+  Dim sURL As String
+  sPath = DChooseFormat.model.TFPath.text
+  If sPath &lt;&gt; "" And right( sPath, 1 ) &lt;&gt; "/" Then
+      sURL = saveFileDialog(DirectoryNameoutofPath(sPath, "/"), FileNameoutofPath(sPath, "/"))
+  ElseIf sPath &lt;&gt; "" Then
+      sURL = saveFileDialog(sPath)
   Else
-      path = saveFileDialog(GetPathSettings("Work"))
+      sURL = saveFileDialog(GetPathSettings("Work"))
   EndIf
-  If path &lt;&gt; "" Then
-    DChooseFormat.model.TFPath.text = ConvertFromURL(path)
+  If sURL &lt;&gt; "" Then
+    DChooseFormat.model.TFPath.text = ConvertFromURL(sURL)
   EndIf
   enableSaveButton()
 End Function ' choosePath
 
 ' Let the user select a path where to save the documents
-' @param sDirectory The directory to start with
-' @param sFileURL   The default file for the dialog
-' @return	        The fileURL the user selected
-Function saveFileDialog(sDirectory As String, Optional sFileURL As String) As String
+' @param sDirectoryPath The directory to start with
+' @param sFilePath      The default file for the dialog
+' @return               The fileURL the user selected
+Function saveFileDialog(sDirectoryPath As String, Optional sFilePath As String) As String
   Dim oFilePicker as Object
 
   oFilePicker = CreateUnoService( "com.sun.star.ui.dialogs.FilePicker" )
   'Pass some arguments to it
   With oFilePicker
       .initialize(Array(com.sun.star.ui.dialogs.TemplateDescription.FILESAVE_SIMPLE))
-      .SetDisplayDirectory( ConvertToURL(sDirectory) )
+      .SetDisplayDirectory( ConvertToURL(sDirectoryPath) )
       .setTitle( "Save As ..." )
   End With
   If ThisComponent.SupportsService( DOC_WRITER ) Then
@@ -216,8 +213,8 @@ Function saveFileDialog(sDirectory As String, Optional sFileURL As String) As St
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
     oFilePicker.appendFilter(GetFilterName("impress8"), "*.odp" )
   EndIf
-  If Not IsMissing( sFileURL ) Then
-     oFilePicker.setDefaultName( sFileURL )
+  If Not IsMissing( sFilePath ) Then
+     oFilePicker.setDefaultName( sFilePath )
   EndIf
 
   If oFilePicker.execute() Then
@@ -227,50 +224,44 @@ Function saveFileDialog(sDirectory As String, Optional sFileURL As String) As St
 End Function ' saveFileDialog
 
 ' Removes the file-extension from a Path
-' @param sPath The path of the file
-' @return      The path without the extension
-Function removeExtension( sPath As String ) As String
-
-  Dim extentions As Variant
-  Dim position As Integer
-  Dim ext As Integer
-  Dim anExt as string
+' @param sURL The URL of the file
+' @return     The URL without the extension
+Function removeExtension( sURL As String ) As String
+  Dim vExtentions As Variant
+  Dim iPosition As Integer
+  Dim iCounter As Integer
+  Dim sAnExt As String
 
   ' list of common extentions
-  ' Following extensions are recognized:
-  ' OO.o 1.1.x    - sxw,sxc,sxi,stw,stc,sti,sxd
-  ' OO.o 2.x      - odt,ods,odp,ott,ots,otp,odg,odm
-  ' MS Office     - doc,xls,ppt,dot,xlt,pot
-  ' MS OOXML      - docx,docm,dotx,dotm,xlsx,xlsm,xltx,xltm,xlsb,pptx,pptm,ppsx,ppsm,potx,potm,sldx,sldm
-  ' MS Pocketpc   - psw,pxl
-  ' StarX         - sdw,sdc,sdd,vor
-  ' Writer Other  - rtf,xml,txt,pdb,html
-  ' Calc Other    - dif,dbf,slk,csv
-  ' Impress Other - sda
-  ' PDF           - pdf
+  ' OO.o 1.1.x
+  ' Open Document Format
+  ' MS Office 97
+  ' MS OOXML
+  ' Writer Other
+  ' Calc Other
+  ' Impress Other
+  ' General Other
 
-  extentions = Array(".sxw", ".sxc", ".sxi", ".stw", ".stc", ".sti", ".sxd", _
+  vExtentions = Array(".sxw", ".sxc", ".sxi", ".stw", ".stc", ".sti", ".sxd", _
     ".odt", ".ods", ".odp", ".ott", ".ots", ".otp", ".odg", "odm", _
     ".doc", ".xls", ".ppt", ".dot", ".xlt", ".pot", _
     ".docx", ".docm", ".dotx", ".dotm", ".xlsx", ".xlsm", ".xltx", ".xltm", ".xlsb", ".pptx", ".pptm", ".ppsx", ".ppsm", ".potx", ".potm", ".sldx", ".sldm", _
-    ".psw", ".pxl", _
-    ".sdw", ".sdc", ".sdd", ".vor", _
-    ".rtf", ".xml", ".txt", ".pdb", ".html", _
-    ".dif", ".dbf", ".slk", ".csv", _
-    ".sda", _
-    ".pdf")
-  position=0
-  For ext = 0 To UBound( extentions )
-    anExt = extentions( ext )
-    If ( right( sPath, len( anExt ) ) = anExt ) Then
-      position=InStr( sPath, anExt )
+    ".sdw", ".rtf", ".xml", ".txt", ".pdb", ".psw", ".html", _
+    ".sdc", ".dif", ".dbf", ".slk", ".pxl", ".csv", _
+    ".sda", ".sdd", _
+    ".pdf", ".vor")
+  iPosition=0
+  For iCounter = 0 To UBound( vExtentions )
+    sAnExt = vExtentions( iCounter )
+    If ( right( sURL, len( sAnExt ) ) = sAnExt ) Then
+      iPosition=InStr( sURL, sAnExt )
       Exit For
     EndIf
   Next
-  If position &lt;&gt; 0 Then
-      removeExtension() = left( sPath, ( position - 1 ) )
+  If iPosition &lt;&gt; 0 Then
+      removeExtension() = left( sURL, ( iPosition - 1 ) )
   Else
-      removeExtension() = sPath
+      removeExtension() = sURL
   EndIf
 End Function ' removeExtension
 
@@ -279,41 +270,41 @@ End Function ' removeExtension
 Function getFormatSettings() As Array
   On Local Error Goto ErrorHandler
   Dim oConfigAccess As Object
-  Dim formats( DIFFERENT_FORMATS - 1 ) As Integer
+  Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
-  formats( ODF ) = oConfigAccess.ODF
-  formats( MSO ) = oConfigAccess.MSO
-  formats( MSX ) = oConfigAccess.MSX
-  formats( PDF ) = oConfigAccess.PDF
+  aFormats( ODF ) = oConfigAccess.ODF
+  aFormats( MSO ) = oConfigAccess.MSO
+  aFormats( MSX ) = oConfigAccess.MSX
+  aFormats( PDF ) = oConfigAccess.PDF
 
-  If Not InStr(GetProductname(),"LibreOffice") Then
-    formats( MSX ) = 0
+  If InStr(GetProductname(),"LibreOffice") = 0 Then
+    aFormats( MSX ) = 0
   EndIf
-  getFormatSettings() = formats()
+  getFormatSettings() = aFormats()
   Exit Function
 
   ErrorHandler:
-  formats( ODF ) = 1
-  formats( MSO ) = 1
-  formats( MSX ) = 1
-  formats( PDF ) = 1
-  If Not InStr(GetProductname(),"LibreOffice") Then
-    formats( MSX ) = 0
+  aFormats( ODF ) = 1
+  aFormats( MSO ) = 1
+  aFormats( MSX ) = 1
+  aFormats( PDF ) = 1
+  If InStr(GetProductname(),"LibreOffice") = 0 Then
+    aFormats( MSX ) = 0
   EndIf
-  getFormatSettings() = formats()
+  getFormatSettings() = aFormats()
 End Function ' getFormatSettings
 
 ' Get the value of the formats in the settings-file
-' @param formats The array with the settings for the formats
-Function setFormatSettings( formats() As Integer )
+' @param aFormats The array with the settings for the formats
+Function setFormatSettings( aFormats() As Integer )
   Dim oConfigAccess As Object
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
-  oConfigAccess.ODF = formats( ODF )
-  oConfigAccess.MSO = formats( MSO )
-  oConfigAccess.MSX = formats( MSX )
-  oConfigAccess.PDF = formats( PDF )
+  oConfigAccess.ODF = aFormats( ODF )
+  oConfigAccess.MSO = aFormats( MSO )
+  oConfigAccess.MSX = aFormats( MSX )
+  oConfigAccess.PDF = aFormats( PDF )
   oConfigAccess.commitChanges()
 End Function ' setFormatSettings
 
@@ -340,11 +331,10 @@ Function initUI()
 End Function ' initUI
 
 ' Get the values from the interface's widgets.
-' @param sPath    The URL were to save the file
-' @param aFormats  The selected formats
-Function getUIProperties( sPath As String, aFormats() as Integer )
-  Dim fileName As String
-  sPath = ConvertToURL( dChooseFormat.model.TFPath.text )
+' @param sURL     The URL were to save the file
+' @param aFormats The selected formats
+Function getUIProperties( sURL As String, aFormats() as Integer )
+  sURL = ConvertToURL( dChooseFormat.model.TFPath.text )
   aFormats( ODF ) = dChooseFormat.model.CBODF.state
   aFormats( MSO ) = dChooseFormat.model.CBMSO.state
   aFormats( MSX ) = dChooseFormat.model.CBMSX.state
@@ -352,9 +342,9 @@ Function getUIProperties( sPath As String, aFormats() as Integer )
 End Function ' getUIProperties
 
 ' Get the values from the interface's widgets.
-' @param sPath     The URL were to save the file
-Function setUIProperties( sPath As String, aFormats() as Integer )
-  dChooseFormat.model.TFPath.text = ConvertFromURL( sPath )
+' @param sURL The URL were to save the file
+Function setUIProperties( sURL As String, aFormats() as Integer )
+  dChooseFormat.model.TFPath.text = ConvertFromURL( sURL )
   dChooseFormat.model.CBODF.state = aFormats( ODF )
   dChooseFormat.model.CBMSO.state = aFormats( MSO )
   dChooseFormat.model.CBMSX.state = aFormats( MSX )
@@ -383,21 +373,21 @@ End Function ' enableSaveButton
 ' @param bCreate   Do we need to create the fileDescriptor
 ' @param iCounter  De counter van de FileDescriptorList
 ' @param iFormat   The format to save the file in
-' @param sPath     The path to save the file to
+' @param sURL      The URL to save the file to
 ' @param sFilter   The name of the Filter to use (optional)
-Function createFileDescriptor( uFileDescriptor As FileDescriptor, bCreate As Integer, iCounter As Integer, iFormat As Integer, sPath As String, Optional sFilter As String )
-  If ( bCreate = 0 ) Then
+Function createFileDescriptor( oFileDescriptor As FileDescriptor, iCreate As Integer, iCounter As Integer, iFormat As Integer, sURL As String, Optional sFilter As String )
+  If ( iCreate = 0 ) Then
     Exit Function
   EndIf
-  Dim uArgs(2) As New com.sun.star.beans.PropertyValue
+  Dim aArgs(2) As New com.sun.star.beans.PropertyValue
   If Not IsMissing( sFilter ) Then
-    uArgs( 0 ) = MakePropertyValue( "FilterName", sFilter )
+    aArgs( 0 ) = MakePropertyValue( "FilterName", sFilter )
   EndIf
   ' This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
-  uArgs( 1 ) = MakePropertyValue( "CompressMode", 0 )
-  uFileDescriptor.URL = ConvertToURL( sPath )
-  uFileDescriptor.format = iFormat
-  uFileDescriptor.info = uArgs()
+  aArgs( 1 ) = MakePropertyValue( "CompressMode", 0 )
+  oFileDescriptor.fileURL = sURL
+  oFileDescriptor.format = iFormat
+  oFileDescriptor.info = aArgs()
   iCounter = iCounter + 1
 End Function ' createFileDescriptor
 
