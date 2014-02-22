@@ -73,7 +73,11 @@ Function initLibraries()
   If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
     GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
   EndIf
-  dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
+  If InStr(GetProductname(),"LibreOffice") Then
+    dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
+  Else
+    dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormatOpenOffice)
+  EndIf
 End Function ' initLibraries
 
 ' Starts the dialog when needed
@@ -282,6 +286,10 @@ Function getFormatSettings() As Array
   formats( MSO ) = oConfigAccess.MSO
   formats( MSX ) = oConfigAccess.MSX
   formats( PDF ) = oConfigAccess.PDF
+
+  If Not InStr(GetProductname(),"LibreOffice") Then
+    formats( MSX ) = 0
+  EndIf
   getFormatSettings() = formats()
   Exit Function
 
@@ -290,6 +298,9 @@ Function getFormatSettings() As Array
   formats( MSO ) = 1
   formats( MSX ) = 1
   formats( PDF ) = 1
+  If Not InStr(GetProductname(),"LibreOffice") Then
+    formats( MSX ) = 0
+  EndIf
   getFormatSettings() = formats()
 End Function ' getFormatSettings
 
@@ -310,8 +321,6 @@ End Function ' setFormatSettings
 
 ' Sets initialization of the UI
 Function initUI()
-  dChooseFormat.model.CBMSX.Enabled = InStr(GetProductname(),"LibreOffice")
-  dChooseFormat.model.CBMSX.State = InStr(GetProductname(),"LibreOffice")
   If ThisComponent.SupportsService( DOC_WRITER ) Then
     dChooseFormat.model.CBODF.Label = GetFilterName("writer8") + " (odt)"
     dChooseFormat.model.CBMSO.Label = GetFilterName("MS Word 97") + " (doc)"
