@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
+<dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="chooseFormat" dlg:left="146" dlg:top="89" dlg:width="156" dlg:height="120" dlg:closeable="true" dlg:moveable="true" dlg:title="&amp;chooseDialog.Title">
+  <dlg:styles>
+    <dlg:style dlg:style-id="0" dlg:text-color="0xff3333"/>
+  </dlg:styles>
+  <dlg:bulletinboard>
+    <dlg:checkbox dlg:id="CBODF" dlg:tab-index="2" dlg:left="12" dlg:top="42" dlg:width="120" dlg:height="8" dlg:checked="true">
+      <script:event script:event-name="on-itemstatechange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:checkbox dlg:id="CBMSO" dlg:tab-index="3" dlg:left="12" dlg:top="52" dlg:width="120" dlg:height="8" dlg:checked="true">
+      <script:event script:event-name="on-itemstatechange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:checkbox dlg:id="CBMSX" dlg:tab-index="4" dlg:left="12" dlg:top="62" dlg:width="120" dlg:height="8" dlg:checked="false" dlg:visible="false">
+      <script:event script:event-name="on-itemstatechange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:checkbox dlg:id="CBPDF" dlg:tab-index="5" dlg:left="12" dlg:top="62" dlg:width="120" dlg:height="8" dlg:checked="true">
+      <script:event script:event-name="on-itemstatechange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:checkbox>
+    <dlg:text dlg:id="LHelp" dlg:left="6" dlg:top="80" dlg:width="144" dlg:height="10" dlg:multiline="true" dlg:style-id="0"/>
+    <dlg:button dlg:id="BSave" dlg:tab-index="6" dlg:left="72" dlg:top="90" dlg:width="35" dlg:height="13" dlg:value="&amp;chooseDialog.BSave.value" enabled="false">
+       <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.saveButtonPressed" script:language="StarBasic"/>
+    </dlg:button>
+    <dlg:button dlg:id="BCancel" dlg:tab-index="7" dlg:left="115" dlg:top="90" dlg:width="35" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
+    <dlg:text dlg:id="LPath" dlg:tab-index="8" dlg:left="6" dlg:top="6" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>
+    <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="6" dlg:top="17" dlg:width="125" dlg:height="13">
+      <script:event script:event-name="on-textchange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:textfield>
+    <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="137" dlg:top="16" dlg:width="13" dlg:height="15" dlg:value="...">
+      <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.choosePath" script:language="StarBasic"/>
+    </dlg:button>
+    <dlg:titledbox dlg:id="FCFileFormat" dlg:left="6" dlg:top="33" dlg:width="144" dlg:height="44">
+      <dlg:title dlg:value="&amp;chooseDialog.FCFileFormat.Title"/>
+    </dlg:titledbox>
+  </dlg:bulletinboard>
+</dlg:window>

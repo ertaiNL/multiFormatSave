@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oor:component-data xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" oor:name="multiFormatSave" oor:package="multiFormatSave" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <node oor:name="multiFormatSaveConfig">
+    <node oor:name="settings">
+      <node oor:name="formats" oor:op="replace">
+        <prop oor:name="ODF" oor:type="xs:int">
+	  <value>1</value>
+	</prop>
+	<prop oor:name="MSO" oor:type="xs:int">
+	  <value>1</value>
+	</prop>
+        <prop oor:name="MSX" oor:type="xs:int">
+	  <value>1</value>
+	</prop>
+        <prop oor:name="PDF" oor:type="xs:int">
+	  <value>1</value>
+	</prop>
+      </node>
+    </node>
+  </node>
+</oor:component-data>
