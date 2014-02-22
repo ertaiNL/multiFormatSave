@@ -20,8 +20,6 @@
   </icon>
   <extension-description>
     <src xlink:href="pkg-desc/pkg-description.en" lang="en" />
-    <src xlink:href="pkg-desc/pkg-description.fr" lang="fr" />
     <src xlink:href="pkg-desc/pkg-description.nl" lang="nl" />
-    <src xlink:href="pkg-desc/pkg-description.hu" lang="hu" />
   </extension-description>
 </description>

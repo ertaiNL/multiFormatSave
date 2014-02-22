@@ -1,12 +1,25 @@
 # MultiFormatSave #
 
-This extension to LibreOffice enables the user to save a document in multiple formats at once. At this moment OpenDocument, MS Office 97, MS Office 07 XML and PDF are supported. This extension possibly works on Apache OpenOffice, but hasn't been tested yet.
+This extension to LibreOffice and OpenOffice enables the user to save a document in multiple formats at once. At this moment OpenDocument, MS Office 97, MS Office 07 XML\* and PDF are supported.
 
-Please download the extension from http://extensions.libreoffice.org/extension-center/multisave-1
+Please download the extension for LibreOffice from http://extensions.libreoffice.org/extension-center/multisave-1
+Please download the extension for OpenOffice from https://github.com/ertaiNL/multiFormatSave/releases
 
-This extension is based on the StarXpert MultiSave extension and has the LGPL-licence.
+The plugin is tested with LibreOffice 4 and OpenOffice 4
+
+This extension is based on the StarXpert MultiSave extension and is licenced in the LGPL+-licence.
+
+\* LibreOffice only as OpenOffice doesn't support saving in this format
 
 # Changelog #
+
+## v1.5 ##
+- Added save-like-function
+- Toolbar-icon now is set to the save-like-function
+- Remembers the last formats you selected
+- Improved Dialog
+- Different Dialog for OpenOffice and LibreOffice
+- Code cleanup
 
 ## v1.4.1 ##
 - Added support for Apache OpenOffice 4
