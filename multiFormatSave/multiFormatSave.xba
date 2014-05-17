@@ -38,6 +38,7 @@ CONST EXTENSION_NAME = "multiFormatSave"
 CONST DOC_WRITER = "com.sun.star.text.TextDocument"
 CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
 CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
+CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
 
 ' Information about a file
 Type FileDescriptor
@@ -49,6 +50,7 @@ End Type
 ' Function called when we want to save without dialog
 Function multiFormatSave()
   initLibraries()
+  
   If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; sCurrentURL Then
     startDialog()
   Else
@@ -166,6 +168,11 @@ Function getFileDescriptors( sURL As String, aFormats() As Integer ) As Array
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".ppt", "MS PowerPoint 97"  )
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".pptx", "Impress MS PowerPoint 2007 XML" )
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "impress_pdf_Export" )
+  ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odg" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".png", "draw_png_Export"  )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".svg", "draw_svg_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "draw_pdf_Export" )
   EndIf
 
   ' Resize the table and return
@@ -212,6 +219,8 @@ Function saveFileDialog(sDirectoryPath As String, Optional sFilePath As String) 
     oFilePicker.appendFilter(GetFilterName("calc8"), "*.ods" )
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
     oFilePicker.appendFilter(GetFilterName("impress8"), "*.odp" )
+  ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
+    oFilePicker.appendFilter(GetFilterName("draw8"), "*.odg" )
   EndIf
   If Not IsMissing( sFilePath ) Then
      oFilePicker.setDefaultName( sFilePath )
@@ -249,7 +258,8 @@ Function removeExtension( sURL As String ) As String
     ".sdw", ".rtf", ".xml", ".txt", ".pdb", ".psw", ".html", _
     ".sdc", ".dif", ".dbf", ".slk", ".pxl", ".csv", _
     ".sda", ".sdd", _
-    ".pdf", ".vor")
+    ".pdf", ".vor", _
+    ".odg", ".svg", ".png")
   iPosition=0
   For iCounter = 0 To UBound( vExtentions )
     sAnExt = vExtentions( iCounter )
@@ -327,6 +337,11 @@ Function initUI()
     dChooseFormat.model.CBMSO.Label = GetFilterName("MS PowerPoint 97") + " (ppt)"
     dChooseFormat.model.CBMSX.Label = GetFilterName("Impress MS PowerPoint 2007 XML") + " (pptx)"
     dChooseFormat.model.CBPDF.Label = GetFilterName("impress_pdf_Export") + " (pdf)"
+  ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
+    dChooseFormat.model.CBODF.Label = GetFilterName("draw8") + " (odg)"
+    dChooseFormat.model.CBMSO.Label = GetFilterName("draw_png_Export") + " (png)"
+    dChooseFormat.model.CBMSX.Label = GetFilterName("draw_svg_Export") + " (svg)"
+    dChooseFormat.model.CBPDF.Label = GetFilterName("draw_pdf_Export") + " (pdf)"
   EndIf
 End Function ' initUI
 
