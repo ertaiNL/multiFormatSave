@@ -17,7 +17,7 @@
 all: compose
 
 compose:
-	zip --exclude .git* --exclude .git\* --exclude screenshots\* -r multiFormatSave_v1-5-1.oxt .
+	zip --exclude .git* --exclude .git\* --exclude screenshots\* -r multiFormatSave_v1-5-333xt .
 
 clean:
 	rm *.oxt
