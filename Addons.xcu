@@ -5,7 +5,7 @@
     <node oor:name="MultiFormatSave.MenuEntry" oor:op="replace">
       <node oor:name="N001" oor:op="replace">
         <prop oor:name="MergeContext" oor:type="xs:string">
-          <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument</value>
+          <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument,com.sun.star.drawing.DrawingDocument</value>
         </prop>
         <prop oor:name="MergePoint" oor:type="xs:string">
           <value>.uno:PickList\.uno:Save</value>
@@ -34,7 +34,7 @@
     <node oor:name="MultiFormatSaveAs.MenuEntry" oor:op="replace">
       <node oor:name="N003" oor:op="replace">
         <prop oor:name="MergeContext" oor:type="xs:string">
-          <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument</value>
+          <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument,com.sun.star.drawing.DrawingDocument</value>
         </prop>
         <prop oor:name="MergePoint" oor:type="xs:string">
           <value>.uno:PickList\.uno:SaveAs</value>
@@ -79,7 +79,7 @@
         <node oor:name="ToolBarItems">
           <node oor:name="m1" oor:op="replace">
             <prop oor:name="Context" oor:type="xs:string">
-              <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument</value>
+              <value>com.sun.star.text.TextDocument,com.sun.star.sheet.SpreadsheetDocument,com.sun.star.presentation.PresentationDocument,com.sun.star.drawing.DrawingDocument</value>
             </prop>
             <prop oor:name="URL" oor:type="xs:string">
               <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
