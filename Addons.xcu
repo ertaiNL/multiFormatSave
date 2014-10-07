@@ -17,8 +17,9 @@
           <node oor:name="N002" oor:op="replace">
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save</value>
-	      <value xml:lang="nl">Multi Opslaan</value>
-	      <value xml:lang="hu">Mentés formátumban</value>
+              <value xml:lang="nl">Multi Opslaan</value>
+              <value xml:lang="hu">Mentés formátumban</value>
+              <value xml:lang="cs">Vícenásobně uložit</value>
             </prop>
             <prop oor:name="URL" oor:type="xs:string">
               <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
@@ -45,8 +46,9 @@
           <node oor:name="N004" oor:op="replace">
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save As...</value>
-	      <value xml:lang="nl">Multi Opslaan als...</value>
-	      <value xml:lang="hu">Mentés több formátumban...</value>
+              <value xml:lang="nl">Multi Opslaan als...</value>
+              <value xml:lang="hu">Mentés több formátumban...</value>
+              <value xml:lang="cs">Vícenásobně uložit jako...</value>
             </prop>
             <prop oor:name="URL" oor:type="xs:string">
               <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSaveAs?language=Basic&amp;location=application</value>
@@ -88,7 +90,8 @@
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save</value>
               <value xml:lang="nl">Multi Opslaan</value>
-	      <value xml:lang="hu">Mentés formátumban</value>
+              <value xml:lang="hu">Mentés formátumban</value>
+              <value xml:lang="cs">Vícenásobné ukládání</value>
             </prop>
             <prop oor:name="Target" oor:type="xs:string">
               <value>_self</value>
