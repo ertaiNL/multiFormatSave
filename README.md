@@ -1,9 +1,11 @@
 # MultiFormatSave #
 
-This extension to LibreOffice and OpenOffice enables the user to save a document in multiple formats at once. At this moment OpenDocument, MS Office 97, MS Office 07 XML\* and PDF are supported.
+This extension to LibreOffice and OpenOffice enables the user to save a document in multiple formats at once. 
+For Writer, Calc and Impress the formats OpenDocument, MS Office 97, MS Office 07 XML\* and PDF are supported.
+For Draw the formats OpenDocument, PNG, SVG and PDF are supported.
 
 Please download the extension for LibreOffice from http://extensions.libreoffice.org/extension-center/multisave-1
-Please download the extension for OpenOffice from https://github.com/ertaiNL/multiFormatSave/releases
+Please download the extension for OpenOffice from http://extensions.openoffice.org/en/project/multiformatsave
 
 The plugin is tested with LibreOffice 4 and OpenOffice 4
 
@@ -12,6 +14,14 @@ This extension is based on the StarXpert MultiSave extension and is licenced in 
 \* LibreOffice only as OpenOffice doesn't support saving in this format
 
 # Changelog #
+
+## v1.5.2 ##
+- Added Draw support
+- Default language now English
+- Czech translation added 
+
+## v1.5.1 ##
+Reverted Release
 
 ## v1.5 ##
 - Added save-like-function
