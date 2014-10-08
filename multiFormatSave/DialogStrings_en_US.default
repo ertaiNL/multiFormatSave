@@ -1,9 +1,0 @@
-# Strings for Dialog Library chooseFormat in English
-chooseDialog.Title=Choose file format
-chooseDialog.BSave.value=Save
-chooseDialog.BCancel.value=Cancel
-chooseDialog.LPath.value=Save as:
-chooseDialog.FCFileFormat.Title=File Format
-InputTextError=You must provide a file name with path.
-InputFormatError=At least one format needs to be selected.
-SaveError=Unable to save the files, be sure that the target files are closed.
