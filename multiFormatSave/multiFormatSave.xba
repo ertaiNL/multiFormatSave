@@ -52,7 +52,7 @@ End Type
 ' Function called when we want to save without dialog
 Function multiFormatSave()
   initLibraries()
-  
+
   If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; sCurrentURL Then
     startDialog()
   Else
@@ -104,7 +104,7 @@ End Function ' startDialog
 Function saveButtonPressed()
   Dim sURL As String
   Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
-  
+
   getUIProperties( sURL, aFormats() )
   saveFiles( sURL, aFormats() )
 End Function ' saveButtonPressed

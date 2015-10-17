@@ -18,6 +18,7 @@
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save</value>
               <value xml:lang="nl">Multi Opslaan</value>
+              <value xml:lang="de">Multi Speichern</value>
               <value xml:lang="hu">Mentés formátumban</value>
               <value xml:lang="cs">Vícenásobně uložit</value>
             </prop>
@@ -46,7 +47,8 @@
           <node oor:name="N004" oor:op="replace">
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save As...</value>
-              <value xml:lang="nl">Multi Opslaan als...</value>
+              <value xml:lang="nl">Multi Opslaan Als...</value>
+              <value xml:lang="de">Multi Speichern Als...</value>
               <value xml:lang="hu">Mentés több formátumban...</value>
               <value xml:lang="cs">Vícenásobně uložit jako...</value>
             </prop>
@@ -90,6 +92,7 @@
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save</value>
               <value xml:lang="nl">Multi Opslaan</value>
+              <value xml:lang="de">Multi Speichern</value>
               <value xml:lang="hu">Mentés formátumban</value>
               <value xml:lang="cs">Vícenásobné ukládání</value>
             </prop>
