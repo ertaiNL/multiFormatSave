@@ -28,13 +28,14 @@ Global sCurrentURL As String
 Global sSaveURL As String
 
 ' Decleration of constants
-CONST DIFFERENT_FORMATS = 4
+CONST DIFFERENT_FORMATS = 5
 CONST ODF = 0
 CONST MSO = 1
 CONST PNG = 1
 CONST MSX = 2
 CONST SVG = 2
 CONST PDF = 3
+CONST RTF = 4
 CONST EXTENSION_NAME = "multiFormatSave"
 
 CONST DOC_WRITER = "com.sun.star.text.TextDocument"
@@ -160,6 +161,7 @@ Function getFileDescriptors( sURL As String, aFormats() As Integer ) As Array
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".doc", "MS Word 97"  )
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".docx", "MS Word 2007 XML" )
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "writer_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( RTF ), iCounter, RTF, sURL + ".rtf", "Rich Text Format" )
   ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".ods" )
     createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".xls", "MS Excel 97"  )
@@ -286,6 +288,9 @@ Function getFormatSettings() As Array
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   aFormats( ODF ) = oConfigAccess.ODF
+  If ThisComponent.SupportsService( DOC_WRITER ) Then 
+    aFormats( RTF ) = oConfigAccess.RTF
+  EndIf 
   If ThisComponent.SupportsService( DOC_DRAW ) Then 
     aFormats( PNG ) = oConfigAccess.PNG
     aFormats( SVG ) = oConfigAccess.SVG
@@ -319,6 +324,9 @@ Function setFormatSettings( aFormats() As Integer )
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   oConfigAccess.ODF = aFormats( ODF )
+  If ThisComponent.SupportsService( DOC_WRITER ) Then 
+    oConfigAccess.RTF = aFormats( RTF )
+  EndIf 
   If ThisComponent.SupportsService( DOC_DRAW ) Then 
     oConfigAccess.PNG = aFormats( PNG )
     oConfigAccess.SVG = aFormats( SVG )
@@ -334,11 +342,16 @@ End Function ' setFormatSettings
 
 ' Sets initialization of the UI
 Function initUI()
+  Dim oCB4 As Object
+  oCB4 = dChooseFormat.getControl("CB4")
+  oCB4.Visible = False
   If ThisComponent.SupportsService( DOC_WRITER ) Then
     dChooseFormat.model.CB0.Label = GetFilterName("writer8") + " (odt)"
     dChooseFormat.model.CB1.Label = GetFilterName("MS Word 97") + " (doc)"
     dChooseFormat.model.CB2.Label = GetFilterName("MS Word 2007 XML") + " (docx)"
     dChooseFormat.model.CB3.Label = GetFilterName("writer_pdf_Export") + " (pdf)"
+    oCB4.Visible = True
+    dChooseFormat.model.CB4.Label = GetFilterName("Rich Text Format") + " (rtf)"
   ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
     dChooseFormat.model.CB0.Label = GetFilterName("calc8") + " (ods)"
     dChooseFormat.model.CB1.Label = GetFilterName("MS Excel 97") + " (xls)"
@@ -366,6 +379,7 @@ Function getUIProperties( sURL As String, aFormats() as Integer )
   aFormats( 1 ) = dChooseFormat.model.CB1.state
   aFormats( 2 ) = dChooseFormat.model.CB2.state
   aFormats( 3 ) = dChooseFormat.model.CB3.state
+  aFormats( 4 ) = dChooseFormat.model.CB4.state
 End Function ' getUIProperties
 
 ' Get the values from the interface's widgets.
@@ -376,12 +390,13 @@ Function setUIProperties( sURL As String, aFormats() as Integer )
   dChooseFormat.model.CB1.state = aFormats( 1 )
   dChooseFormat.model.CB2.state = aFormats( 2 )
   dChooseFormat.model.CB3.state = aFormats( 3 )
+  dChooseFormat.model.CB4.state = aFormats( 4 )
 End Function ' setUIProperties
 
 ' Check if the save-button needs to be enabled
 ' Function called when one of the textFields or checkBoxes are changed.
 Function enableSaveButton()
-If ( DChooseFormat.model.CB0.state = 0 And DChooseFormat.model.CB1.state = 0 And DChooseFormat.model.CB2.state = 0 And DChooseFormat.model.CB3.state = 0 ) Then
+If ( DChooseFormat.model.CB0.state = 0 And DChooseFormat.model.CB1.state = 0 And DChooseFormat.model.CB2.state = 0 And DChooseFormat.model.CB3.state = 0 And DChooseFormat.model.CB4.state = 0 ) Then
     DChooseFormat.model.BSave.enabled = FALSE
     DChooseFormat.model.LHelp.Label = "&amp;InputFormatError"
   ElseIf ( DChooseFormat.model.TFPath.text = "" Or right( DChooseFormat.model.TFPath.text, 1) = "/") Then

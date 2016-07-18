@@ -21,6 +21,9 @@
 	<prop oor:name="PNG" oor:type="xs:int">
 	  <value>1</value>
 	</prop>
+	<prop oor:name="RTF" oor:type="xs:int">
+	  <value>0</value>
+	</prop>
 
       </node>
     </node>
