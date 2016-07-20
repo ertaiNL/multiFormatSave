@@ -8,6 +8,7 @@
       <prop oor:name="PDF" oor:type="xs:int"/>
       <prop oor:name="SVG" oor:type="xs:int"/>
       <prop oor:name="PNG" oor:type="xs:int"/>
+      <prop oor:name="RTF" oor:type="xs:int"/>
     </group>
   </templates>
   <component>
