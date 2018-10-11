@@ -16,6 +16,9 @@ This extension is based on the StarXpert MultiSave extension and is licenced in 
 
 # Changelog #
 
+## v1.5.5
+- updated german translation
+
 ## v1.5.4 ##
 - Added support for RTF in Writer
 
