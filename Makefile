@@ -14,10 +14,21 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <http:www.gnu.org/licenses/>.
 #
-all: compose
+version = 1.5.7
+
+all: clean compose
 
 compose:
-	zip --exclude .git* --exclude .git\* --exclude screenshots\* -r multiFormatSave_v1-5-6.oxt .
+	$(info *** COMPOSE ***)
+	cp -r plugin temp
+	sed -i "s/VERSION/${version}/" temp/description.xml
+	cp LICENSE temp
+	cp README.md temp
+
+	cd temp; zip -r ../multiFormatSave_v${version}.oxt *
+	rm -rf temp
 
 clean:
-	rm *.oxt
+	$(info *** CLEAN ***)
+	rm -f *.oxt
+	rm -rf temp
