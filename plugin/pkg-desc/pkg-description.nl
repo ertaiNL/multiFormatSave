@@ -2,4 +2,4 @@ Deze extensie voor LibreOffice stelt de gebruiker in staat om een document tegel
 
 Download de extensie voor LibreOffice van http://extensions.libreoffice.org/extension-center/multisave-1
 
-Deze extensie is gebaseerd op de StarXpert MultiSave extensie en heeft de LGPL-licentie
+Deze extensie is gebaseerd op de StarXpert MultiSave extensie en heeft de GPL v2-licentie

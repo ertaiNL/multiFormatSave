@@ -1,12 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<description xmlns="http://openoffice.org/extensions/description/2006" xmlns:dep="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
+<description xmlns="http://openoffice.org/extensions/description/2006" xmlns:xlink="http://www.w3.org/1999/xlink">
   <identifier value="extensions.multiFormatSave"/>
   <version value="VERSION"/>
   <platform value="all" />
   <registration>
-    <simple-license accept-by="admin" default-license-id="ID0" suppress-on-update="true" >
-      <license-text xlink:href="LICENSE" lang="en" license-id="ID0" />
-      <license-text xlink:href="LICENSE" lang="en-US" />
+    <simple-license>
+      <license-text xlink:href="LICENSE" lang="en" />
     </simple-license>
   </registration>
   <publisher>
