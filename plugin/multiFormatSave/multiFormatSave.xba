@@ -36,7 +36,6 @@ CONST MSX = 2
 CONST SVG = 2
 CONST PDF = 3
 CONST RTF = 4
-CONST EXTENSION_NAME = "multiFormatSave"
 
 CONST DOC_WRITER = "com.sun.star.text.TextDocument"
 CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
@@ -69,15 +68,9 @@ End Function ' multiFormatSaveAs
 
 ' Initializes the libraries we use in this plugin
 Function initLibraries()
-If (Not GlobalScope.BasicLibraries.isLibraryLoaded("Tools")) Then
-    GlobalScope.BasicLibraries.Loadlibrary("Tools")
-  EndIf
-  If (Not GlobalScope.BasicLibraries.isLibraryLoaded("FormWizard")) Then
-    GlobalScope.BasicLibraries.Loadlibrary("FormWizard")
-  EndIf
-  If (Not GlobalScope.DialogLibraries.isLibraryLoaded(EXTENSION_NAME)) Then
-    GlobalScope.DialogLibraries.Loadlibrary(EXTENSION_NAME)
-  EndIf
+  loadBasicLibrary("Tools")
+  loadBasicLibrary("FormWizard")
+  loadDialogLibrary("multiFormatSave")
 
   dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 End Function ' initLibraries
@@ -420,10 +413,10 @@ Function createFileDescriptor( oFileDescriptor As FileDescriptor, iCreate As Int
   EndIf
   Dim aArgs(2) As New com.sun.star.beans.PropertyValue
   If Not IsMissing( sFilter ) Then
-    aArgs( 0 ) = MakePropertyValue( "FilterName", sFilter )
+    aArgs( 0 ) = makePropertyValue( "FilterName", sFilter )
   EndIf
   ' This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
-  aArgs( 1 ) = MakePropertyValue( "CompressMode", 0 )
+  aArgs( 1 ) = makePropertyValue( "CompressMode", 0 )
   oFileDescriptor.fileURL = sURL
   oFileDescriptor.format = iFormat
   oFileDescriptor.info = aArgs()
@@ -437,7 +430,7 @@ Function getConfigAccess( sNodePath As String ) As Object
   Dim oConfigProvider As Object
   oConfigProvider = createUnoService( "com.sun.star.configuration.ConfigurationProvider" )
   getConfigAccess() = oConfigProvider.createInstanceWithArguments( "com.sun.star.configuration.ConfigurationUpdateAccess", _
-	Array( MakePropertyValue( "nodepath", sNodePath ) ) )
+	Array( makePropertyValue( "nodepath", sNodePath ) ) )
 End Function ' GetConfigAccess
 
 ' Create and return a new com.sun.star.beans.PropertyValue.
@@ -452,5 +445,17 @@ Function makePropertyValue( cName As String, Optional uValue ) As com.sun.star.b
   EndIf
   makePropertyValue() = oPropertyValue
 End Function ' makePropertyValue
+
+Function loadBasicLibrary(name As String)
+  If (Not GlobalScope.BasicLibraries.isLibraryLoaded(name)) Then
+    GlobalScope.BasicLibraries.Loadlibrary(name)
+  EndIf
+End Function
+
+Function loadDialogLibrary(name As String)
+  If (Not GlobalScope.DialogLibraries.isLibraryLoaded(name)) Then
+    GlobalScope.DialogLibraries.Loadlibrary(name)
+  EndIf
+End Function
 
 </script:module>
