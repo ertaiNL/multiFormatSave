@@ -85,7 +85,7 @@
             </prop>
             <prop oor:name="URL" oor:type="xs:string">
               <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
-						</prop>
+			</prop>
             <prop oor:name="Title" oor:type="xs:string">
               <value xml:lang="en">Multi Save</value>
               <value xml:lang="nl">Multi Opslaan</value>
@@ -102,19 +102,19 @@
     </node>
 	</node>
 	<node oor:name="Images">
-    <node oor:name="nl.ertai.MultiFormatSave.I001" oor:op="replace">
-			<prop oor:name="URL" oor:type="xs:string">
-				<value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
-      </prop>
-      <node oor:name="UserDefinedImages">
-        <prop oor:name="ImageSmallURL" oor:type="xs:string">
-          <value>%origin%/icons/multiFormatSave_16.png</value>
-        </prop>
-        <prop oor:name="ImageBigURL" oor:type="xs:string">
-          <value>%origin%/icons/multiFormatSave_26.png</value>
-        </prop>
-      </node>
-		</node>
+        <node oor:name="nl.ertai.MultiFormatSave.I001" oor:op="replace">
+	        <prop oor:name="URL" oor:type="xs:string">
+	            <value>vnd.sun.star.script:multiFormatSave.multiFormatSave.multiFormatSave?language=Basic&amp;location=application</value>
+            </prop>
+            <node oor:name="UserDefinedImages">
+                <prop oor:name="ImageSmallURL" oor:type="xs:string">
+                    <value>%origin%/icons/multiFormatSave_16.png</value>
+                </prop>
+                <prop oor:name="ImageBigURL" oor:type="xs:string">
+                    <value>%origin%/icons/multiFormatSave_26.png</value>
+                </prop>
+            </node>
+	    </node>
 	</node>
 </node>
 </oor:component-data>
