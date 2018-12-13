@@ -4,27 +4,26 @@
     <node oor:name="settings">
       <node oor:name="formats" oor:op="replace">
         <prop oor:name="ODF" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
-	<prop oor:name="MSO" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
+          <value>1</value>
+        </prop>
+        <prop oor:name="MSO" oor:type="xs:int">
+          <value>1</value>
+        </prop>
         <prop oor:name="MSX" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
+          <value>1</value>
+        </prop>
         <prop oor:name="PDF" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
-	<prop oor:name="SVG" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
-	<prop oor:name="PNG" oor:type="xs:int">
-	  <value>1</value>
-	</prop>
-	<prop oor:name="RTF" oor:type="xs:int">
-	  <value>0</value>
-	</prop>
-
+          <value>1</value>
+        </prop>
+	      <prop oor:name="SVG" oor:type="xs:int">
+	        <value>1</value>
+	      </prop>
+	      <prop oor:name="PNG" oor:type="xs:int">
+	        <value>1</value>
+	      </prop>
+	      <prop oor:name="RTF" oor:type="xs:int">
+	        <value>0</value>
+	      </prop>
       </node>
     </node>
   </node>

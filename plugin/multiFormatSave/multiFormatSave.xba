@@ -64,16 +64,14 @@ End Function ' mutliFormatSave
 Function multiFormatSaveAs()
   initLibraries()
   startDialog()
-End Function ' multiFormatSaveAs
+End Function 'multiFormatSaveAs
 
 ' Initializes the libraries we use in this plugin
 Function initLibraries()
-  loadBasicLibrary("Tools")
-  loadBasicLibrary("FormWizard")
-  loadDialogLibrary("multiFormatSave")
-
-  dChooseFormat = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
-End Function ' initLibraries
+    loadBasicLibrary("Tools")
+    loadBasicLibrary("FormWizard")
+    dChooseFormat = createDialog()
+End Function 'initLibraries
 
 ' Starts the dialog when needed
 Function startDialog()
@@ -278,16 +276,16 @@ Function getFormatSettings() As Array
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   aFormats( ODF ) = oConfigAccess.ODF
-  If ThisComponent.SupportsService( DOC_WRITER ) Then 
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
     aFormats( RTF ) = oConfigAccess.RTF
-  EndIf 
-  If ThisComponent.SupportsService( DOC_DRAW ) Then 
+  EndIf
+  If ThisComponent.SupportsService( DOC_DRAW ) Then
     aFormats( PNG ) = oConfigAccess.PNG
     aFormats( SVG ) = oConfigAccess.SVG
   Else
     aFormats( MSO ) = oConfigAccess.MSO
     aFormats( MSX ) = oConfigAccess.MSX
-  EndIf 
+  EndIf
   aFormats( PDF ) = oConfigAccess.PDF
 
   If InStr(GetProductname(),"LibreOffice") = 0 Then
@@ -314,10 +312,10 @@ Function setFormatSettings( aFormats() As Integer )
 
   oConfigAccess = getConfigAccess( "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats" )
   oConfigAccess.ODF = aFormats( ODF )
-  If ThisComponent.SupportsService( DOC_WRITER ) Then 
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
     oConfigAccess.RTF = aFormats( RTF )
-  EndIf 
-  If ThisComponent.SupportsService( DOC_DRAW ) Then 
+  EndIf
+  If ThisComponent.SupportsService( DOC_DRAW ) Then
     oConfigAccess.PNG = aFormats( PNG )
     oConfigAccess.SVG = aFormats( SVG )
   Else
@@ -452,10 +450,12 @@ Function loadBasicLibrary(name As String)
   EndIf
 End Function
 
-Function loadDialogLibrary(name As String)
-  If (Not GlobalScope.DialogLibraries.isLibraryLoaded(name)) Then
-    GlobalScope.DialogLibraries.Loadlibrary(name)
+Function createDialog()
+  If (Not GlobalScope.DialogLibraries.isLibraryLoaded("multiFormatSave")) Then
+    GlobalScope.DialogLibraries.Loadlibrary("multiFormatSave")
   EndIf
+
+  createDialog() = CreateUnoDialog(globalscope.DialogLibraries.multiFormatSave.chooseFormat)
 End Function
 
 </script:module>
