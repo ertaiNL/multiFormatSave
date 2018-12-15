@@ -37,8 +37,6 @@ CONST SVG = 2
 CONST PDF = 3
 CONST RTF = 4
 
-
-
 ' Function called when we want to save without dialog
 Function multiFormatSave()
   initLibraries()
@@ -226,8 +224,6 @@ Function removeExtension( sURL As String ) As String
       removeExtension() = sURL
   EndIf
 End Function ' removeExtension
-
-
 
 ' UI FUNCTIONS ---------------------------------------------------
 
