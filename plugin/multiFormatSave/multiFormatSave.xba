@@ -37,10 +37,7 @@ CONST SVG = 2
 CONST PDF = 3
 CONST RTF = 4
 
-CONST DOC_WRITER = "com.sun.star.text.TextDocument"
-CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
-CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
-CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
+
 
 ' Function called when we want to save without dialog
 Function multiFormatSave()
@@ -120,17 +117,17 @@ End Function ' saveFiles
 Function getFormat(number As Integer) As String
     If (number = ODF) Then
       getFormat() = "ODF"
-    ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And number = PNG) Then
+    ElseIf (isComponentDraw() And number = PNG) Then
       getFormat() = "PNG"
     ElseIf (number = MSO) Then
       getFormat() = "MSO"
-    ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And number = SVG) Then
+    ElseIf (isComponentDraw() And number = SVG) Then
       getFormat() = "SVG"
     ElseIf (number = MSX) Then
       getFormat() = "MSX"
     ElseIf (number = PDF) Then
       getFormat() = "PDF"
-    ElseIf (ThisComponent.SupportsService( DOC_WRITER ) And number = RTF) Then
+    ElseIf (isComponentWriter() And number = RTF) Then
       getFormat() = "RTF"
     EndIf
 End Function ' getFormat
@@ -239,24 +236,24 @@ Function initUI()
   Dim oCB4 As Object
   oCB4 = dChooseFormat.getControl("CB4")
   oCB4.Visible = False
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
+  If (isComponentWriter()) Then
     dChooseFormat.model.CB0.Label = GetFilterName("writer8") + " (odt)"
     dChooseFormat.model.CB1.Label = GetFilterName("MS Word 97") + " (doc)"
     dChooseFormat.model.CB2.Label = GetFilterName("MS Word 2007 XML") + " (docx)"
     dChooseFormat.model.CB3.Label = GetFilterName("writer_pdf_Export") + " (pdf)"
     oCB4.Visible = True
     dChooseFormat.model.CB4.Label = GetFilterName("Rich Text Format") + " (rtf)"
-  ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
+  ElseIf (isComponentCalc()) Then
     dChooseFormat.model.CB0.Label = GetFilterName("calc8") + " (ods)"
     dChooseFormat.model.CB1.Label = GetFilterName("MS Excel 97") + " (xls)"
     dChooseFormat.model.CB2.Label = GetFilterName("Calc MS Excel 2007 XML") + " (xlsx)"
     dChooseFormat.model.CB3.Label = GetFilterName("calc_pdf_Export") + " (pdf)"
-  ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
+  ElseIf (isComponentImpress()) Then
     dChooseFormat.model.CB0.Label = GetFilterName("impress8") + " (odp)"
     dChooseFormat.model.CB1.Label = GetFilterName("MS PowerPoint 97") + " (ppt)"
     dChooseFormat.model.CB2.Label = GetFilterName("Impress MS PowerPoint 2007 XML") + " (pptx)"
     dChooseFormat.model.CB3.Label = GetFilterName("impress_pdf_Export") + " (pdf)"
-  ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
+  ElseIf (isComponentDraw()) Then
     dChooseFormat.model.CB0.Label = GetFilterName("draw8") + " (odg)"
     dChooseFormat.model.CB1.Label = GetFilterName("draw_png_Export") + " (png)"
     dChooseFormat.model.CB2.Label = GetFilterName("draw_svg_Export") + " (svg)"
@@ -310,10 +307,10 @@ Function getAllFormatSettings() As Array
   settings = getSettings()
 
   aFormats( ODF ) = settings.ODF
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
+  If (isComponentWriter()) Then
     aFormats( RTF ) = settings.RTF
   EndIf
-  If ThisComponent.SupportsService( DOC_DRAW ) Then
+  If (isComponentDraw()) Then
     aFormats( PNG ) = settings.PNG
     aFormats( SVG ) = settings.SVG
   Else
@@ -329,10 +326,10 @@ Function saveAllFormatSettings( aFormats() As Integer ) As Array
   settings = getSettings()
 
   settings.ODF = aFormats( ODF )
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
+  If (isComponentWriter()) Then
     settings.RTF = aFormats( RTF )
   EndIf
-  If ThisComponent.SupportsService( DOC_DRAW ) Then
+  If (isComponentDraw()) Then
     settings.PNG = aFormats( PNG )
     settings.SVG = aFormats( SVG )
   Else

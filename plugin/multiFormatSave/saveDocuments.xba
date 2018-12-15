@@ -43,4 +43,24 @@ Private Function exportArguments(format As String) As Array
   exportArguments() = arguments
 End Function
 
+Private Function isExportedDocument(format As String) As Boolean
+  isExportedDocument() = (format = "PDF" Or format = "SVG" Or format = "PNG")
+End Function
+
+Private Function exportFilterName(format As String) As String
+  If (isComponentWriter() And format = "PDF") Then
+      exportFilterName() = "writer_pdf_Export"
+  ElseIf (isComponentCalc() And format = "PDF") Then
+    exportFilterName() = "calc_pdf_Export"
+  ElseIf (isComponentImpress() And format = "PDF") Then
+    exportFilterName() = "impress_pdf_Export"
+  ElseIf (isComponentDraw() And format = "PDF") Then
+    exportFilterName() = "draw_pdf_Export"
+  ElseIf (isComponentDraw() And format = "SVG") Then
+    exportFilterName() = "draw_svg_Export"
+  ElseIf (isComponentDraw() And format = "PNG") Then
+    exportFilterName() = "draw_png_Export"
+  EndIf
+End Function
+
 </script:module>

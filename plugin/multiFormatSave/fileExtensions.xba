@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
-<script:module xmlns:script="http://openoffice.org/2000/script" script:name="settings" script:language="StarBasic">REM  *****  BASIC  *****
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="fileExtensions" script:language="StarBasic">REM  *****  BASIC  *****
 
 '************************************************
 'Copyright (C) 2018 and later -- Rob Snelders (GPL v3+)
@@ -19,45 +19,16 @@
 'along with this program.  If not, see http://www.gnu.org/licenses/
 '************************************************
 
-CONST DOC_WRITER = "com.sun.star.text.TextDocument"
-CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
-CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
-CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
-
-Function isExportedDocument(format As String) As Boolean
-  If (format = "PDF" Or format = "SVG" Or format = "PNG") Then
-    isExportedDocument() = True
-  Else
-    isExportedDocument() = False
-  EndIf
-End Function
-
-Private Function exportFilterName(format As String) As String
-  If (ThisComponent.SupportsService( DOC_WRITER ) And format = "PDF") Then
-      exportFilterName() = "writer_pdf_Export"
-  ElseIf (ThisComponent.SupportsService( DOC_CALC ) And format = "PDF") Then
-    exportFilterName() = "calc_pdf_Export"
-  ElseIf (ThisComponent.SupportsService( DOC_IMPRESS ) And format = "PDF") Then
-    exportFilterName() = "impress_pdf_Export"
-  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "PDF") Then
-    exportFilterName() = "draw_pdf_Export"
-  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "SVG") Then
-    exportFilterName() = "draw_svg_Export"
-  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "PNG") Then
-    exportFilterName() = "draw_png_Export"
-  EndIf
-End Function
-
-Private Function getExtension(format As String) As String
+Function getExtension(format As String) As String
   If (format = "PDF") Then
     getExtension() = "pdf"
-  ElseIf (ThisComponent.SupportsService(DOC_WRITER)) Then
+  ElseIf (isComponentWriter()) Then
     getExtension() = getExtensionWriter(format)
-  ElseIf (ThisComponent.SupportsService(DOC_CALC)) Then
+  ElseIf (isComponentCalc()) Then
     getExtension() = getExtensionCalc(format)
-  ElseIf (ThisComponent.SupportsService(DOC_IMPRESS)) Then
+  ElseIf (isComponentImpress()) Then
     getExtension() = getExtensionImpress(format)
-  ElseIf (ThisComponent.SupportsService(DOC_DRAW)) Then
+  ElseIf (isComponentDraw()) Then
       getExtension() = getExtensionDraw(format)
   EndIf
 End Function
