@@ -25,19 +25,19 @@ CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
 CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
 
 Function isComponentWriter() As Boolean
-  isWriter() = ThisComponent.SupportsService( DOC_WRITER )
+  isComponentWriter() = ThisComponent.SupportsService( DOC_WRITER )
 End Function
 
 Function isComponentCalc() As Boolean
-  isCalc() = ThisComponent.SupportsService( DOC_CALC )
+  isComponentCalc() = ThisComponent.SupportsService( DOC_CALC )
 End Function
 
 Function isComponentImpress() As Boolean
-  isImpress() = ThisComponent.SupportsService( DOC_IMPRESS )
+  isComponentImpress() = ThisComponent.SupportsService( DOC_IMPRESS )
 End Function
 
 Function isComponentDraw() As Boolean
-  isDraw() = ThisComponent.SupportsService( DOC_DRAW )
+  isComponentDraw() = ThisComponent.SupportsService( DOC_DRAW )
 End Function
 
 </script:module>
