@@ -384,7 +384,6 @@ Function getAllFormatSettings() As Array
 End Function
 
 Function saveAllFormatSettings( aFormats() As Integer ) As Array
-  Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
   Dim settings as Object
   settings = getSettings()
 
