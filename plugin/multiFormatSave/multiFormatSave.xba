@@ -25,7 +25,6 @@ Option Explicit
 
 Public dChooseFormat As Object
 Global sCurrentURL As String
-Global sSaveURL As String
 
 ' Decleration of constants
 CONST DIFFERENT_FORMATS = 5
@@ -44,7 +43,7 @@ Function multiFormatSave()
   If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; sCurrentURL Then
     startDialog()
   Else
-    saveFiles( sSaveURL, getAllFormatSettings() )
+    saveFiles( removeExtension(sCurrentURL), getAllFormatSettings() )
   EndIf
 End Function ' mutliFormatSave
 
@@ -64,10 +63,8 @@ End Function 'initLibraries
 Function startDialog()
   initUI()
   ' fix current file URL
-  If ThisComponent.hasLocation() = true And ThisComponent.getURL() = sCurrentURL Then
-    setUIProperties(sSaveURL, getAllFormatSettings())
-  ElseIf (ThisComponent.hasLocation()) Then
-    setUIProperties(removeExtension(thiscomponent.Location), getAllFormatSettings())
+  If (ThisComponent.hasLocation()) Then
+    setUIProperties(removeExtension(ThisComponent.Location), getAllFormatSettings())
   Else
     setUIProperties(GetPathSettings("Work"), getAllFormatSettings())
   EndIf
@@ -101,7 +98,6 @@ Function saveFiles( sURL As String, aFormats() As Integer )
   Next
 
   saveAllFormatSettings( aFormats() )
-  sSaveURL = sURL
   sCurrentURL = ThisComponent.location
   dChooseFormat.endExecute
   Exit Function
