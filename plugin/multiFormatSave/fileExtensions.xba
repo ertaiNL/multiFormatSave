@@ -33,7 +33,6 @@ Function getExtension(format As String) As String
   EndIf
 End Function
 
-
 Private Function getExtensionWriter(format As String) As String
   If (format = "ODF") Then
     getExtensionWriter() = "odt"
