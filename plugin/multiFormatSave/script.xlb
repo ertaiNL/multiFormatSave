@@ -4,4 +4,5 @@
   <library:element library:name="multiFormatSave"/>
   <library:element library:name="settings"/>
   <library:element library:name="saveDocuments"/>
+  <library:element library:name="filterSettings"/>
 </library:library>

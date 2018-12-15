@@ -19,6 +19,28 @@
 'along with this program.  If not, see http://www.gnu.org/licenses/
 '************************************************
 
+Private Function saveOrExportDocument(baseUrl As String, format As String)
+    If (isExportedDocument(format)) Then
+      exportDocument(baseUrl + getExtension(format), format)
+    Else
+      saveDocument(baseUrl + getExtension(format))
+    EndIf
+End Function
 
+Private Function saveDocument(fileURL As String)
+    ThisComponent.storeAsURL(fileURL, Array())
+End Function
+
+Private Function exportDocument(fileURL As String, format As String)
+    ThisComponent.storeToURL(fileURL, exportArguments(format))
+End Function
+
+Private Function exportArguments(format As String) As Array
+  Dim arguments(2) As New com.sun.star.beans.PropertyValue
+  arguments( 0 ) = makePropertyValue( "FilterName", exportFilterName( format )
+  ' This 2nd property is only needed for pdf. But doesn't hurt the others as it is ignored there
+  arguments( 1 ) = makePropertyValue( "CompressMode", 0 )
+  exportArguments() = arguments
+End Function
 
 </script:module>

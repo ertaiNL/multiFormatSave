@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="settings" script:language="StarBasic">REM  *****  BASIC  *****
+
+'************************************************
+'Copyright (C) 2018 and later -- Rob Snelders (GPL v3+)
+
+'This program is free software: you can redistribute it and/or modify
+'it under the terms of the GNU General Public License as published by
+'the Free Software Foundation, either version 3 of the License, or
+'(at your option) any later version.
+
+'This program is distributed in the hope that it will be useful,
+'but WITHOUT ANY WARRANTY; without even the implied warranty of
+'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'GNU General Public License for more details.
+
+'You should have received a copy of the GNU General Public License
+'along with this program.  If not, see http://www.gnu.org/licenses/
+'************************************************
+
+CONST DOC_WRITER = "com.sun.star.text.TextDocument"
+CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
+CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
+CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
+
+Function isExportedDocument(format As String) As Boolean
+  If (format = "PDF" Or format = "SVG" Or format = "PNG") Then
+    isExportedDocument() = True
+  Else
+    isExportedDocument() = False
+  EndIf
+End Function
+
+Private Function exportFilterName(format As String) As String
+  If (ThisComponent.SupportsService( DOC_WRITER ) And format = "PDF") Then
+      exportFilterName() = "writer_pdf_Export"
+  ElseIf (ThisComponent.SupportsService( DOC_CALC ) And format = "PDF") Then
+    exportFilterName() = "calc_pdf_Export"
+  ElseIf (ThisComponent.SupportsService( DOC_IMPRESS ) And format = "PDF") Then
+    exportFilterName() = "impress_pdf_Export"
+  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "PDF") Then
+    exportFilterName() = "draw_pdf_Export"
+  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "SVG") Then
+    exportFilterName() = "draw_svg_Export"
+  ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And format = "PNG") Then
+    exportFilterName() = "draw_png_Export"
+  EndIf
+End Function
+
+Private Function getExtension(format As String) As String
+  If (format = "PDF") Then
+    getExtension() = "pdf"
+  ElseIf (ThisComponent.SupportsService(DOC_WRITER)) Then
+    getExtension() = getExtensionWriter(format)
+  ElseIf (ThisComponent.SupportsService(DOC_CALC)) Then
+    getExtension() = getExtensionCalc(format)
+  ElseIf (ThisComponent.SupportsService(DOC_IMPRESS)) Then
+    getExtension() = getExtensionImpress(format)
+  ElseIf (ThisComponent.SupportsService(DOC_DRAW)) Then
+      getExtension() = getExtensionDraw(format)
+  EndIf
+End Function
+
+
+Private Function getExtensionWriter(format As String) As String
+  If (format = "ODF") Then
+    getExtensionWriter() = "odt"
+  ElseIf (format = "MSO") Then
+    getExtensionWriter() = "doc"
+  ElseIf (format = "MSX") Then
+    getExtensionWriter() = "docx"
+  ElseIf (format = "RTF") Then
+    getExtensionWriter() = "rtf"
+  EndIf
+End Function
+
+Private Function getExtensionCalc(format As String) As String
+  If (format = "ODF") Then
+    getExtensionCalc() = "ods"
+  ElseIf (format = "MSO") Then
+    getExtensionCalc() = "xls"
+  ElseIf (format = "MSX") Then
+    getExtensionCalc() = "xlsx"
+  EndIf
+End Function
+
+Private Function getExtensionImpress(format As String) As String
+  If (format = "ODF") Then
+    getExtensionImpress() = "odp"
+  ElseIf (format = "MSO") Then
+    getExtensionImpress() = "ppt"
+  ElseIf (format = "MSX") Then
+    getExtensionImpress() = "pptx"
+  EndIf
+End Function
+
+Private Function getExtensionDraw(format As String) As String
+  If (format = "ODF") Then
+    getExtensionDraw() = "odg"
+  ElseIf (format = "PNG") Then
+    getExtensionDraw() = "png"
+  ElseIf (format = "SVG") Then
+    getExtensionDraw() = "svg"
+  EndIf
+End Function
+
+</script:module>

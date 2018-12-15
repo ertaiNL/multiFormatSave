@@ -44,9 +44,7 @@ CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
 
 ' Information about a file
 Type FileDescriptor
-  fileURL As String
-  format As Integer
-  info              ' description() as "com.sun.star.beans.PropertyValue"
+  format As String
 End Type
 
 ' Function called when we want to save without dialog
@@ -107,18 +105,11 @@ Function saveFiles( sURL As String, aFormats() As Integer )
   Dim aFileDescriptorList() 'No type here as that breaks
 
   ' -- Generate the info for the files to save. ----------------------------
-  aFileDescriptorList() = getFileDescriptors( sURL, aFormats() )
+  aFileDescriptorList() = getFileDescriptors( aFormats() )
 
   ' -- Write the files to the disk. ----------------------------------------
   for iCounter=0 to UBound( aFileDescriptorList() )
-
-    If (Not ThisComponent.hasLocation() And aFileDescriptorList( iCounter ).format = ODF) Then 'Save as ODF
-      ThisComponent.storeAsURL( aFileDescriptorList( iCounter ).fileURL, Array() )
-    ElseIf (ThisComponent.hasLocation() And ThisComponent.getURL() = aFileDescriptorList( iCounter ).fileURL) Then 'Save current document
-      ThisComponent.storeAsURL( aFileDescriptorList( iCounter ).fileURL, Array() )
-    Else 'Save other documents
-      ThisComponent.storeToURL( aFileDescriptorList( iCounter ).fileURL, aFileDescriptorList( iCounter ).info() )
-    EndIf
+    saveOrExportDocument( sURL, aFileDescriptorList( iCounter ).format )
   Next
 
   saveAllFormatSettings( aFormats() )
@@ -134,36 +125,35 @@ Function saveFiles( sURL As String, aFormats() As Integer )
 End Function ' saveFiles
 
 ' Creates the FileDescriptors to be able to save the files
-' @param sURL     URL of where to save the files, without extension.
 ' @param aFormats List of the format (ODF, MSO, PDF) to save the file to.
 ' @return	  List with FileDescriptors
-Function getFileDescriptors( sURL As String, aFormats() As Integer ) As Array
+Function getFileDescriptors( aFormats() As Integer ) As Array
   Dim iCounter As Integer
   iCounter = 0
   Dim aFileDescriptorList( DIFFERENT_FORMATS - 1 ) As FileDescriptor
 
   'Create the FileDescriptors Themselves
   If ThisComponent.SupportsService( DOC_WRITER ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odt" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".doc", "MS Word 97"  )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".docx", "MS Word 2007 XML" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "writer_pdf_Export" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( RTF ), iCounter, RTF, sURL + ".rtf", "Rich Text Format" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( RTF ), iCounter, "RTF")
   ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".ods" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".xls", "MS Excel 97"  )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".xlsx", "Calc MS Excel 2007 XML" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "calc_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
   ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odp" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, MSO, sURL + ".ppt", "MS PowerPoint 97"  )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, MSX, sURL + ".pptx", "Impress MS PowerPoint 2007 XML" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "impress_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
   ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, ODF, sURL + ".odg" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PNG ), iCounter, PNG, sURL + ".png", "draw_png_Export"  )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( SVG ), iCounter, SVG, sURL + ".svg", "draw_svg_Export" )
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, PDF, sURL + ".pdf", "draw_pdf_Export" )
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PNG ), iCounter, "PNG")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( SVG ), iCounter, "SVG")
+    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
   EndIf
 
   ' Resize the table and return
@@ -345,21 +335,11 @@ End Function ' enableSaveButton
 ' @param bCreate   Do we need to create the fileDescriptor
 ' @param iCounter  De counter van de FileDescriptorList
 ' @param iFormat   The format to save the file in
-' @param sURL      The URL to save the file to
-' @param sFilter   The name of the Filter to use (optional)
-Function createFileDescriptor( oFileDescriptor As FileDescriptor, iCreate As Integer, iCounter As Integer, iFormat As Integer, sURL As String, Optional sFilter As String )
+Function createFileDescriptor( oFileDescriptor As FileDescriptor, iCreate As Integer, iCounter As Integer, format As String )
   If ( iCreate = 0 ) Then
     Exit Function
   EndIf
-  Dim aArgs(2) As New com.sun.star.beans.PropertyValue
-  If Not IsMissing( sFilter ) Then
-    aArgs( 0 ) = makePropertyValue( "FilterName", sFilter )
-  EndIf
-  ' This 2nd property is only needed for pdf. But doesn't hard the others as it is ignored there
-  aArgs( 1 ) = makePropertyValue( "CompressMode", 0 )
-  oFileDescriptor.fileURL = sURL
-  oFileDescriptor.format = iFormat
-  oFileDescriptor.info = aArgs()
+  oFileDescriptor.format = format
   iCounter = iCounter + 1
 End Function ' createFileDescriptor
 
