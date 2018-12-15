@@ -42,11 +42,6 @@ CONST DOC_CALC = "com.sun.star.sheet.SpreadsheetDocument"
 CONST DOC_IMPRESS = "com.sun.star.presentation.PresentationDocument"
 CONST DOC_DRAW = "com.sun.star.drawing.DrawingDocument"
 
-' Information about a file
-Type FileDescriptor
-  format As String
-End Type
-
 ' Function called when we want to save without dialog
 Function multiFormatSave()
   initLibraries()
@@ -102,14 +97,12 @@ Function saveFiles( sURL As String, aFormats() As Integer )
   On Local Error Goto ErrorHandler
 
   Dim iCounter As Integer
-  Dim aFileDescriptorList() 'No type here as that breaks
-
-  ' -- Generate the info for the files to save. ----------------------------
-  aFileDescriptorList() = getFileDescriptors( aFormats() )
 
   ' -- Write the files to the disk. ----------------------------------------
-  for iCounter=0 to UBound( aFileDescriptorList() )
-    saveOrExportDocument( sURL, aFileDescriptorList( iCounter ).format )
+  for iCounter=0 to UBound( aFormats() )
+    If (aFormats( iCounter) = 1) Then
+      saveOrExportDocument( sURL, getFormat(iCounter) )
+    EndIf
   Next
 
   saveAllFormatSettings( aFormats() )
@@ -124,42 +117,23 @@ Function saveFiles( sURL As String, aFormats() As Integer )
     MsgBox "Error" &amp; ERR &amp; " on line " &amp; ERL &amp; ". " &amp; chr$(13) &amp; ERROR$
 End Function ' saveFiles
 
-' Creates the FileDescriptors to be able to save the files
-' @param aFormats List of the format (ODF, MSO, PDF) to save the file to.
-' @return	  List with FileDescriptors
-Function getFileDescriptors( aFormats() As Integer ) As Array
-  Dim iCounter As Integer
-  iCounter = 0
-  Dim aFileDescriptorList( DIFFERENT_FORMATS - 1 ) As FileDescriptor
-
-  'Create the FileDescriptors Themselves
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( RTF ), iCounter, "RTF")
-  ElseIf ThisComponent.SupportsService( DOC_CALC ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
-  ElseIf ThisComponent.SupportsService( DOC_IMPRESS ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSO ), iCounter, "MSO")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( MSX ), iCounter, "MSX")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
-  ElseIf ThisComponent.SupportsService( DOC_DRAW ) Then
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( ODF ), iCounter, "ODF")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PNG ), iCounter, "PNG")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( SVG ), iCounter, "SVG")
-    createFileDescriptor( aFileDescriptorList( iCounter ), aFormats( PDF ), iCounter, "PDF")
-  EndIf
-
-  ' Resize the table and return
-  Redim Preserve aFileDescriptorList( iCounter - 1 ) As FileDescriptor
-  getFileDescriptors() = aFileDescriptorList()
-End Function ' getFileDescriptors
+Function getFormat(number As Integer) As String
+    If (number = ODF) Then
+      getFormat() = "ODF"
+    ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And number = PNG) Then
+      getFormat() = "PNG"
+    ElseIf (number = MSO) Then
+      getFormat() = "MSO"
+    ElseIf (ThisComponent.SupportsService( DOC_DRAW ) And number = SVG) Then
+      getFormat() = "SVG"
+    ElseIf (number = MSX) Then
+      getFormat() = "MSX"
+    ElseIf (number = PDF) Then
+      getFormat() = "PDF"
+    ElseIf (ThisComponent.SupportsService( DOC_WRITER ) And number = RTF) Then
+      getFormat() = "RTF"
+    EndIf
+End Function ' getFormat
 
 ' Lets the user choose a path where to save the documents and save it in the TFPath
 ' Function called when the "..." button is clicked.
@@ -329,19 +303,6 @@ If ( DChooseFormat.model.CB0.state = 0 And DChooseFormat.model.CB1.state = 0 And
 End Function ' enableSaveButton
 
 ' BASIC FUNCTIONS ------------------------------------------------
-
-' Create and return a filedescriptor
-' @param uFileDesc The var to save the fileDescriptor in
-' @param bCreate   Do we need to create the fileDescriptor
-' @param iCounter  De counter van de FileDescriptorList
-' @param iFormat   The format to save the file in
-Function createFileDescriptor( oFileDescriptor As FileDescriptor, iCreate As Integer, iCounter As Integer, format As String )
-  If ( iCreate = 0 ) Then
-    Exit Function
-  EndIf
-  oFileDescriptor.format = format
-  iCounter = iCounter + 1
-End Function ' createFileDescriptor
 
 Function getAllFormatSettings() As Array
   Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
