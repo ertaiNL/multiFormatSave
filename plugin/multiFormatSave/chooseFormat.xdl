@@ -5,6 +5,16 @@
     <dlg:style dlg:style-id="0" dlg:text-color="0xff3333"/>
   </dlg:styles>
   <dlg:bulletinboard>
+    <dlg:text dlg:id="LPath" dlg:left="6" dlg:top="6" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>
+    <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="6" dlg:top="17" dlg:width="125" dlg:height="13">
+      <script:event script:event-name="on-textchange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
+    </dlg:textfield>
+    <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="137" dlg:top="16" dlg:width="13" dlg:height="15" dlg:value="...">
+      <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.choosePath" script:language="StarBasic"/>
+    </dlg:button>
+    <dlg:titledbox dlg:id="FCFileFormat" dlg:left="6" dlg:top="33" dlg:width="144" dlg:height="64">
+      <dlg:title dlg:value="&amp;chooseDialog.FCFileFormat.Title"/>
+    </dlg:titledbox>
     <dlg:checkbox dlg:id="CB0" dlg:tab-index="2" dlg:left="12" dlg:top="42" dlg:width="120" dlg:height="8" dlg:checked="true">
       <script:event script:event-name="on-itemstatechange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
     </dlg:checkbox>
@@ -25,15 +35,5 @@
        <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.saveButtonPressed" script:language="StarBasic"/>
     </dlg:button>
     <dlg:button dlg:id="BCancel" dlg:tab-index="8" dlg:left="115" dlg:top="110" dlg:width="35" dlg:height="13" dlg:button-type="cancel" dlg:value="&amp;chooseDialog.BCancel.value"/>
-    <dlg:text dlg:id="LPath" dlg:tab-index="9" dlg:left="6" dlg:top="6" dlg:width="69" dlg:height="9" dlg:value="&amp;chooseDialog.LPath.value"/>
-    <dlg:textfield dlg:id="TFPath" dlg:tab-index="0" dlg:left="6" dlg:top="17" dlg:width="125" dlg:height="13">
-      <script:event script:event-name="on-textchange" script:macro-name="multiFormatSave.multiFormatSave.enableSaveButton" script:language="StarBasic"/>
-    </dlg:textfield>
-    <dlg:button dlg:id="BPath" dlg:tab-index="1" dlg:left="137" dlg:top="16" dlg:width="13" dlg:height="15" dlg:value="...">
-      <script:event script:event-name="on-performaction" script:macro-name="multiFormatSave.multiFormatSave.choosePath" script:language="StarBasic"/>
-    </dlg:button>
-    <dlg:titledbox dlg:id="FCFileFormat" dlg:left="6" dlg:top="33" dlg:width="144" dlg:height="64">
-      <dlg:title dlg:value="&amp;chooseDialog.FCFileFormat.Title"/>
-    </dlg:titledbox>
   </dlg:bulletinboard>
 </dlg:window>
