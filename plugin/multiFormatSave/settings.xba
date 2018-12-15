@@ -20,85 +20,23 @@
 '************************************************
 
 ' Decleration of constants
-CONST DIFFERENT_FORMATS = 5
-CONST ODF = 0
-CONST MSO = 1
-CONST PNG = 1
-CONST MSX = 2
-CONST SVG = 2
-CONST PDF = 3
-CONST RTF = 4
-
 CONST CONFIGURATION_DATA_PATH = "/multiFormatSave.multiFormatSave/multiFormatSaveConfig/settings/formats"
 CONST CONFIGURATION_PROVIDER_NAME = "com.sun.star.configuration.ConfigurationProvider"
 CONST CONFIGURATION_UPDATE_ACCESS_NAME = "com.sun.star.configuration.ConfigurationUpdateAccess"
 
 ' Get the value of the formats in the settings-file
-' @return The array with the settings for the formats
-Function getFormatSettings() As Array
-  On Local Error Goto ErrorHandler
-  Dim oConfigAccess As Object
-  Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
-
-  oConfigAccess = getConfigAccess()
-  aFormats( ODF ) = oConfigAccess.ODF
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
-    aFormats( RTF ) = oConfigAccess.RTF
-  EndIf
-  If ThisComponent.SupportsService( DOC_DRAW ) Then
-    aFormats( PNG ) = oConfigAccess.PNG
-    aFormats( SVG ) = oConfigAccess.SVG
-  Else
-    aFormats( MSO ) = oConfigAccess.MSO
-    aFormats( MSX ) = oConfigAccess.MSX
-  EndIf
-  aFormats( PDF ) = oConfigAccess.PDF
-
-  If InStr(GetProductname(),"LibreOffice") = 0 Then
-    aFormats( MSX ) = 0
-  EndIf
-  getFormatSettings() = aFormats()
-  Exit Function
-
-  ErrorHandler:
-  aFormats( ODF ) = 1
-  aFormats( MSO ) = 1 'or PNG
-  aFormats( MSX ) = 1 'or SVG
-  aFormats( PDF ) = 1
-  If InStr(GetProductname(),"LibreOffice") = 0 Then
-    aFormats( MSX ) = 0 'or SVG
-  EndIf
-  getFormatSettings() = aFormats()
-End Function ' getFormatSettings
-
-' Get the value of the formats in the settings-file
 ' @param aFormats The array with the settings for the formats
-Function setFormatSettings( aFormats() As Integer )
-  Dim oConfigAccess As Object
+Function saveSettings( settings As Object )
+  settings.commitChanges()
+End Function
 
-  oConfigAccess = getConfigAccess()
-  oConfigAccess.ODF = aFormats( ODF )
-  If ThisComponent.SupportsService( DOC_WRITER ) Then
-    oConfigAccess.RTF = aFormats( RTF )
-  EndIf
-  If ThisComponent.SupportsService( DOC_DRAW ) Then
-    oConfigAccess.PNG = aFormats( PNG )
-    oConfigAccess.SVG = aFormats( SVG )
-  Else
-    oConfigAccess.MSO = aFormats( MSO )
-    oConfigAccess.MSX = aFormats( MSX )
-  EndIf
-  oConfigAccess.PDF = aFormats( PDF )
-  oConfigAccess.commitChanges()
-End Function ' setFormatSettings
-
-Private Function getSetting() As Object
+Function getSettings() As Object
   Dim configProvider As Object
   Dim propertiesArray(0) As Object
 
   configProvider = createUnoService(CONFIGURATION_PROVIDER_NAME)
   propertiesArray(0) = makePropertyValue("nodepath", CONFIGURATION_DATA_PATH)
-  getSetting() = configProvider.createInstanceWithArguments(CONFIGURATION_UPDATE_ACCESS_NAME, propertiesArray())
+  getSettings() = configProvider.createInstanceWithArguments(CONFIGURATION_UPDATE_ACCESS_NAME, propertiesArray())
 End Function
 
 </script:module>

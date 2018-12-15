@@ -56,7 +56,7 @@ Function multiFormatSave()
   If ThisComponent.hasLocation() = false Or ThisComponent.getURL() &lt;&gt; sCurrentURL Then
     startDialog()
   Else
-    saveFiles( sSaveURL, getFormatSettings() )
+    saveFiles( sSaveURL, getAllFormatSettings() )
   EndIf
 End Function ' mutliFormatSave
 
@@ -77,11 +77,11 @@ Function startDialog()
   initUI()
   ' fix current file URL
   If ThisComponent.hasLocation() = true And ThisComponent.getURL() = sCurrentURL Then
-    setUIProperties(sSaveURL, getFormatSettings())
+    setUIProperties(sSaveURL, getAllFormatSettings())
   ElseIf (ThisComponent.hasLocation()) Then
-    setUIProperties(removeExtension(thiscomponent.Location), getFormatSettings())
+    setUIProperties(removeExtension(thiscomponent.Location), getAllFormatSettings())
   Else
-    setUIProperties(GetPathSettings("Work"), getFormatSettings())
+    setUIProperties(GetPathSettings("Work"), getAllFormatSettings())
   EndIf
   enableSaveButton()
 
@@ -121,7 +121,7 @@ Function saveFiles( sURL As String, aFormats() As Integer )
     EndIf
   Next
 
-  setFormatSettings( aFormats() )
+  saveAllFormatSettings( aFormats() )
   sSaveURL = sURL
   sCurrentURL = ThisComponent.location
   dChooseFormat.endExecute
@@ -365,21 +365,42 @@ End Function ' createFileDescriptor
 
 Function getAllFormatSettings() As Array
   Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
+  Dim settings as Object
+  settings = getSettings()
 
-  aFormats( ODF ) = getSettingAsInteger( "ODF" )
+  aFormats( ODF ) = settings.ODF
   If ThisComponent.SupportsService( DOC_WRITER ) Then
-    aFormats( RTF ) = getSettingAsInteger( "RTF" )
+    aFormats( RTF ) = settings.RTF
   EndIf
   If ThisComponent.SupportsService( DOC_DRAW ) Then
-    aFormats( PNG ) = getSettingAsInteger( "PNG" )
-    aFormats( SVG ) = getSettingAsInteger( "SVG" )
+    aFormats( PNG ) = settings.PNG
+    aFormats( SVG ) = settings.SVG
   Else
-    aFormats( MSO ) = getSettingAsInteger( "MSO" )
-    aFormats( MSX ) = getSettingAsInteger( "MSX" )
+    aFormats( MSO ) = settings.MSO
+    aFormats( MSX ) = settings.MSX
   EndIf
-  aFormats( PDF ) = getSettingAsInteger( "PDF" )
+  aFormats( PDF ) = settings.PDF
   getAllFormatSettings() = aFormats()
+End Function
 
+Function saveAllFormatSettings( aFormats() As Integer ) As Array
+  Dim aFormats( DIFFERENT_FORMATS - 1 ) As Integer
+  Dim settings as Object
+  settings = getSettings()
+
+  settings.ODF = aFormats( ODF )
+  If ThisComponent.SupportsService( DOC_WRITER ) Then
+    settings.RTF = aFormats( RTF )
+  EndIf
+  If ThisComponent.SupportsService( DOC_DRAW ) Then
+    settings.PNG = aFormats( PNG )
+    settings.SVG = aFormats( SVG )
+  Else
+    settings.MSO = aFormats( MSO )
+    settings.MSX = aFormats( MSX )
+  EndIf
+  settings.PDF = aFormats( PDF )
+  saveSettings( settings )
 End Function
 
 Function loadBasicLibrary(name As String)
