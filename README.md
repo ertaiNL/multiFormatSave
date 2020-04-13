@@ -5,7 +5,7 @@ For Writer the formats OpenDocument, MS Office 97, MS Office 07 XML, RTF and PDF
 For Calc and Impress the formats OpenDocument, MS Office 97, MS Office 07 XML and PDF are supported.
 For Draw the formats OpenDocument, PNG, SVG and PDF are supported.
 
-Please download the extension for LibreOffice from http://extensions.libreoffice.org/extension-center/multisave-1
+Please download the extension for LibreOffice from https://extensions.libreoffice.org/extensions/multisave-1
 
 This extension is based on the StarXpert MultiSave extension and is licenced in the LGPL+-licence.
 
